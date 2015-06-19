@@ -609,6 +609,11 @@ daum:		;
 //	}
 //-------- DGR, SGR용 Io담기 END
 
+	MOTOR_STATE();
+	Theta_Cal();
+	Get_thr_P();
+
+
 	// wave 저장 시 di/do 값도 저장함. 1.38ms 마다 1회(12샘플)
 	// digital  normal
 	if(WAVE.post_start != 0x1234)
@@ -834,7 +839,10 @@ interrupt void TINT1_ISR(void)
 	++OCR50_2.op_count;	// OCR50-2
 	++OCGR50.op_count;	// OCGR50
 	++OCGR51.op_count;	// OCGR51
+
 	++THR.op_count; 		// THR
+	++THR.theta_count;
+
 	++NSR.op_count;			// NSR 
 	++LR51.op_count; 		// LR51
 	++NCHR.op_count;		// NCHR

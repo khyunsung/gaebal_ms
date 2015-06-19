@@ -327,14 +327,186 @@ void RELAY_OCGR51(void)
 	}
 }
 
-void RELAY_THR49(void)
+void RELAY_THR(void)
 {
+	THR.Op_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold; //배수 정보
 
+	if((THR.ppresent_theta == 0.0) && (THR.op_status != RELAY_TRIP))
+	{
+	  THR.cool_Flag = ON;
+	  THR.hot_Flag = OFF;
+	}
+	else if(((THR.ppresent_theta <= 1.0) && (THR.ppresent_theta > 0.0)) && (THR.op_status != RELAY_TRIP))
+	{
+	  THR.cool_Flag = OFF;
+	  THR.hot_Flag = ON;
+	  THR.Pre_Curr = sqrt(THR.ppresent_theta) * THR.Pickup_Threshold;
+	}
+	else if((THR.ppresent_theta > 1.0) && (THR.op_status != RELAY_TRIP))
+	{
+	  THR.cool_Flag = OFF;
+	  THR.hot_Flag = ON;
+	  THR.Pre_Curr = THR.Pickup_Threshold;
+	}
+	
+//	if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
+//	{
+//		THR.op_status = RELAY_NORMAL;
+//		if((Alarm_Trip==0)&&(Lr51_Flag!=STATE_WITHIN_WAIT)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
+//		   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(Lr51_Flag!=STATE_BEYOND_WAIT)&&
+//		   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
+//		{
+//			Alarm_Off();
+//			Alarm_Off();
+//		}
+//	}
+          
+	if(THR.Op_Ratio > 1.03)
+	{
+//	if((THR.op_status == RELAY_NORMAL) && (H50.op_status == RELAY_TRIP))
+		if(THR.op_status == RELAY_NORMAL)
+		{
+			THR.op_count = 0;
+
+			if(THR.hot_Flag == ON)				{THR.op_status = STATE_WAIT_NO;}
+			else if(THR.cool_Flag == ON)	{THR.op_status = STATE_WAIT_COOL;}
+			return;
+		}
+		else if(THR.op_status == STATE_WAIT_COOL)
+		{
+			RELAY_STATUS.pickup |= F_THR;  //alarm ON
+			THR.Op_Time_set_temp = Get_thr_DelayTime(THR.op_status);
+//		Thr_DelayTime -=(float)Trip_Delay;
+			THR.Op_Time_set = THR.Op_Time_set_temp;
+
+			if(THR.op_count > THR.Op_Time_set)
+			{
+				Relay_On(THR.do_output);
+
+				THR.op_status = RELAY_TRIP;
+				THR.Op_Phase	= PROTECT.I_Op_Phase; //상 정보
+				THR.Delay_Time = THR.op_count;
+				THR.Op_Time		= THR.Delay_Time + TOTAL_DELAY_THR; //동작 시간
+				THR.op_count = 0;
+				
+				RELAY_STATUS.pickup									&= ~F_THR; //계전요소 alarm OFF
+				RELAY_STATUS.operation_realtime			|= F_THR;  //현재 동작 상태 변수 설정
+				RELAY_STATUS.operation_sum_holding	|= F_THR;  //누적 동작 상태 변수 설정
+			}
+		}
+  	else if(THR.op_status == STATE_WAIT_NO)
+		{
+			RELAY_STATUS.pickup |= F_THR;  //alarm ON
+			THR.Op_Time_set_temp = Get_thr_DelayTime(THR.op_status);
+//		Thr_DelayTime -=(float)Trip_Delay;
+			THR.Op_Time_set = THR.Op_Time_set_temp;
+
+			if(THR.op_count > THR.Op_Time_set)
+			{
+				Relay_On(THR.do_output);
+
+				THR.op_status = RELAY_TRIP;
+				THR.Op_Phase	= PROTECT.I_Op_Phase; //상 정보
+				THR.Delay_Time = THR.op_count;
+				THR.Op_Time		= THR.Delay_Time + TOTAL_DELAY_THR; //동작 시간
+				THR.op_count = 0;
+
+				RELAY_STATUS.pickup									&= ~F_THR; //계전요소 alarm OFF
+				RELAY_STATUS.operation_realtime			|= F_THR;  //현재 동작 상태 변수 설정
+				RELAY_STATUS.operation_sum_holding	|= F_THR;  //누적 동작 상태 변수 설정
+			}
+		}
+	}
+	else
+	{
+		if(THR.Op_Ratio < 0.99)
+		{
+			if((THR.op_status==STATE_WAIT_COOL)||(THR.op_status==STATE_WAIT_NO))
+			{
+				RELAY_STATUS.pickup	&= ~F_THR; //계전요소 alarm OFF
+				THR.op_status = RELAY_NORMAL;
+			}
+
+			if(THR.op_status == RELAY_TRIP)
+			{
+				if(THR.op_count > 100)
+				{
+					Relay_Off(THR.do_output); //DO open
+					THR.op_status = RELAY_NORMAL; //THR상태 NORMAL
+					RELAY_STATUS.operation_realtime &= ~F_THR; //동작 상태 변수 해제
+					
+					THR.hot_Flag = OFF;
+					THR.cool_Flag = ON;
+				}
+			}
+		}
+	}
 }
 
-void RELAY_NSR46(void)
+void RELAY_NSR(void)
 {
+	if(NSR.use == 0xaaaa)
+	{
+		if(PROTECT.I2_RMS >= NSR.Pickup_Threshold)
+		{
+			if(NSR.op_status == RELAY_NORMAL)
+			{
+				NSR.op_status = RELAY_DETECT;
+				NSR.op_count = 0;
+			}
+			else if(NSR.op_status == RELAY_DETECT)
+			{
+				if(NSR.op_count >= NSR.pickup_limit)
+				{	
+					NSR.op_status = RELAY_PICKUP;
+					RELAY_STATUS.pickup |= F_NSR;  //alarm ON
+					NSR.Pickup_Time = NSR.op_count;
+					NSR.op_count = 0;
+				}
+			}
+			else if(NSR.op_status == RELAY_PICKUP)
+			{
+				if(NSR.op_count >= NSR.delay_ms)
+				{
+					Relay_On(NSR.do_output);
 
+					NSR.op_status	= RELAY_TRIP;
+					NSR.Op_Ratio	= PROTECT.I2_RMS / NSR.Pickup_Threshold; //배수 V_Op_Phase
+					NSR.Op_Phase	= PROTECT.V_Op_Phase; //상
+					NSR.Delay_Time = NSR.op_count;
+					NSR.Op_Time		= NSR.Delay_Time + NSR.Pickup_Time + TOTAL_DELAY_NSR; //동작 시간
+
+					RELAY_STATUS.pickup									&= ~F_NSR; //계전요소 alarm OFF
+					RELAY_STATUS.operation_realtime			|= F_NSR;  //현재 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_NSR;  //누적 동작 상태 변수 설정
+
+					EVENT.optime = (unsigned long)NSR.Op_Time;
+					EVENT.operation |= (F_NSR << 16) + NSR.Op_Phase;
+					EVENT.fault_type = F_NSR;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: NSR.Op_Phase;
+					Save_Relay_Event(NSR.Op_Ratio * 100.0F);
+					Save_Screen_Info(NSR.Op_Phase);		
+				}
+			}
+		}
+		else
+		{
+			if(PROTECT.I2_RMS <= NSR.Dropout_Threshold)  //under 99%
+			{
+				if((NSR.op_status == RELAY_DETECT) || (NSR.op_status == RELAY_PICKUP))
+				{
+					NSR.op_status = RELAY_NORMAL;
+					RELAY_STATUS.pickup &= ~F_NSR; //계전요소 alarm OFF
+				}
+				else if(NSR.op_status == RELAY_TRIP)
+				{
+					Relay_Off(NSR.do_output); //DO open
+					NSR.op_status = RELAY_NORMAL; //50_1상태 NORMAL
+					RELAY_STATUS.operation_realtime &= ~F_NSR; //동작 상태 변수 해제
+				}
+			}
+		}
+	}
 }
 
 void RELAY_51LR(void)
@@ -342,7 +514,7 @@ void RELAY_51LR(void)
 
 }
 
-void RELAY_NCHR66(void)
+void RELAY_NCHR(void)
 {
 
 }
@@ -352,9 +524,82 @@ void RELAY_50H(void)
 
 }
 
-void RELAY_UCR37(void)
+void RELAY_UCR(void)
 {
+	if(UCR.use == 0xaaaa)
+	{
+		if(((MEASUREMENT.rms_value[Ia]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ib]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ic]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic]>=UCR.Min_Pickup_Threshold)))
+		{
+			if((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))
+			{
+				UCR.Op_Phase = Ia+1; //상
+				UCR.RMS = MEASUREMENT.rms_value[Ia];
+			}
+			else if((MEASUREMENT.rms_value[Ib] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib] >= UCR.Min_Pickup_Threshold))
+			{
+				UCR.Op_Phase = Ib+1; //상
+				UCR.RMS = MEASUREMENT.rms_value[Ib];
+			}
+			else if((MEASUREMENT.rms_value[Ic] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic] >= UCR.Min_Pickup_Threshold))
+			{
+				UCR.Op_Phase = Ic+1; //상
+				UCR.RMS = MEASUREMENT.rms_value[Ic];
+			}
+			
+			if((UCR.op_status == RELAY_NORMAL) && (M_STATE.Run_Flag == ON))
+			{
+				UCR.op_status = RELAY_DETECT;
+				UCR.op_count = 0;
+			}
+			else if(UCR.op_status == RELAY_DETECT)
+			{
+				if(UCR.op_count >= UCR.pickup_limit)
+				{	
+					UCR.op_status = RELAY_PICKUP;
+					RELAY_STATUS.pickup |= F_UCR;  //alarm ON
+					UCR.Pickup_Time = NSR.op_count;
+					UCR.op_count = 0;
+				}
+			}
+			else if(UCR.op_status == RELAY_PICKUP)
+			{
+				if(UCR.op_count >= UCR.delay_ms)
+				{
+					Relay_On(UCR.do_output);
 
+					UCR.op_status	= RELAY_TRIP;
+					UCR.Op_Ratio = UCR.RMS / THR.Pickup_Threshold; //배수 
+					UCR.Delay_Time = UCR.op_count;
+					UCR.Op_Time		= UCR.Delay_Time + UCR.Pickup_Time + TOTAL_DELAY_UCR; //동작 시간
+
+					RELAY_STATUS.pickup									&= ~F_UCR; //계전요소 alarm OFF
+					RELAY_STATUS.operation_realtime			|= F_UCR;  //현재 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_UCR;  //누적 동작 상태 변수 설정
+
+					EVENT.optime = (unsigned long)UCR.Op_Time;
+					EVENT.operation |= (F_UCR << 16) + UCR.Op_Phase;
+					EVENT.fault_type = F_UCR;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: UCR.Op_Phase;
+					Save_Relay_Event(UCR.Op_Ratio * 100.0F);
+					Save_Screen_Info(UCR.Op_Phase);		
+				}
+			}
+		}
+		else
+		{
+			if((UCR.op_status == RELAY_DETECT)||(UCR.op_status == RELAY_PICKUP))
+			{
+				UCR.op_status = RELAY_NORMAL;
+				RELAY_STATUS.pickup &= ~F_UCR; //계전요소 alarm OFF
+			}
+			else if(UCR.op_status == RELAY_TRIP)
+			{
+				Relay_Off(UCR.do_output); //DO open
+				UCR.op_status = RELAY_NORMAL; //UCR 상태 NORMAL
+				RELAY_STATUS.operation_realtime &= ~F_UCR; //동작 상태 변수 해제
+			}
+		}
+	}
 }
 
 void RELAY_DGR(void)
@@ -518,6 +763,8 @@ void PROTECTIVE_RELAY(void)
 		PROTECT.I_Op_Phase = Ic+1;
 		PROTECT.Max_I_RMS = MEASUREMENT.rms_value[Ic];
 	}
+ 	PROTECT.Thr49_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold;
+
 	PROTECT.In_Op_Phase = In+1;
 	PROTECT.Max_In_RMS = MEASUREMENT.rms_value[In];
 
@@ -557,23 +804,22 @@ void PROTECTIVE_RELAY(void)
 	}
 	//-------- 최소 전압 상 저장 END
 
-	//-------- 정상/역상 전압 저장
-	PROTECT.V1_RMS = MEASUREMENT.V1_value;
-	PROTECT.V2_RMS = MEASUREMENT.V2_value;
-	//-------- 정상/역상 전압 저장 END
-
+	//-------- 역상 전류 저장
+	PROTECT.I2_RMS = MEASUREMENT.I2_value; //역상 전류
+	//-------- 역상 전류 저장 END
+	
 	OCR_MODE_SET.ocr_di_mask = (DIGITAL_INPUT.di_status & 0x018);
 
 	RELAY_OCR50_1();
 	RELAY_OCR50_2();
 	RELAY_OCGR50();
 	RELAY_OCGR51();
-	RELAY_THR49();
-	RELAY_NSR46();
+	RELAY_THR();
+	RELAY_NSR();
 	RELAY_51LR();
-	RELAY_NCHR66();
+	RELAY_NCHR();
 	RELAY_50H();
-	RELAY_UCR37();
+	RELAY_UCR();
 	if(CORE.gr_select == NCT_SELECT)	{RELAY_DGR();}
 	if(CORE.gr_select == ZCT_SELECT)	{RELAY_SGR();}
 
@@ -602,4 +848,206 @@ unsigned long Inverse_GetDelayTime(int mode, float OP_level, float Ratio)
 	return((unsigned long)(DelayTime * 1000.));
 }
 
+int init_highLevel=1; 
+void MOTOR_STATE(void)
+{
+//-------- SET 66용 STATE
+	if(PROTECT.Thr49_Ratio < SET_66.RatioSet_66) 																{SET_66.Stop_Count++;}
+	if((SET_66.Stop_Flag == ON) && (PROTECT.Thr49_Ratio >= SET_66.RatioSet_66))	{SET_66.Start_Count++;}
+	if((SET_66.Start_Flag == ON) && (PROTECT.Thr49_Ratio >= 1.0))								{SET_66.OverRun_Count++;}
+	if((SET_66.OverRun_Flag == ON) && (SET_66.Start_Flag == ON) && (PROTECT.Thr49_Ratio < 1.0) && (PROTECT.Thr49_Ratio >= 0.1))	{SET_66.Run_Count++;}
 
+	if(SET_66.Stop_Count >= SET_66.stop_delay)
+	{
+		SET_66.Stop_Flag		= ON;
+		SET_66.Start_Flag	 	= OFF;
+		SET_66.Run_Flag		 	= OFF;
+		SET_66.OverRun_Flag = OFF;
+
+		SET_66.Stop_Count = 0;
+		SET_66.Start_Count = 0;
+//	SET_66.Reactor_Start_Flag = STATE_NO; (?)
+	}
+	if((SET_66.Start_Count >= SET_66.start_delay) && (SET_66.Stop_Flag == ON))
+	{
+		SET_66.Stop_Flag  = OFF;
+		SET_66.Start_Flag = ON;
+
+		SET_66.Stop_Count = 0;
+		SET_66.Start_Count = 0;
+	}
+	if((SET_66.Start_Flag == ON) && (SET_66.OverRun_Count >= 60))
+	{
+		SET_66.OverRun_Flag	= ON; 
+		SET_66.Run_Flag			= OFF;
+
+		SET_66.OverRun_Count = 0; 
+	}
+	if((SET_66.OverRun_Flag == ON) && (SET_66.Start_Flag == ON) && (SET_66.Run_Count >= 60))
+	{
+		SET_66.Start_Flag		= OFF;
+		SET_66.OverRun_Flag = OFF;
+		SET_66.Run_Flag			= ON;
+
+		SET_66.Run_Count = 0;
+	}
+//-------- SET 66용 STATE END
+
+	if((init_highLevel) && (PROTECT.Thr49_Ratio >= 0.1))
+	{
+		M_STATE.Stop_Flag		 = OFF;
+		M_STATE.Start_Flag	 = OFF;
+		M_STATE.OverRun_Flag = OFF;
+		M_STATE.Run_Flag		 = ON;
+
+		init_highLevel=0;
+		LR51.Reactor_Start_Flag = STATE_NO;
+	}
+
+	if(PROTECT.Thr49_Ratio < 0.05) 														{M_STATE.Stop_Count++;}
+	if((M_STATE.Stop_Flag==ON)&&(PROTECT.Thr49_Ratio>=0.1))		{M_STATE.Start_Count++;}
+	if((M_STATE.Start_Flag==ON)&&(PROTECT.Thr49_Ratio>=1.0))	{M_STATE.OverRun_Count++;}
+	if((M_STATE.OverRun_Flag == ON)&&(M_STATE.Start_Flag == ON)&&(PROTECT.Thr49_Ratio<1.0)&&(PROTECT.Thr49_Ratio>=0.1))	{M_STATE.Run_Count++;}
+
+	if(M_STATE.Stop_Count >= 60) //MOTOR STOP
+	{
+		M_STATE.Stop_Flag		 = ON;
+		M_STATE.Start_Flag	 = OFF;
+		M_STATE.OverRun_Flag = OFF;
+		M_STATE.Run_Flag		 = OFF;
+
+		M_STATE.Stop_Count = 0;
+		init_highLevel = 0;
+		LR51.Reactor_Start_Flag = STATE_NO;
+	}
+
+	if((M_STATE.Stop_Flag == ON) && (M_STATE.Start_Count >= 60)) //MOTOR START
+	{
+		M_STATE.Stop_Flag  = OFF;
+		M_STATE.Start_Flag = ON;
+
+		M_STATE.Start_Count = 0;
+		//MarkTime(StartTime);
+	}
+
+	if((M_STATE.Start_Flag == ON) && (M_STATE.OverRun_Count >= 60)) //MOTOR OVERRUN
+	{
+		M_STATE.OverRun_Flag = ON; 
+		M_STATE.Run_Flag 		 = OFF;
+		
+		M_STATE.OverRun_Count = 0;
+		LR51.Reactor_Start_Flag = STATE_NO;
+	}
+
+	if((M_STATE.OverRun_Flag == ON) && (M_STATE.Start_Flag == ON) && (M_STATE.Run_Count >= 60)) //MOTOR RUN
+	{
+		M_STATE.Start_Flag 	 = OFF;
+		M_STATE.OverRun_Flag = OFF;
+		M_STATE.Run_Flag		 = ON;
+
+		M_STATE.Run_Count = 0;
+		LR51.Reactor_Start_Flag = STATE_NO;
+//	startTimeflag = 1;
+	}
+
+	if((M_STATE.Run_Flag != ON)&&(M_STATE.Stop_Flag != ON))	
+	{
+//		ElapseStartTime=GetElapseTime(StartTime);
+//		if(OldStartmaxI < PROTECT.Max_I_RMS)
+//		{
+//			OldStartmaxI = PROTECT.Max_I_RMS;
+//			OldMAX_Phase = Thr_Ph;
+//		}
+	}	
+//	if(startTimeflag)
+//	{
+//		M_STATE.T_st=ElapseStartTime;
+//		startTimeflag=0;
+//		
+//		M_STATE.DispStartmaxI = (OldStartmaxI*360*Cur_fact)/(I_scale+(float)(CalFact_I[OldMAX_Phase]/TempValue2)) +0.05;
+//		OldStartmaxI = 0.;
+//	}
+}
+
+void Theta_Cal(void)
+{
+	int itemp,temp;
+	float cal_cold;
+
+	cal_cold = THR.Cold_Time * 33.43;
+
+	itemp = THR.his_index-1;
+	if(itemp < 0)	{itemp += 12;}
+
+	THR.temp_theta[THR.his_index] = PROTECT.Max_I_RMS/THR.Pickup_Threshold;
+	THR.or_theta = THR.temp_theta[THR.his_index];
+
+	THR.fsteady_theta = THR.or_theta - THR.re_theta;
+
+	if(THR.fsteady_theta > 0.5)
+	{
+		THR.theta_count = 0;
+
+		THR.hot_flg = -1;
+		temp = THR.his_index;
+		THR.tmp_theta = THR.temp_theta[temp]*THR.temp_theta[temp];
+		THR.re_theta  = THR.temp_theta[temp];
+		THR.ppresent_theta = THR.present_theta;
+	}
+	else if(THR.fsteady_theta < -0.5)
+	{
+		THR.theta_count = 0;
+		
+		THR.hot_flg = 1;
+		temp = THR.his_index;
+		THR.tmp_theta = THR.temp_theta[temp]*THR.temp_theta[temp];
+		THR.re_theta  = THR.temp_theta[temp];
+		THR.ppresent_theta = THR.present_theta;
+	}
+	if(THR.hot_flg != 0)
+	{
+		if(THR.hot_flg == -1)
+		{
+			THR.ThetaTime = (float)(THR.theta_count * 0.001);
+			if(THR.tmp_theta >= THR.ppresent_theta)
+		 	{
+				THR.present_theta = THR.ppresent_theta + (THR.tmp_theta - THR.ppresent_theta)*(1-exp(-1.0*(THR.ThetaTime/(cal_cold))));
+			}
+			else if(THR.tmp_theta < THR.ppresent_theta)
+			{
+				THR.present_theta = THR.tmp_theta + (THR.ppresent_theta - THR.tmp_theta)*(exp(-1.0*(THR.ThetaTime/(cal_cold*THR.Cold_Thau))));
+			}
+		}
+		else if(THR.hot_flg == 1)
+		{
+			THR.ThetaTime = (float)(THR.theta_count * 0.001);
+			if(THR.tmp_theta <= THR.ppresent_theta)
+			{
+				THR.present_theta = THR.tmp_theta + (THR.ppresent_theta - THR.tmp_theta)*(exp(-1.0*(THR.ThetaTime/(cal_cold*THR.Cold_Thau))));
+			}
+			else if(THR.tmp_theta > THR.ppresent_theta)
+			{
+				THR.present_theta = THR.ppresent_theta + (THR.tmp_theta - THR.ppresent_theta)*(1-exp(-1.0*(THR.ThetaTime/(cal_cold))));
+			}
+		}
+	}
+	THR.Tem_State = (int)(THR.present_theta*100.0);
+	THR.his_index++;
+	THR.his_index = THR.his_index % 12;
+}
+
+void Get_thr_P(void)
+{
+	 float P_temp;
+	 P_temp = 36 - exp(THR.Hot_Time/(THR.Cold_Time*33.44))*(36-1.03*1.03);
+	 THR.P_limit = sqrt(P_temp);
+}
+
+float Get_thr_DelayTime(int flag)
+{
+	float DelayTime;
+	
+	if(flag == STATE_WAIT_COOL)	{DelayTime=(float)((THR.Cold_Time*33.44)*log(PROTECT.Max_I_RMS*PROTECT.Max_I_RMS/((PROTECT.Max_I_RMS*PROTECT.Max_I_RMS)-(1.03*1.03*THR.Pickup_Threshold*THR.Pickup_Threshold))));}
+	else												{DelayTime=(float)((THR.Cold_Time*33.44)*log((PROTECT.Max_I_RMS*PROTECT.Max_I_RMS-THR.P_limit*THR.P_limit*THR.Pre_Curr*THR.Pre_Curr)/((PROTECT.Max_I_RMS*PROTECT.Max_I_RMS)-(1.03*1.03*THR.Pickup_Threshold*THR.Pickup_Threshold))));}
+	return (DelayTime*1000.);
+}

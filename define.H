@@ -31,6 +31,10 @@
 //#pragma CODE_SECTION(display_time, "ramfuncs");
 #pragma CODE_SECTION(rtc_handling, "ramfuncs");
 #pragma CODE_SECTION(PROTECTIVE_RELAY, "ramfuncs");
+#pragma CODE_SECTION(MOTOR_STATE, "ramfuncs");
+#pragma CODE_SECTION(Theta_Cal, "ramfuncs");
+#pragma CODE_SECTION(Get_thr_P, "ramfuncs");
+#pragma CODE_SECTION(Get_thr_DelayTime, "ramfuncs");
 #pragma CODE_SECTION(Inverse_GetDelayTime, "ramfuncs");
 #pragma CODE_SECTION(event_direct_save, "ramfuncs");
 
@@ -38,13 +42,13 @@
 #pragma CODE_SECTION(RELAY_OCR50_2, "ramfuncs");
 #pragma CODE_SECTION(RELAY_OCGR50, "ramfuncs");
 #pragma CODE_SECTION(RELAY_OCGR51, "ramfuncs");
-#pragma CODE_SECTION(RELAY_THR49, "ramfuncs");
+#pragma CODE_SECTION(RELAY_THR, "ramfuncs");
 
-#pragma CODE_SECTION(RELAY_NSR46, "ramfuncs");
+#pragma CODE_SECTION(RELAY_NSR, "ramfuncs");
 #pragma CODE_SECTION(RELAY_51LR, "ramfuncs");
-#pragma CODE_SECTION(RELAY_NCHR66, "ramfuncs");
+#pragma CODE_SECTION(RELAY_NCHR, "ramfuncs");
 #pragma CODE_SECTION(RELAY_50H, "ramfuncs");
-#pragma CODE_SECTION(RELAY_UCR37, "ramfuncs");
+#pragma CODE_SECTION(RELAY_UCR, "ramfuncs");
 
 #pragma CODE_SECTION(RELAY_DGR, "ramfuncs");
 #pragma CODE_SECTION(RELAY_SGR, "ramfuncs");
@@ -88,12 +92,12 @@
 #define F_OCR50_2         0x00000002L
 #define F_OCGR50          0x00000004L
 #define F_OCGR51          0x00000008L
-#define F_THR49           0x00000010L
-#define F_NSR46           0x00000020L
+#define F_THR							0x00000010L
+#define F_NSR							0x00000020L
 #define F_51LR            0x00000040L
-#define F_NCHR66          0x00000080L
+#define F_NCHR						0x00000080L
 #define F_50H          		0x00000100L
-#define F_UCR37           0x00000200L
+#define F_UCR							0x00000200L
 #define F_DGR             0x00000400L
 #define F_SGR             0x00000800L
 //#define CBM             0x00008000
@@ -118,10 +122,18 @@
 #define RELAY_DETECT      1
 #define RELAY_PICKUP      2
 #define RELAY_TRIP   			3
-#define DROPOUT_NORMAL    0
-#define DROPOUT_DETECT    1
 
-#define AUX_RELAY_MAX      0x1ff
+#define STATE_NO					4
+#define STATE_WAIT				5
+#define STATE_WAIT_COOL		6
+#define STATE_WAIT_NO			7
+#define STATE_WITHIN			8
+#define STATE_BEYOND			9
+#define STATE_WITHIN_WAIT	10
+#define STATE_BEYOND_WAIT	11
+#define STATE_WITHIN_TRIP	12
+
+#define AUX_RELAY_MAX      0x0ff
 
 #define INSTANT     0
 #define DEFINITE    1
@@ -200,6 +212,9 @@
 //#define LOGIC_DELAY_TIME		 3	//OCR(inst, def의 경우) 3msec
 
 #define TOTAL_DELAY_51G				 14 // 51G 확인 완료
+#define TOTAL_DELAY_THR	       23
+#define TOTAL_DELAY_NSR	       23
+#define TOTAL_DELAY_UCR	       23
 #define TOTAL_DELAY_67GD       22
 #define TOTAL_DELAY_67GS       25 
 

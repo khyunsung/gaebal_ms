@@ -75,6 +75,9 @@ void screen_frame3(const char *str[2])
 void menu_00_00(unsigned int value, int display)
 {
 	char string[22];
+	const char *s_info_front[2] = {"  ", "SI"};
+	const char *s_info_behind[7] = {" ST", " SP", " RN", " FS", " UL", "50H", "   "};
+
 
 	if(display == 1) {
 		sprintf(string, "    [ HIMAP- M ]    \0");
@@ -87,6 +90,26 @@ void menu_00_00(unsigned int value, int display)
 		cursor_move(0, 0);
 		return;
 	} else if(display == 2) {
+		
+		if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON)) 			{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Stop_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[1]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Run_Flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[2]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag!=ON) && (M_STATE.Run_Flag!=ON) && (M_STATE.Run_Flag!=ON))	
+																																		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[6]);}
+
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[1]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[2]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag!=ON) && (M_STATE.Run_Flag!=ON) && (M_STATE.Run_Flag!=ON))	
+																																		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[6]);}
+		VFD_Single_Line_dump(LCD_L1_00, string);
+
 		sprintf(string, " %02d:%02d:%02d     NO.%d%d \0", TIME.hour, TIME.minute, TIME.second, ADDRESS.address/10, ADDRESS.address%10);
 		VFD_Single_Line_dump(LCD_L2_00, string);
 		return;
@@ -102,6 +125,10 @@ void menu_00_00(unsigned int value, int display)
 		Screen_Position.select = 3;
 		Screen_Position.data_change = NORMAL_MENU;
 		Set_Password = 0x8000 + 1111;
+	} else if(value == (DISPLAY_KEY|ENTER_KEY)) {
+		Screen_Position.y = 43;
+		Screen_Position.x = 2;
+		cursor_move(0, 0);
 	}
 }
 
@@ -408,9 +435,11 @@ void menu_01_01(unsigned int value, int display)
 			Screen_Position.x = 2;
 			cursor_move(0, 0);//cursor off
 			EVENT.view_point = EVENT.view_start;//khs, 2015-04-03 ¿ÀÈÄ 5:07:27
-		} else { //THETA D
-//			Screen_Position.y = 46;
-//			Screen_Position.x = 3;
+		} else {
+			Screen_Position.y = 30;
+			Screen_Position.x = 2;
+			Screen_Position.data_change = REALTIME_MENU;
+			cursor_move(0, 0);//cursor off
 		}
 	}
 }
@@ -878,9 +907,10 @@ void menu_02_01(unsigned int value, int display)
 //		Screen_Position.y = 29;
 //		Screen_Position.x = 2;
 //		cursor_move(0, 0);
-		} else { //THETA D
-//		Screen_Position.y = 46;
-//		Screen_Position.x = 3;
+		} else {
+			Screen_Position.y = 34;
+			Screen_Position.x = 2;
+			cursor_move(0, 0);
 		}
 	}
 }
@@ -3210,6 +3240,101 @@ void menu_29_03(unsigned int value, int display)
 	}
 }
 
+void menu_30_02(unsigned int value, int display)
+{
+	char string[22];
+
+	const char *str[2] = {
+			" \6d :   [%]        \1\0",
+			" P_LIMIT :          \0" };
+
+	if(display == 1) {
+		screen_frame3(str);
+		return;
+	} else if(display == 2) {
+		sprintf(string, "%3d\0", THR.Tem_State);
+		VFD_Single_Line_dump(LCD_L1_05, string);
+		sprintf(string, "%5.2f\0", THR.P_limit);
+		VFD_Single_Line_dump(LCD_L2_11, string);
+		return;
+	}
+
+	if(value == UP_KEY) {
+		Screen_Position.y = 1;
+		Screen_Position.x = 1;
+		Screen_Position.select = 0;
+	}
+}
+
+void menu_34_02(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0],"MAX CURRENT [ST%cRN]%c\0",RIGHTARROW,UPARROW);
+	sprintf(str[1],"CURRENT  %7.1f[A]%c\0",M_STATE.DispStartmaxI,DOWNARROW);
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value == UP_KEY) {
+		Screen_Position.y = 2;
+		Screen_Position.x = 1;
+		Screen_Position.select = 0;
+	} else if(value == DOWN_KEY) {
+		Screen_Position.y = 34;
+		Screen_Position.x = 3;
+		cursor_move(0, 0);//cursor off
+	} 
+}
+
+void menu_34_03(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0],"ELAPSE TIME [ST%cRN]%c\0",RIGHTARROW,UPARROW);
+	sprintf(str[1],"TIME   %7.2f[SEC]%c\0",M_STATE.T_st,DOWNARROW);
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value == UP_KEY) {
+		Screen_Position.y = 2;
+		Screen_Position.x = 1;
+		Screen_Position.select = 0;
+	} else if(value == DOWN_KEY) {
+		Screen_Position.y = 34;
+		Screen_Position.x = 4;
+		cursor_move(0, 0);//cursor off
+	} 
+}
+
+void menu_34_04(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0],"     START COUNT   %c\0",UPARROW);
+	sprintf(str[1],"         %2d [TIMES]%c\0",NCHR.Start_RNum,DOWNARROW);
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value == UP_KEY) {
+		Screen_Position.y = 2;
+		Screen_Position.x = 1;
+		Screen_Position.select = 0;
+	} else if(value == DOWN_KEY) {
+		Screen_Position.y = 34;
+		Screen_Position.x = 2;
+		cursor_move(0, 0);//cursor off
+	} 
+}
+
 void menu_41_02(unsigned int value, int display)
 {
 	const char *str[2] = {
@@ -4048,6 +4173,25 @@ void menu_42_13(unsigned int value, int display)
 			Screen_Position.y = 41;
 			Screen_Position.x = 3;
 			Screen_Position.select = 0;
+	}
+}
+
+void menu_43_02(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0],"  Your Password is  \0");
+	sprintf(str[1],"      [ %4d ]       \0",PASSWORD.real);
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value) {
+			Screen_Position.y = 0;
+			Screen_Position.x = 0;
+			cursor_move(0, 0);//cursor off
 	}
 }
 
@@ -9440,7 +9584,7 @@ void menu_81_05(unsigned int value, int display)
 	} else if(value == RIGHT_KEY) {
 		if(Screen_Position.select++ >= 3) Screen_Position.select = 3;
 	} else if(value == UP_KEY) {
-		CPT.ct_primary_temp += number_digit[Screen_Position.select % 4];
+		CPT.nct_primary_temp += number_digit[Screen_Position.select % 4];
 		if(CPT.nct_primary_temp >= CT_MAX) CPT.nct_primary_temp = CT_MAX;
 	} else if(value == DOWN_KEY) {
 		CPT.nct_primary_temp -= number_digit[Screen_Position.select % 4];
@@ -10785,6 +10929,9 @@ void menu_87_03(unsigned int value, int display)
 			Screen_Position.y = 97;
 			Screen_Position.x = 4;
 			Screen_Position.select = 1;
+			
+			DSGR_ANGLE.dgr_angle_temp = DSGR_ANGLE.dgr_angle;
+			
 		} else if(Screen_Position.select == 1) {
 			Screen_Position.y = 98;
 			Screen_Position.x = 4;
@@ -11861,6 +12008,8 @@ void menu_97_04(unsigned int value, int display)
 		Screen_Position.y = 97;
 		Screen_Position.x = 5;
 		Screen_Position.select = 1;
+		
+		DSGR_ANGLE.sgr_angle_temp = DSGR_ANGLE.sgr_angle;
 	}
 }
 
@@ -15241,20 +15390,20 @@ const Screen_Function_Pointer menu_tables[200][18] = { //2015.02.17
 		{menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_27_04, menu_27_05, menu_27_06,},                                                     // 27
 		{menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_28_05,},                                                                 // 28
 		{menu_dummy, menu_dummy, menu_29_02, menu_29_03, },                                                                                        // 29
-		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 30
+		{menu_dummy, menu_dummy, menu_30_02, },                                                                                                    // 30
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 31
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 32
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 33
-		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 34
+		{menu_dummy, menu_dummy, menu_34_02, menu_34_03, menu_34_04,},                                                                             // 34
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 35
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 36
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 37
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 38
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 39
-		{menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, },							   // 40
+		{menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, },							   						 // 40
 		{menu_dummy, menu_dummy, menu_41_02, menu_41_03, menu_41_04, menu_41_05, menu_41_06, menu_41_07, menu_41_08, menu_41_09, menu_41_10, menu_41_11, menu_41_12,}, // 41
 		{menu_dummy, menu_42_01, menu_42_02, menu_42_03, menu_dummy, menu_42_05, menu_42_06, menu_42_07, menu_42_08, menu_42_09, menu_42_10, menu_42_11, menu_42_12, menu_42_13,}, // 42
-		{menu_dummy, menu_dummy, menu_dummy, menu_43_03, menu_43_04, menu_43_05, menu_43_06, menu_43_07, menu_43_08, menu_43_09, menu_43_10, menu_43_11, menu_43_12,}, // 43
+		{menu_dummy, menu_dummy, menu_43_02, menu_43_03, menu_43_04, menu_43_05, menu_43_06, menu_43_07, menu_43_08, menu_43_09, menu_43_10, menu_43_11, menu_43_12,}, // 43
 		{menu_dummy, menu_dummy, menu_dummy, menu_44_03, menu_dummy, menu_44_05, menu_44_06, menu_44_07, menu_44_08, menu_44_09, menu_44_10, menu_44_11, menu_44_12, menu_44_13,}, // 44
 		{menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_45_04, menu_45_05, menu_45_06, menu_45_07, menu_45_08, menu_45_09, menu_45_10, menu_45_11, menu_45_12,}, // 45
 		{menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_dummy, menu_46_05, menu_46_06, menu_46_07, menu_46_08, menu_46_09, menu_46_10, menu_46_11, menu_46_12, menu_46_13,}, // 46

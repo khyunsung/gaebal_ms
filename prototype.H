@@ -73,17 +73,22 @@ void serial_write(unsigned int, unsigned int *, unsigned int *);
 void serial_ok_nak_send(unsigned int);
 
 void PROTECTIVE_RELAY(void);
+void MOTOR_STATE(void);
+void Theta_Cal(void);
+void Get_thr_P(void);
+float Get_thr_DelayTime(int);
+
 void RELAY_OCR50_1(void);
 void RELAY_OCR50_2(void);
 void RELAY_OCGR50(void);
 void RELAY_OCGR51(void);
-void RELAY_THR49(void);
+void RELAY_THR(void);
 
-void RELAY_NSR46(void);
+void RELAY_NSR(void);
 void RELAY_51LR(void);
-void RELAY_NCHR66(void);
+void RELAY_NCHR(void);
 void RELAY_50H(void);
-void RELAY_UCR37(void);
+void RELAY_UCR(void);
 
 void RELAY_DGR(void);
 void RELAY_SGR(void);

@@ -1331,14 +1331,13 @@ void booting_setting_check(void)
 	DISPLAY.multipllier[2] = CPT.ct_ratio;
 	DISPLAY.multipllier[3] = CPT.nct_ratio;
 	DISPLAY.multipllier[4] = CPT.nct_ratio;
-//DISPLAY.multipllier[5] = 133.33333333333333333333333333333; //외부 ZCT 비 = 200:1.5=133.33[mA]=0.13333[A]
-	DISPLAY.multipllier[5] = 100;
+	DISPLAY.multipllier[5] = 133.33333333333333333333333333333; //외부 ZCT 비 = 200:1.5=133.33[mA]=0.13333[A]
 	DISPLAY.multipllier[6] = CPT.pt_ratio;
 	DISPLAY.multipllier[7] = CPT.pt_ratio;
 	DISPLAY.multipllier[8] = CPT.pt_ratio;
 	DISPLAY.multipllier[9] = CPT.gpt_ratio;
 
-	// true rms calibration 값과 ct/pt ratio를 곱함
+// true rms calibration 값과 ct/pt ratio를 곱함
 //	for(i = 0; i < 10; i++)
 //	{
 //		DISPLAY.multipllier[i] = CALIBRATION.slope_trms[i];

@@ -290,9 +290,25 @@ struct
 	float Max_Vn_RMS;
 
 	float Min_V_RMS;
-	float V1_RMS;	
-	float V2_RMS;
+	float I2_RMS;
+
+	float Thr49_Ratio;
 } PROTECT;
+
+struct
+{
+	unsigned int Stop_Count;
+	unsigned int Start_Count;
+	unsigned int Run_Count;
+	unsigned int OverRun_Count;
+
+	unsigned int Stop_Flag;
+	unsigned int Start_Flag;
+	unsigned int Run_Flag;
+	unsigned int OverRun_Flag;
+
+	float DispStartmaxI;
+} M_STATE;
 
 struct
 {
@@ -453,18 +469,38 @@ struct
 	unsigned int tau_limit;
 	unsigned int do_relay;
 	
-	unsigned int delay_ms;
+	unsigned long Op_Time_set;
+	unsigned long Op_Time_set_temp;
 	unsigned int do_output;
 	
 	// 내부운용	
 	float Pickup_Threshold;
 	float Dropout_Threshold;
+	float Cold_Time;
+	float Hot_Time;
+	float Cold_Thau;
 
 	unsigned long op_count;
+	unsigned long theta_count;
 	unsigned int pickup_limit;
 	unsigned long event_ready;
 	unsigned int op_status;
-	unsigned int over_volt_flag;
+
+	unsigned int cool_Flag;
+	unsigned int hot_Flag;
+	float present_theta;
+	float ppresent_theta;
+	float P_limit;
+	float fsteady_theta;
+	float tmp_theta;
+	float or_theta;
+	float re_theta;
+	float ThetaTime;
+	int his_index;
+	int Tem_State;
+	int hot_flg;  //unsigned int 안됨
+	double temp_theta[12];
+	double Pre_Curr;
 
 	// 추가 부분
 	unsigned int use_temp;
@@ -538,7 +574,7 @@ struct
 	unsigned int pickup_limit;
 	unsigned long event_ready;
 	unsigned int op_status;
-	unsigned int over_volt_flag;
+	unsigned int Reactor_Start_Flag;
 
 	// 추가 부분
 	unsigned int use_temp;
@@ -577,7 +613,7 @@ struct
 	unsigned int pickup_limit;
 	unsigned long event_ready;
 	unsigned int op_status;
-	unsigned int over_volt_flag;
+	unsigned int Start_RNum;
 
 	// 추가 부분
 	unsigned int use_temp;
@@ -642,8 +678,10 @@ struct
 	unsigned int do_output;
 	
 	// 내부운용	
-	float Pickup_Threshold;
-	float Dropout_Threshold;
+	float Min_Pickup_Threshold;
+	float Max_Pickup_Threshold;
+//float Dropout_Threshold;
+	float RMS;
 
 	unsigned long op_count;
 	unsigned int pickup_limit;
@@ -947,6 +985,18 @@ struct
 	unsigned int ratio_temp;
 	unsigned int start_delay_temp;
 	unsigned int stop_delay_temp;
+	
+	float RatioSet_66;
+
+	unsigned int Stop_Count;
+	unsigned int Start_Count;
+	unsigned int Run_Count;
+	unsigned int OverRun_Count;
+
+	unsigned int Stop_Flag;
+	unsigned int Start_Flag;
+	unsigned int Run_Flag;
+	unsigned int OverRun_Flag;
 } SET_66;
 //--------- SYSTEM VARIABLE END
 
@@ -1729,37 +1779,6 @@ const unsigned int OCGR51_I_MIN[2] = {10, 2}; //자리수가 같음?
 const unsigned int OCGR51_I_MAX[2] = {500, 100};
 const unsigned int OCGR51_TL_MIN = 5;
 const unsigned int OCGR51_TL_MAX = 1000;
-
-//const unsigned int UVR_1_V_MIN[4] = {200,220,240,380};
-//const unsigned int UVR_1_V_MAX[4] = {1000,1100,1200,1900}; 
-//const unsigned int UVR_2_V_MIN[4] = {200,220,240,380};
-//const unsigned int UVR_2_V_MAX[4] = {1000,1100,1200,1900}; //자리수가 다름 해결
-//const unsigned int UVR_3_V_MIN[4] = {200,220,240,380};
-//const unsigned int UVR_3_V_MAX[4] = {1000,1100,1200,1900}; //자리수가 다름 해결
-//const unsigned int UVR_T_MIN = 1;
-//const unsigned int UVR_T_MAX = 100;
-
-//const unsigned int P47_V_MIN[4] = {500,550,600,950};
-//const unsigned int P47_V_MAX[4] = {1000,1100,1200,1900}; //자리수가 다름 해결
-//const unsigned int P47_T_MIN = 1;
-//const unsigned int P47_T_MAX = 100;
-
-//const unsigned int N47_V_MIN[4] = {20,22,24,38};
-//const unsigned int N47_V_MAX[4] = {500,550,600,950};
-//const unsigned int N47_T_MIN = 1;
-//const unsigned int N47_T_MAX = 100;
-
-//const unsigned int OVR_V_MIN[4] = {1100,1210,1320,2090};
-//const unsigned int OVR_V_MAX[4] = {1450,1595,1740,2755};
-//const unsigned int OVR_T_MIN = 1;
-//const unsigned int OVR_T_MAX = 100;
-//const unsigned int OVR_TL_MIN = 5;
-//const unsigned int OVR_TL_MAX = 1000;
-
-//const unsigned int OVGR_V_MIN[3] = {121,132,209};
-//const unsigned int OVGR_V_MAX[3] = {550,600,950};
-//const unsigned int OVGR_TL_MIN = 5;
-//const unsigned int OVGR_TL_MAX = 1000;
 
 const unsigned int THR_I_MIN[2] = {5, 10}; //자리수 다름
 const unsigned int THR_I_MAX[2] = {60, 120};

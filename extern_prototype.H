@@ -68,17 +68,22 @@ extern void serial_write(unsigned int, unsigned int *, unsigned int *);
 extern void serial_ok_nak_send(unsigned int);
 
 extern void PROTECTIVE_RELAY(void);
+extern void MOTOR_STATE(void);
+extern void Theta_Cal(void);
+extern void Get_thr_P(void);
+extern float Get_thr_DelayTime(int);
+
 extern void RELAY_OCR50_1(void);
 extern void RELAY_OCR50_2(void);
 extern void RELAY_OCGR50(void);
 extern void RELAY_OCGR51(void);
-extern void RELAY_THR49(void);
+extern void RELAY_THR(void);
 
-extern void RELAY_NSR46(void);
+extern void RELAY_NSR(void);
 extern void RELAY_51LR(void);
-extern void RELAY_NCHR66(void);
+extern void RELAY_NCHR(void);
 extern void RELAY_50H(void);
-extern void RELAY_UCR37(void);
+extern void RELAY_UCR(void);
 
 extern void RELAY_DGR(void);
 extern void RELAY_SGR(void);

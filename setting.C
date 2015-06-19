@@ -110,8 +110,8 @@ void setting_post_handling(unsigned int *ar_address)
 		DISPLAY.multipllier[3] = CPT.nct_ratio;
 		DISPLAY.multipllier[4] = CPT.nct_ratio;
 		//ZCT
-//	DISPLAY.multipllier[5] = 133.33333333333333333333333333333; //외부 ZCT 비 = 200:1.5=133.33[mA]=0.13333[A]
-		DISPLAY.multipllier[5] = 100;
+		DISPLAY.multipllier[5] = 133.33333333333333333333333333333; //외부 ZCT 비 = 200:1.5=133.33[mA]=0.13333[A]
+		DISPLAY.multipllier[6] = CPT.pt_ratio;
 		DISPLAY.multipllier[7] = CPT.pt_ratio;
 		DISPLAY.multipllier[8] = CPT.pt_ratio;
 		DISPLAY.multipllier[9] = CPT.gpt_ratio;
@@ -148,9 +148,7 @@ void setting_post_handling(unsigned int *ar_address)
 		DISPLAY.multipllier[2] = CPT.ct_ratio;
 		DISPLAY.multipllier[3] = CPT.nct_ratio;
 		DISPLAY.multipllier[4] = CPT.nct_ratio;
-		//ZCT
-//		DISPLAY.multipllier[5] = 133.33333333333333333333333333333; //외부 ZCT 비 = 200:1.5=133.33[mA]=0.13333[A]
-		DISPLAY.multipllier[5] = 100;
+		DISPLAY.multipllier[5] = 133.33333333333333333333333333333; //외부 ZCT 비 = 200:1.5=133.33[mA]=0.13333[A]
 		DISPLAY.multipllier[6] = CPT.pt_ratio;
 		DISPLAY.multipllier[7] = CPT.pt_ratio;
 		DISPLAY.multipllier[8] = CPT.pt_ratio;
@@ -199,6 +197,11 @@ void setting_post_handling(unsigned int *ar_address)
 	else if(ar_address == MODBUS_BAUDRATE)
 	{
 		
+	}
+
+	else if(ar_address == RATIO_66)
+	{
+		SET_66.RatioSet_66 = (float)(SET_66.ratio*0.01);
 	}
 
 //	else if(ar_address == DI_DEBOUNCE1)
@@ -284,12 +287,20 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == OCR50_1_USE)
 	{
-		OCR50_1.Pickup_Threshold = (float)OCR50_1.current_set;
-		OCR50_1.Pickup_Threshold *= 0.1;
-		
-		OCR50_1.Dropout_Threshold = (float)OCR50_1.current_set;
-		OCR50_1.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
-		
+		if(CORE.rated_ct == CT_5A) {
+			OCR50_1.Pickup_Threshold = (float)OCR50_1.current_set;
+			OCR50_1.Pickup_Threshold *= 0.1;
+
+			OCR50_1.Dropout_Threshold = (float)OCR50_1.current_set;
+			OCR50_1.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		} else {
+//			OCR50_1.Pickup_Threshold = (float)OCR50_1.current_set;
+//			OCR50_1.Pickup_Threshold *= 0.1;
+//
+//			OCR50_1.Dropout_Threshold = (float)OCR50_1.current_set;
+//			OCR50_1.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		}
+
 		OCR50_1.op_status = RELAY_NORMAL;
 		OCR50_1.Op_Ratio = 0.0;
 		OCR50_1.Op_Phase = 0;
@@ -323,12 +334,20 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == OCR50_2_USE)
 	{
-		OCR50_2.Pickup_Threshold = (float)OCR50_2.current_set;
-		OCR50_2.Pickup_Threshold *= 0.1;
-		
-		OCR50_2.Dropout_Threshold = (float)OCR50_2.current_set;
-		OCR50_2.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
-		
+		if(CORE.rated_ct == CT_5A) {
+			OCR50_2.Pickup_Threshold = (float)OCR50_2.current_set;
+			OCR50_2.Pickup_Threshold *= 0.1;
+
+			OCR50_2.Dropout_Threshold = (float)OCR50_2.current_set;
+			OCR50_2.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		} else {
+//			OCR50_2.Pickup_Threshold = (float)OCR50_2.current_set;
+//			OCR50_2.Pickup_Threshold *= 0.1;
+//
+//			OCR50_2.Dropout_Threshold = (float)OCR50_2.current_set;
+//			OCR50_2.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		}
+
 		OCR50_2.op_status = RELAY_NORMAL;
 		OCR50_2.Op_Ratio = 0.0;
 		OCR50_2.Op_Phase = 0;
@@ -362,12 +381,20 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == OCGR50_USE)
 	{
-		OCGR50.Pickup_Threshold = (float)OCGR50.current_set;
-		OCGR50.Pickup_Threshold *= 0.1;
-		
-		OCGR50.Dropout_Threshold = (float)OCGR50.current_set;
-		OCGR50.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
-		
+		if(CORE.rated_ct == CT_5A) {
+			OCGR50.Pickup_Threshold = (float)OCGR50.current_set;
+			OCGR50.Pickup_Threshold *= 0.1;
+	
+			OCGR50.Dropout_Threshold = (float)OCGR50.current_set;
+			OCGR50.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		} else {
+//		OCGR50.Pickup_Threshold = (float)OCGR50.current_set;
+//		OCGR50.Pickup_Threshold *= 0.1;
+//
+//		OCGR50.Dropout_Threshold = (float)OCGR50.current_set;
+//		OCGR50.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		}
+
 		OCGR50.op_status = RELAY_NORMAL;
 		OCGR50.Op_Ratio = 0.0;
 		OCGR50.Op_Phase = 0;
@@ -402,12 +429,20 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == OCGR51_USE)
 	{
-		OCGR51.Pickup_Threshold = (float)OCGR51.current_set;
-		OCGR51.Pickup_Threshold *= 0.01;
-		
-		OCGR51.Dropout_Threshold = (float)OCGR51.current_set;
-		OCGR51.Dropout_Threshold *= 0.0097; // 0.0097 = 0.01 * 0.97
-		
+		if(CORE.rated_ct == CT_5A) {
+			OCGR51.Pickup_Threshold = (float)OCGR51.current_set;
+			OCGR51.Pickup_Threshold *= 0.01;
+	
+			OCGR51.Dropout_Threshold = (float)OCGR51.current_set;
+			OCGR51.Dropout_Threshold *= 0.0097; // 0.0097 = 0.01 * 0.97
+		} else {
+//		OCGR51.Pickup_Threshold = (float)OCGR51.current_set;
+//		OCGR51.Pickup_Threshold *= 0.01;
+//
+//		OCGR51.Dropout_Threshold = (float)OCGR51.current_set;
+//		OCGR51.Dropout_Threshold *= 0.0097; // 0.0097 = 0.01 * 0.97
+		}
+
 		OCGR51.op_status = RELAY_NORMAL;
 		OCGR51.Op_Ratio = 0.0;
 		OCGR51.Op_Phase = 0;
@@ -432,17 +467,79 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == THR_USE)
 	{
+		if(CORE.rated_ct == CT_5A) {
+			THR.Pickup_Threshold = (float)THR.current_set;
+			THR.Pickup_Threshold *= 0.1;
+			
+			THR.Dropout_Threshold = (float)THR.current_set;
+			THR.Dropout_Threshold *= 0.0099; // 0.0099 = 0.01 * 0.99
+		} else {
+			THR.Pickup_Threshold = (float)THR.current_set;
+			THR.Pickup_Threshold *= 0.01;
+			
+			THR.Dropout_Threshold = (float)THR.current_set;
+			THR.Dropout_Threshold *= 0.0099; // 0.0099 = 0.01 * 0.99
+		}
+		THR.Cold_Time = (float)(THR.cold_limit * 0.1);
+		THR.Hot_Time  = (float)(THR.hot_limit * 0.1);
+		THR.Cold_Thau = (float)(THR.tau_limit * 0.1);
 
+		THR.op_status = RELAY_NORMAL;
+		THR.Op_Ratio = 0.0;
+		THR.Op_Phase = 0;
+		THR.Op_Time = 0.0;
+		
+		THR.do_output = 0;
+		for(i = 0; i < 8; i++)
+		{
+			if(THR.do_relay & (0x0001 << i))
+			THR.do_output |= DO_ON_BIT[i];
+		}
+		
+//	THR.event_ready = THR_SET_EVENT;
+//	THR.event_ready |= (unsigned long)(THR.mode << 8);
+//	THR.event_ready |= 0x00000008;
+		
+		RELAY_STATUS.pickup							&= ~F_THR;
+		RELAY_STATUS.operation_realtime	&= ~F_THR;
 	}
 
 	else if(ar_address == NSR_USE)
 	{
+		NSR.Pickup_Threshold = (float)NSR.current_set;
+		NSR.Pickup_Threshold *= 0.1;
 
+		NSR.Dropout_Threshold = (float)NSR.current_set;
+		NSR.Dropout_Threshold *= 0.097; // 0.097 = 0.1 * 0.97
+
+		NSR.op_status = RELAY_NORMAL;
+		NSR.Op_Ratio = 0.0;
+		NSR.Op_Phase = 0;
+		NSR.Op_Time = 0.0;
+
+		NSR.do_output = 0;
+		for(i = 0; i < 8; i++)
+		{
+			if(NSR.do_relay & (0x0001 << i))
+			NSR.do_output |= DO_ON_BIT[i];
+		}
+
+		NSR.pickup_limit = DEFINITE_PICKUP_LIMIT;
+			
+		NSR.delay_ms = NSR.delay_time * 100; //100msec -> msec로 변환
+		NSR.delay_ms = NSR.delay_ms - DEFINITE_PICKUP_LIMIT - TOTAL_DELAY_NSR;
+
+//		NSR.event_ready = NSR_SET_EVENT;
+//		NSR.event_ready |= 0x00000100;
+
+		RELAY_STATUS.pickup							&= ~F_NSR;
+		RELAY_STATUS.operation_realtime	&= ~F_NSR;
 	}
 
 	else if(ar_address == LR51_USE)
 	{
-
+		LR51.op_status = RELAY_NORMAL;
+		LR51.Reactor_Start_Flag = STATE_NO;
 	}
 
 	else if(ar_address == NCHR_USE)
@@ -457,31 +554,68 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == UCR_USE)
 	{
+		UCR.Min_Pickup_Threshold = (float)UCR.min_current_set;
+		UCR.Min_Pickup_Threshold *= 0.01;
 
+		UCR.Max_Pickup_Threshold = (float)UCR.max_current_set;
+		UCR.Max_Pickup_Threshold *= 0.01;
+
+		UCR.RMS = 0.0;
+
+		UCR.op_status = RELAY_NORMAL;
+		UCR.Op_Ratio = 0.0;
+		UCR.Op_Phase = 0;
+		UCR.Op_Time = 0.0;
+
+		UCR.do_output = 0;
+		for(i = 0; i < 8; i++)
+		{
+			if(UCR.do_relay & (0x0001 << i))
+			UCR.do_output |= DO_ON_BIT[i];
+		}
+
+		UCR.pickup_limit = DEFINITE_PICKUP_LIMIT;
+			
+		UCR.delay_ms = UCR.delay_time * 100; //100msec -> msec로 변환
+		UCR.delay_ms = UCR.delay_ms - DEFINITE_PICKUP_LIMIT - TOTAL_DELAY_UCR;
+
+//		UCR.event_ready = UCR_SET_EVENT;
+//		UCR.event_ready |= 0x00000100;
+
+		RELAY_STATUS.pickup							&= ~F_UCR;
+		RELAY_STATUS.operation_realtime	&= ~F_UCR;
 	}
 
 	else if(ar_address == DGR_USE)
 	{
 		if(CORE.gr_select == NCT_SELECT)
 		{
-			DGR.Pickup_Threshold_Io = (float)DGR.current_set;
-			DGR.Pickup_Threshold_Io *= 0.1;
-			
-			DGR.Dropout_Threshold_Io = (float)DGR.current_set;
-			DGR.Dropout_Threshold_Io *= 0.097; // 0.097 = 0.1 * 0.97
+			if(CORE.rated_ct == CT_5A) {
+				DGR.Pickup_Threshold_Io = (float)DGR.current_set;
+				DGR.Pickup_Threshold_Io *= 0.1;
+
+				DGR.Dropout_Threshold_Io = (float)DGR.current_set;
+				DGR.Dropout_Threshold_Io *= 0.097; // 0.097 = 0.1 * 0.97
+			} else {
+//			DGR.Pickup_Threshold_Io = (float)DGR.current_set;
+//			DGR.Pickup_Threshold_Io *= 0.1;
+//
+//			DGR.Dropout_Threshold_Io = (float)DGR.current_set;
+//			DGR.Dropout_Threshold_Io *= 0.097; // 0.097 = 0.1 * 0.97
+			}
 			
 			DGR.Pickup_Threshold_Vo = (float)DGR.voltage_set;
 			DGR.Pickup_Threshold_Vo *= 0.1;
-			
+
 			DGR.Dropout_Threshold_Vo = (float)DGR.voltage_set;
 			DGR.Dropout_Threshold_Vo *= 0.097; // 0.097 = 0.1 * 0.97
-			
+
 			DGR.angle_low = (float)DGR.angle_set;
 			DGR.angle_low -= 60.;
-			
+
 			if(DGR.angle_low < 0.)
 			DGR.angle_low += 360;
-			
+
 			DGR.angle_high = (float)DGR.angle_set;
 			DGR.angle_high += 60.;
 //			DGR.Pickup_Threshold_Angle = DGR.angle_set;
