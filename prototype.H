@@ -77,6 +77,7 @@ void MOTOR_STATE(void);
 void Theta_Cal(void);
 void Get_thr_P(void);
 float Get_thr_DelayTime(int);
+void MOTOR_START_CHECK(void);
 
 void RELAY_OCR50_1(void);
 void RELAY_OCR50_2(void);

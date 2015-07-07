@@ -664,6 +664,11 @@ extern struct
 	unsigned long event_ready;
 	unsigned int op_status;
 
+	unsigned int save_flag;
+	unsigned int display_flag;
+	unsigned int reset_ready_flag;
+	unsigned int trip_flag;
+
 	// 추가 부분
 	unsigned int use_temp;
 	unsigned int current_set_temp;

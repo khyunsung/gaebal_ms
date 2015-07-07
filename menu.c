@@ -76,7 +76,7 @@ void menu_00_00(unsigned int value, int display)
 {
 	char string[22];
 	const char *s_info_front[2] = {"  ", "SI"};
-	const char *s_info_behind[7] = {" ST", " SP", " RN", " FS", " UL", "50H", "   "};
+	const char *s_info_behind[7] = {" FS", " UL", "50H", " ST", " SP", " RN", "   "};
 
 
 	if(display == 1) {
@@ -91,23 +91,25 @@ void menu_00_00(unsigned int value, int display)
 		return;
 	} else if(display == 2) {
 		
-		if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON)) 			{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
-		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Stop_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[1]);}
-		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Run_Flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[2]);}
-		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
-		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
-		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
-		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag!=ON) && (M_STATE.Run_Flag!=ON) && (M_STATE.Run_Flag!=ON))	
-																																		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[6]);}
+//		if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))			{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[0]);}
+//		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[1]);}
+//		else if((NCHR.op_status != RELAY_TRIP) && (H50.display_flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[2]);}
+		if((NCHR.op_status != RELAY_TRIP) && (H50.display_flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[2]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Start_Flag==ON)) {sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[3]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Stop_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[4]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (M_STATE.Run_Flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[5]);}
+		else if((NCHR.op_status != RELAY_TRIP) && (H50.display_flag!=ON) && (M_STATE.Start_Flag!=ON) && (M_STATE.Run_Flag!=ON) && (M_STATE.Run_Flag!=ON))	
+																																				{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[0], s_info_behind[6]);}
 
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[1]);}
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[2]);}
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
-		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag!=ON) && (M_STATE.Run_Flag!=ON) && (M_STATE.Run_Flag!=ON))	
-																																		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[6]);}
+//		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[0]);}
+//		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[1]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (H50.display_flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[2]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Start_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[3]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Stop_Flag==ON))	{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[4]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (M_STATE.Run_Flag==ON))		{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[5]);}
+		else if((NCHR.op_status == RELAY_TRIP) && (H50.display_flag!=ON) && (M_STATE.Start_Flag!=ON) && (M_STATE.Run_Flag!=ON) && (M_STATE.Run_Flag!=ON))	
+																																				{sprintf(string, "%s  [ HIMAP- M ] %s\0", s_info_front[1], s_info_behind[6]);}
+
 		VFD_Single_Line_dump(LCD_L1_00, string);
 
 		sprintf(string, " %02d:%02d:%02d     NO.%d%d \0", TIME.hour, TIME.minute, TIME.second, ADDRESS.address/10, ADDRESS.address%10);
@@ -15564,7 +15566,7 @@ const Screen_Function_Pointer menu_tables[200][18] = { //2015.02.17
 
 void menu_init(void)
 {								   //01234567890123456789
-	VFD_Single_Line_dump(LCD_L1_00, "    [ HIMAP-FI ]    \0");
+	VFD_Single_Line_dump(LCD_L1_00, "    [ HIMAP- M ]    \0");
 	VFD_Single_Line_dump(LCD_L2_00, "                    \0");
 
 	Screen_Position.x = 0; //init. screen info.

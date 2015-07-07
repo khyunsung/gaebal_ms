@@ -549,7 +549,41 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == H50_USE)
 	{
+		if(CORE.rated_ct == CT_5A) {
+			H50.Pickup_Threshold = (float)H50.current_set;
+			H50.Pickup_Threshold *= 0.1;
+	
+			H50.Dropout_Threshold = (float)H50.current_set;
+			H50.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		} else {
+//		H50.Pickup_Threshold = (float)H50.current_set;
+//		H50.Pickup_Threshold *= 0.1;
+//
+//		H50.Dropout_Threshold = (float)H50.current_set;
+//		H50.Dropout_Threshold *= 0.099; // 0.099 = 0.1 * 0.99
+		}
 
+		H50.op_status = RELAY_NORMAL;
+		H50.Op_Ratio = 0.0;
+		H50.Op_Phase = 0;
+		H50.Op_Time = 0.0;
+		
+		H50.do_output = 0;
+		for(i = 0; i < 8; i++)
+		{
+			if(H50.do_relay & (0x0001 << i))
+			H50.do_output |= DO_ON_BIT[i];
+		}
+
+		H50.pickup_limit = INSTANT_PICKUP_LIMIT;
+		H50.delay_ms = 40 - INSTANT_PICKUP_LIMIT - TOTAL_DELAY_H50; //순시 목표 40msec
+
+//	H50.event_ready = H50_SET_EVENT;
+//	H50.event_ready |= (unsigned long)(H50.mode << 8);
+//	H50.event_ready |= 0x00000008;
+		
+		RELAY_STATUS.pickup							&= ~F_H50;
+		RELAY_STATUS.operation_realtime	&= ~F_H50;
 	}
 
 	else if(ar_address == UCR_USE)

@@ -72,6 +72,7 @@ extern void MOTOR_STATE(void);
 extern void Theta_Cal(void);
 extern void Get_thr_P(void);
 extern float Get_thr_DelayTime(int);
+extern void MOTOR_START_CHECK(void);
 
 extern void RELAY_OCR50_1(void);
 extern void RELAY_OCR50_2(void);

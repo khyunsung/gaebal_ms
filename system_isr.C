@@ -612,6 +612,8 @@ daum:		;
 	MOTOR_STATE();
 	Theta_Cal();
 	Get_thr_P();
+	
+//	if(LR51Enable&&(Start_Flag==ON)&&(OverRun_Flag != ON))	MOTOR_START_CHECK();
 
 
 	// wave 저장 시 di/do 값도 저장함. 1.38ms 마다 1회(12샘플)

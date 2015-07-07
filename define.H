@@ -35,6 +35,7 @@
 #pragma CODE_SECTION(Theta_Cal, "ramfuncs");
 #pragma CODE_SECTION(Get_thr_P, "ramfuncs");
 #pragma CODE_SECTION(Get_thr_DelayTime, "ramfuncs");
+#pragma CODE_SECTION(MOTOR_START_CHECK, "ramfuncs");
 #pragma CODE_SECTION(Inverse_GetDelayTime, "ramfuncs");
 #pragma CODE_SECTION(event_direct_save, "ramfuncs");
 
@@ -96,7 +97,7 @@
 #define F_NSR							0x00000020L
 #define F_51LR            0x00000040L
 #define F_NCHR						0x00000080L
-#define F_50H          		0x00000100L
+#define F_H50          		0x00000100L
 #define F_UCR							0x00000200L
 #define F_DGR             0x00000400L
 #define F_SGR             0x00000800L
@@ -212,7 +213,8 @@
 //#define LOGIC_DELAY_TIME		 3	//OCR(inst, def의 경우) 3msec
 
 #define TOTAL_DELAY_51G				 14 // 51G 확인 완료
-#define TOTAL_DELAY_THR	       23
+#define TOTAL_DELAY_THR	       17
+#define TOTAL_DELAY_H50	       17
 #define TOTAL_DELAY_NSR	       23
 #define TOTAL_DELAY_UCR	       23
 #define TOTAL_DELAY_67GD       22
