@@ -538,8 +538,42 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == LR51_USE)
 	{
+		if(CORE.rated_ct == CT_5A) {
+			LR51.Pickup_Threshold = (float)LR51.current_set;
+			LR51.Pickup_Threshold *= 0.1;
+			
+			LR51.Dropout_Threshold = (float)LR51.current_set;
+			LR51.Dropout_Threshold *= 0.0099; // 0.0099 = 0.01 * 0.99
+		} else {
+//			LR51.Pickup_Threshold = (float)LR51.current_set;
+//			LR51.Pickup_Threshold *= 0.01;
+//			
+//			LR51.Dropout_Threshold = (float)LR51.current_set;
+//			LR51.Dropout_Threshold *= 0.0099; // 0.0099 = 0.01 * 0.99
+		}
+//		LR51.Cold_Time = (float)(LR51.cold_limit * 0.1);
+//		LR51.Hot_Time  = (float)(LR51.hot_limit * 0.1);
+//		LR51.Cold_Thau = (float)(LR51.tau_limit * 0.1);
+
 		LR51.op_status = RELAY_NORMAL;
 		LR51.Reactor_Start_Flag = STATE_NO;
+		LR51.Op_Ratio = 0.0;
+		LR51.Op_Phase = 0;
+		LR51.Op_Time = 0.0;
+		
+		LR51.do_output = 0;
+		for(i = 0; i < 8; i++)
+		{
+			if(LR51.do_relay & (0x0001 << i))
+			LR51.do_output |= DO_ON_BIT[i];
+		}
+		
+//	LR51.event_ready = THR_SET_EVENT;
+//	LR51.event_ready |= (unsigned long)(LR51.mode << 8);
+//	LR51.event_ready |= 0x00000008;
+		
+		RELAY_STATUS.pickup							&= ~F_51LR;
+		RELAY_STATUS.operation_realtime	&= ~F_51LR;
 	}
 
 	else if(ar_address == NCHR_USE)

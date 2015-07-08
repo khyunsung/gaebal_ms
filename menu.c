@@ -12933,7 +12933,7 @@ void menu_103_11(unsigned int value, int display)
 	}
 }
 
-void menu_150_01(unsigned int value, int display)  //2015.02.17
+void menu_150_01(unsigned int value, int display)
 {
 	const char *str[2] = {
 			"[VERSION     ] ?   \1\0",
@@ -12971,8 +12971,10 @@ void menu_150_01(unsigned int value, int display)  //2015.02.17
 		} else if(Screen_Position.select == 1) {
 			Screen_Position.y = 151;
 			Screen_Position.x = 2;
+			Screen_Position.select = 0;
+
+			CORE.Hz_temp = CORE.Hz;
 		}
-		Screen_Position.select = 0;
 	}
 }
 
@@ -13050,7 +13052,7 @@ void menu_151_01(unsigned int value, int display)
 	}
 }
 
-void menu_151_02(unsigned int value, int display)  //2015.02.17
+void menu_151_02(unsigned int value, int display)
 {
 	char str[2][22];
 
@@ -13075,19 +13077,24 @@ void menu_151_02(unsigned int value, int display)  //2015.02.17
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
-			CORE.Hz = Hz60; //2015.02.25
+
+			CORE.Hz_temp = Hz60;
+
 			Screen_Position.y = 151;
 			Screen_Position.x = 3;
 		} else {
-			CORE.Hz = Hz50; //2015.02.25
+
+			CORE.Hz_temp = Hz50;
+
 			Screen_Position.y = 151;
 			Screen_Position.x = 3;
 		}
 		Screen_Position.select = 0;
+		CORE.rated_ct_temp = CORE.rated_ct;
 	}
 }
 
-void menu_151_03(unsigned int value, int display)  //2015.02.25
+void menu_151_03(unsigned int value, int display)
 {
 	char str[2][22];
 
@@ -13112,15 +13119,16 @@ void menu_151_03(unsigned int value, int display)  //2015.02.25
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
-			CORE.rated_ct = CT_5A;
+			CORE.rated_ct_temp = CT_5A;
 			Screen_Position.y = 151;
 			Screen_Position.x = 4;
 		} else {
-			CORE.rated_ct = CT_1A;
+			CORE.rated_ct_temp = CT_1A;
 			Screen_Position.y = 151;
 			Screen_Position.x = 4;
 		}
 		Screen_Position.select = 0;
+		CORE.gr_select_temp = CORE.gr_select;
 	}
 }
 
@@ -13149,11 +13157,15 @@ void menu_151_04(unsigned int value, int display)
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
-			CORE.gr_select = NCT_SELECT;
+
+			CORE.gr_select_temp = NCT_SELECT;
+
 			Screen_Position.y = 151;
 			Screen_Position.x = 5;
 		} else {
-			CORE.gr_select = ZCT_SELECT;
+
+			CORE.gr_select_temp = ZCT_SELECT;
+
 			Screen_Position.y = 151;
 			Screen_Position.x = 5;
 		}
@@ -13161,15 +13173,15 @@ void menu_151_04(unsigned int value, int display)
 	}
 }
 
-void menu_151_05(unsigned int value, int display)  //2015.02.17
+void menu_151_05(unsigned int value, int display)
 {
 	char str[2][22];
-	unsigned int crc; //2015.02.25
+	unsigned int crc;
 
 	if(display) {
-		sprintf(str[0],"   %s,%s,%s    \0",(CORE.Hz == Hz60)? "60Hz" : (CORE.Hz == Hz50) ? "50Hz": " ERR",
-																	  	 (CORE.rated_ct == CT_5A)? " 5A" : (CORE.rated_ct == CT_1A) ? " 1A": "ERR",
-																			 (CORE.gr_select == NCT_SELECT)? " NCT" : (CORE.gr_select == ZCT_SELECT) ? " ZCT": " ERR");	//2015.02.25
+		sprintf(str[0],"   %s,%s,%s    \0",(CORE.Hz_temp == Hz60)? "60Hz" : (CORE.Hz_temp == Hz50) ? "50Hz": " ERR",
+																	  	 (CORE.rated_ct_temp == CT_5A)? " 5A" : (CORE.rated_ct_temp == CT_1A) ? " 1A": "ERR",
+																			 (CORE.gr_select_temp == NCT_SELECT)? " NCT" : (CORE.gr_select_temp == ZCT_SELECT) ? " ZCT": " ERR");
 		sprintf(str[1],"WANT TO SET ?  [Y/N]\0");
 		
 		screen_frame2(str);
@@ -13189,13 +13201,13 @@ void menu_151_05(unsigned int value, int display)  //2015.02.17
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
+
 			//CORE 정보 저장
-			crc = Setting_CRC(&CORE.Hz, 3);
+			crc = Setting_CRC(&CORE.Hz_temp, 3);
 			flash_sector_erase(RATED_Hz);
-//			flash_word_write(RATED_Hz, MODBUS.baudrate); //코어 셋팅 깨짐 test 용
-			flash_word_write(RATED_Hz, CORE.Hz); 
-			flash_word_write(RATED_CT, CORE.rated_ct);
-			flash_word_write(GR_SELECT, CORE.gr_select);
+			flash_word_write(RATED_Hz, CORE.Hz_temp); 
+			flash_word_write(RATED_CT, CORE.rated_ct_temp);
+			flash_word_write(GR_SELECT, CORE.gr_select_temp);
 			flash_word_write(CORE_CRC, crc);
 			ClearFLASH();	//Flash Reset 함수 실행
 			//주파수 변경시 CALIBRATION 다시 추가(??)

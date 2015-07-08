@@ -355,8 +355,8 @@ void RELAY_THR(void)
 		{
 			THR.op_status = RELAY_NORMAL;
 
-//			if((Alarm_Trip==0)&&(Lr51_Flag!=STATE_WITHIN_WAIT)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
-//			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(Lr51_Flag!=STATE_BEYOND_WAIT)&&
+//			if((Alarm_Trip==0)&&(LR51.op_status!=STATE_WITHIN_WAIT)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
+//			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(LR51.op_status!=STATE_BEYOND_WAIT)&&
 //			   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
 //			{
 //				Alarm_Off();
@@ -517,7 +517,124 @@ void RELAY_NSR(void)
 
 void RELAY_51LR(void)
 {
-
+//	Lr51_Ratio = Rms_Lr51/Lr51_Current;
+//	Thr51_Ratio = Lr51_I_start/ThrInvSet;
+//	In51_Ratio =  Rms_Lr51/ThrInvSet;
+//	Get_Lr51_OpLevel(Thr51_Ratio);
+//
+//	Lr51Time=GetElapseTime(LR51);
+//
+//	if(M_STATE.OverRun_Flag == ON)
+//	{
+//		if((LR51.op_status != STATE_WITHIN_WAIT) && (LR51.op_status != RELAY_TRIP) && (LR51.op_status != STATE_WITHIN_TRIP))	{LR51.op_status = STATE_WITHIN;}
+//	}
+//	if(M_STATE.Run_Flag == ON)
+//	{
+//		if((LR51.op_status != STATE_BEYOND_WAIT) && (LR51.op_status != RELAY_TRIP) && (LR51.op_status != STATE_WITHIN_TRIP))	{LR51.op_status = STATE_BEYOND;}
+//	}
+//
+//	if(In51_Ratio >= 1.0) //START ½Ã
+//	{
+//		if(LR51.op_status == STATE_WITHIN)
+//		{
+//			//MarkTime(LR51);
+//			LR51.op_count = 0;
+//
+//			if(lr51_Fault_state == 0)
+//			{
+//				lr51_Fault_state = 1;
+//			}
+//			LR51.op_status = STATE_WITHIN_WAIT;
+//			return;
+//	  }
+//		else if(LR51.op_status == STATE_WITHIN_WAIT)
+//		{
+//			Alarm_On();
+//			Lr51_DelayTime = Get_Lr51_DelayTime(In51_Ratio);
+//			Lr51_DelayTime -=(float)Trip_Delay;
+//
+//			if(Lr51_DelayTime >= (2*Lr51_t_start))			{Lr51_DelayTime = 2*Lr51_t_start;}
+//			else if(Lr51_DelayTime < (2*Lr51_t_start))	{Lr51_DelayTime = Get_Lr51_DelayTime(In51_Ratio);}
+//
+//			Lr51_DelayTime -=0.020;
+//			if(Lr51_DelayTime < Lr51Time)
+//			{
+//				MarkTime(LR51);
+//				Alarm_Off();
+//				Relay_On(LR51.do_output);
+//				Alarm_Trip=1;
+//				LR51.op_status = STATE_WITHIN_TRIP;
+//				Lr51Time += (rand()%7)*0.001;
+//				Add_Fault(LR51);
+//				Fault_save(F51LR|FINV,Rms_Lr51/ThrInvSet,Lr51_Phase,Lr51Time+Trip_Delay-0.01);
+//			}
+//		}
+//		Lr51_Trip_Count=0;
+//	}
+//	else if(In51_Ratio < 0.97)
+//	{
+//		if(LR51.op_status == STATE_WITHIN_WAIT)
+//		{
+//			Alarm_Off();
+//			LR51.op_status = RELAY_NORMAL;
+//		}
+//		if(LR51.op_status == STATE_WITHIN_TRIP)
+//		{
+//			if(0.1 < Lr51Time)
+//			{
+//				Relay_Off(LR51.do_output);
+//				EVENT_C   &= ~LR51;
+//				CB_STATUS &= ~LR51;
+//				LR51.op_status = RELAY_NORMAL;
+//			}
+//		}
+//	}
+//
+//
+//
+//	if(Lr51_Ratio>=1.0) //RUN ½Ã
+//	{
+//		if(LR51.op_status == STATE_BEYOND)
+//		{
+//			MarkTime(LR51);
+//			LR51.op_status = STATE_BEYOND_WAIT;
+//			return;
+//		}
+//		else if(LR51.op_status == STATE_BEYOND_WAIT)
+//		{
+//			Alarm_On();
+//			if(Lr51Time > Lr51_const_time)
+//			{
+//				MarkTime(LR51);
+//				Alarm_Off();
+//				Relay_On(LR51.do_output);
+//				Alarm_Trip=1;
+//				LR51.op_status = RELAY_TRIP;
+//				Lr51Time += (rand()%7)*0.001;
+//				Add_Fault(LR51);
+//				Fault_save(F51LR|FDEF,Rms_Lr51/Lr51_Current,Lr51_Phase,Lr51Time);
+//				Over_Time = 0.0;
+//			}
+//		}
+//	}
+//	else if(Lr51_Ratio<0.97)
+//	{
+//		if(LR51.op_status == STATE_BEYOND_WAIT)
+//		{
+//			Alarm_Off();
+//			LR51.op_status = RELAY_NORMAL;
+//		}
+//		if(LR51.op_status == RELAY_TRIP)
+//		{
+//			if(0.1 < Lr51Time)
+//			{
+//				Relay_Off(LR51.do_output);
+//				EVENT_C   &= ~LR51;
+//				CB_STATUS &= ~LR51;
+//				LR51.op_status = RELAY_NORMAL;
+//			}
+//		}
+//	}
 }
 
 void RELAY_NCHR(void)
@@ -1108,7 +1225,7 @@ float Get_thr_DelayTime(int flag)
 
 void MOTOR_START_CHECK(void)
 {
-//	if(Lr51_Flag==STATE_WITHIN_TRIP || Lr51_Flag==STATE_TRIP)	return;
+//	if(LR51.op_status == STATE_WITHIN_TRIP || LR51.op_status == RELAY_TRIP)	return;
 //	
 //	startTime=GetElapseTime(LRStart);
 //	if(start_Flag==STATE_NO)

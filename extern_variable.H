@@ -972,7 +972,11 @@ extern struct
 	unsigned int Hz;
 	unsigned int rated_ct;	
 	unsigned int gr_select;
-//unsigned int model;	//2015.02.25	
+//unsigned int model;	//2015.02.25
+
+	unsigned int Hz_temp;
+	unsigned int rated_ct_temp;	
+	unsigned int gr_select_temp;
 } CORE;
 
 extern struct
