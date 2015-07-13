@@ -37,6 +37,7 @@
 #pragma CODE_SECTION(Get_thr_DelayTime, "ramfuncs");
 #pragma CODE_SECTION(MOTOR_START_CHECK, "ramfuncs");
 #pragma CODE_SECTION(Inverse_GetDelayTime, "ramfuncs");
+#pragma CODE_SECTION(Inverse_51LR_GetDelayTime, "ramfuncs");
 #pragma CODE_SECTION(event_direct_save, "ramfuncs");
 
 #pragma CODE_SECTION(RELAY_OCR50_1, "ramfuncs");
@@ -130,9 +131,11 @@
 #define STATE_WAIT_NO			7
 #define STATE_WITHIN			8
 #define STATE_BEYOND			9
-#define STATE_WITHIN_WAIT	10
-#define STATE_BEYOND_WAIT	11
-#define STATE_WITHIN_TRIP	12
+#define STATE_WITHIN_DETECT	10
+#define STATE_BEYOND_DETECT	11
+#define STATE_WITHIN_PICKUP	12
+#define STATE_BEYOND_PICKUP	13
+#define STATE_WITHIN_TRIP	14
 
 #define AUX_RELAY_MAX      0x0ff
 
@@ -216,6 +219,7 @@
 #define TOTAL_DELAY_THR	       17
 #define TOTAL_DELAY_H50	       17
 #define TOTAL_DELAY_NSR	       23
+#define TOTAL_DELAY_51LR			 14
 #define TOTAL_DELAY_UCR	       23
 #define TOTAL_DELAY_67GD       22
 #define TOTAL_DELAY_67GS       25 

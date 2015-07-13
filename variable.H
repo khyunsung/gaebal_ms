@@ -567,8 +567,19 @@ struct
 	unsigned int do_output;
 	
 	// 내부운용	
+	float Pickup_Threshold_Start;
+	float Dropout_Threshold_Start;
+	float	Start_Ratio;
+	float	Start_Ratio_Set;
+	float	Start_OPLevel;
+	unsigned int delay_ms_time;
+	unsigned int delay_sec_time;
+	unsigned int delay_ms_start;
+	unsigned int delay_ms_temp;
+
 	float Pickup_Threshold;
 	float Dropout_Threshold;
+	float	Ratio;
 
 	unsigned long op_count;
 	unsigned int pickup_limit;

@@ -60,6 +60,7 @@ unsigned int setting_min_max_check_angle(int *, int, int);
 void rtc_handling(void);
 
 unsigned long Inverse_GetDelayTime(int ,float ,float);
+unsigned long Inverse_51LR_GetDelayTime(float, float);
 
 void eerom_control(unsigned int, unsigned int);
 void eerom_write(unsigned int, void *);

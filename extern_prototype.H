@@ -55,6 +55,7 @@ extern unsigned int setting_min_max_check_angle(int *, int, int);
 extern void rtc_handling(void);
 
 extern unsigned long Inverse_GetDelayTime(int, float, float);
+extern unsigned long Inverse_51LR_GetDelayTime(float OP_level, float Ratio);
 
 extern void eerom_control(unsigned int, unsigned int);
 extern void eerom_write(unsigned int, void *);
