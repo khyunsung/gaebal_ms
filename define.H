@@ -102,6 +102,20 @@
 #define F_UCR							0x00000200L
 #define F_DGR             0x00000400L
 #define F_SGR             0x00000800L
+
+#define INT_F_OCR50_1     0x00000001L
+#define INT_F_OCR50_2     0x00000002L
+#define INT_F_OCGR50      0x00000003L
+#define INT_F_OCGR51      0x00000004L
+#define INT_F_THR					0x00000005L
+#define INT_F_NSR					0x00000006L
+#define INT_F_51LR        0x00000007L
+#define INT_F_NCHR				0x00000008L
+#define INT_F_H50         0x00000009L
+#define INT_F_UCR					0x0000000AL
+#define INT_F_DGR         0x0000000BL
+#define INT_F_SGR         0x0000000CL
+
 //#define CBM             0x00008000
 //#define CBM2            0x00010000
 //#define SYSCH           0x00020000
@@ -358,6 +372,7 @@
 #define H50_SET_EVENT       0x00150000L
 #define SL_SET_EVENT        0x00160000L
 #define NCH_SET_EVENT       0x00170000L
+#define RELAY_ONOFF_EVENT   0x00200000L
 
 #define CT_PT_SET_EVENT       0x00000000L
 #define DI_DEBOUNCE_EVENT     0x00010000L

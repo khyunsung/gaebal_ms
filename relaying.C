@@ -69,7 +69,7 @@ void RELAY_OCR50_1(void)
 						RELAY_STATUS.operation_sum_holding	|= F_OCR50_1;  //누적 동작 상태 변수 설정
 						
 						EVENT.optime = (unsigned long)OCR50_1.Op_Time;
-						EVENT.operation |= (F_OCR50_1 << 16) + OCR50_1.Op_Phase;
+						EVENT.operation |= (INT_F_OCR50_1 << 16) + OCR50_1.Op_Phase;
 						EVENT.fault_type = F_OCR50_1;
 						Phase_Info = (Phase_Info == 0)? EVENT.operation: OCR50_1.Op_Phase;
 						Save_Relay_Event(OCR50_1.Op_Ratio * 100.0F);
@@ -155,7 +155,7 @@ void RELAY_OCR50_2(void)
 						RELAY_STATUS.operation_sum_holding	|= F_OCR50_2;  //누적 동작 상태 변수 설정
 						
 						EVENT.optime = (unsigned long)OCR50_2.Op_Time;
-						EVENT.operation |= (F_OCR50_2 << 16) + OCR50_2.Op_Phase;
+						EVENT.operation |= (INT_F_OCR50_2 << 16) + OCR50_2.Op_Phase;
 						Phase_Info = (Phase_Info == 0)? EVENT.operation: OCR50_2.Op_Phase;
 						EVENT.fault_type = F_OCR50_2;
 						Save_Relay_Event(OCR50_2.Op_Ratio * 100.0F);
@@ -228,7 +228,7 @@ void RELAY_OCGR50(void)
 					RELAY_STATUS.operation_sum_holding	|= F_OCGR50;  //누적 동작 상태 변수 설정
 
 					EVENT.optime = (unsigned long)OCGR50.Op_Time;
-					EVENT.operation |= (F_OCGR50 << 16) + OCGR50.Op_Phase;
+					EVENT.operation |= (INT_F_OCGR50 << 16) + OCGR50.Op_Phase;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: OCGR50.Op_Phase;
 					EVENT.fault_type = F_OCGR50;
 					Save_Relay_Event(OCGR50.Op_Ratio * 100.0F);
@@ -300,7 +300,7 @@ void RELAY_OCGR51(void)
 					RELAY_STATUS.operation_sum_holding	|= F_OCGR51;  //누적 동작 상태 변수 설정
 
 					EVENT.optime = (unsigned long)OCGR51.Op_Time;
-					EVENT.operation |= (F_OCGR51 << 16) + OCGR51.Op_Phase;
+					EVENT.operation |= (INT_F_OCGR51 << 16) + OCGR51.Op_Phase;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: OCGR51.Op_Phase;
 					EVENT.fault_type = F_OCGR51;
 					Save_Relay_Event(OCGR51.Op_Ratio * 100.0F);
@@ -488,7 +488,7 @@ void RELAY_NSR(void)
 					RELAY_STATUS.operation_sum_holding	|= F_NSR;  //누적 동작 상태 변수 설정
 
 					EVENT.optime = (unsigned long)NSR.Op_Time;
-					EVENT.operation |= (F_NSR << 16) + NSR.Op_Phase;
+					EVENT.operation |= (INT_F_NSR << 16) + NSR.Op_Phase;
 					EVENT.fault_type = F_NSR;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: NSR.Op_Phase;
 					Save_Relay_Event(NSR.Op_Ratio * 100.0F);
@@ -569,7 +569,7 @@ void RELAY_51LR(void)
 				RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
 
 				EVENT.optime = (unsigned long)LR51.Op_Time;
-				EVENT.operation |= (F_OCGR51 << 16) + LR51.Op_Phase;
+				EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
 				Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
 				EVENT.fault_type = F_51LR;
 				Save_Relay_Event(LR51.Op_Ratio * 100.0F);
@@ -627,7 +627,7 @@ void RELAY_51LR(void)
 				RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
 
 				EVENT.optime = (unsigned long)LR51.Op_Time;
-				EVENT.operation |= (F_OCGR51 << 16) + LR51.Op_Phase;
+				EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
 				Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
 				EVENT.fault_type = F_51LR;
 				Save_Relay_Event(LR51.Op_Ratio * 100.0F);
@@ -762,7 +762,7 @@ void RELAY_UCR(void)
 					RELAY_STATUS.operation_sum_holding	|= F_UCR;  //누적 동작 상태 변수 설정
 
 					EVENT.optime = (unsigned long)UCR.Op_Time;
-					EVENT.operation |= (F_UCR << 16) + UCR.Op_Phase;
+					EVENT.operation |= (INT_F_UCR << 16) + UCR.Op_Phase;
 					EVENT.fault_type = F_UCR;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: UCR.Op_Phase;
 					Save_Relay_Event(UCR.Op_Ratio * 100.0F);
@@ -832,7 +832,7 @@ void RELAY_DGR(void)
 					RELAY_STATUS.operation_sum_holding	|= F_DGR;  //누적 동작 상태 변수 설정
 					
 					EVENT.optime = (unsigned long)DGR.Op_Time;
-					EVENT.operation |= (F_DGR << 16) + DGR.Op_Phase;
+					EVENT.operation |= (INT_F_DGR << 16) + DGR.Op_Phase;
 					EVENT.fault_type = F_DGR;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: DGR.Op_Phase;
 					Save_Relay_Event(DGR.Op_Ratio * 100.0F);
@@ -905,7 +905,7 @@ void RELAY_SGR(void)
 					RELAY_STATUS.operation_sum_holding	|= F_SGR;  //누적 동작 상태 변수 설정
 					
 					EVENT.optime = (unsigned long)SGR.Op_Time;
-					EVENT.operation |= (F_SGR << 16) + SGR.Op_Phase;
+					EVENT.operation |= (INT_F_SGR << 16) + SGR.Op_Phase;
 					EVENT.fault_type = F_SGR;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: SGR.Op_Phase;
 					Save_Relay_Event(SGR.Op_Ratio * 100.0F);

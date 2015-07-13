@@ -54,6 +54,10 @@ const char* event3e[2]={"   ] 67GD  SETTING  ",
                        "                    "};
 const char* event3f[2]={"   ] 67GS  SETTING  ",
                        "                    "};
+const char* event40[2]={"   ] RLY PARAMETER  ",
+                       "     RE-SETTING.    "};
+const char* event41[2]={"   ] SYS PARAMETER  ",
+                       "     RE-SETTING.    "};
 
                       //12345678901234567890
 const char* event4[2]={"   ] SYSTEM SETTING ",

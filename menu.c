@@ -15043,11 +15043,12 @@ void menu_popup(unsigned int value, int display)
 	if(i == 15) i = 0;
 	
 	sprintf(str[0], "%s\0", Trip_Message[i][0]);
-	if(Phase_Info == 9 || Phase_Info == 10) {
+	/*if(Phase_Info == 9 || Phase_Info == 10) {
 		sprintf(str[1], "                    \0");
-	} else {
+	} else */
+	//{
 		sprintf(str[1], " [Fault Phase: %s ] \0", phase_character[Phase_Info % 11]);
-	}
+	//}
 
 	if(display) {
 		screen_frame2(str);
@@ -15092,6 +15093,7 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 {
 	char temp_char;
 	unsigned int temp16;
+	unsigned int temp16_2;
 	unsigned int i_tmp[3];
 	int temp_int;
 	char str[22];
@@ -15108,16 +15110,12 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
 		temp16 &= 0x00ff;
 		
-		i_tmp[0] = 1;
-		for(temp_int = 1; temp_int < 16; temp_int++) {
-			if(temp16 & i_tmp[0]) break;
-			i_tmp[0] <<= 1;
-		}
-		str[0] = (temp_int == 16)? 0: temp_int;
+		str[0] = (temp16 > 16)? 0: temp16;
 		
 		// relay curve (특성 정보인데 사용을 하나?)
 		temp16 = *(EVENT_CONTENT1 + (EVENT.view_point * 18));
 		temp16 &= 0x00ff;
+		temp16_2 = temp16;
 //		LCD.line_3rd_adder = relay_curve[temp16];
 		
 		//상 정보 (Phase)
@@ -15144,13 +15142,14 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 		//"  Ph:AB     Ot: 0.986"
 		if(str[0]) {
 			sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
-			if(str[0] == 10 || str[0] == 11) {	//47P, 47N
-				sprintf(str2[1],"          Ot: %.3f   \0", event_phase[temp16], ((float)i_tmp[0])/1000.0F);
-			} else if(str[0] == 10 || str[0] == 11) {	//67GD, 67GS
-				sprintf(str2[1],"  %d\x0DF   Ot: %.3f   \0", temp16, ((float)i_tmp[0])/1000.0F);
+			/*if(str[0] == 10 || str[0] == 11) {	//47P, 47N
+				sprintf(str2[1],"          Ot: %.3f   \0", ((float)i_tmp[0])/1000.0F);
+			} else if(str[0] == 14 || str[0] == 15) {	//67GD, 67GS
+				sprintf(str2[1],"   %4d\x0DF   Ot: %.3f \0", (temp16_2 << 8) + temp16, ((float)i_tmp[0])/1000.0F);
 			} else {	// 나머지
+			*/
 				sprintf(str2[1],"  Ph:%s   Ot: %.3f   \0", event_phase[temp16], ((float)i_tmp[0])/1000.0F);
-			}
+			//}
 		} else {
 			sprintf(str2[0],"   ] NO EVENT !    \x01\0");
 			sprintf(str2[1],"                     \0");
@@ -15162,25 +15161,33 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	// relay set
 	else if(EVENT.temp == 0x02)
 	{
-		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_CONTENT2 + (EVENT.view_point * 18));
 		temp16 &= 0x00ff;
+		if(temp16 == 1) {
+			screen_frame3(event41);//{"   ] SYS PARAMETER  ",
+		} else {
 
-		if(temp16 == (OCR50_1_SET_EVENT >> 16))        {			screen_frame3(event31);
-		} else if(temp16 == (OCR50_2_SET_EVENT >> 16)) {			screen_frame3(event32);
-		} else if(temp16 == (OCR51_1_SET_EVENT >> 16)) {			screen_frame3(event33);
-		} else if(temp16 == (OCR51_2_SET_EVENT >> 16)) {			screen_frame3(event34);
-		} else if(temp16 == (OCGR50_SET_EVENT >> 16)) {			screen_frame3(event35);
-		} else if(temp16 == (OCGR51_SET_EVENT >> 16)) {			screen_frame3(event36);
-		} else if(temp16 == (UVR_1_SET_EVENT  >> 16)) {			screen_frame3(event37);
-		} else if(temp16 == (UVR_2_SET_EVENT  >> 16)) {			screen_frame3(event38);
-		} else if(temp16 == (UVR_3_SET_EVENT  >> 16)) {			screen_frame3(event39);
-		} else if(temp16 == (P47_SET_EVENT  >> 16)) {			screen_frame3(event3a);
-		} else if(temp16 == (P47_SET_EVENT  >> 16)) {			screen_frame3(event3b);
-		} else if(temp16 == (OVR_SET_EVENT  >> 16)) {			screen_frame3(event3c);
-		} else if(temp16 == (OVGR_SET_EVENT  >> 16)) {		screen_frame3(event3d);
-		} else if(temp16 == (DGR_SET_EVENT  >> 16)) {			screen_frame3(event3e);
-		} else if(temp16 == (SGR_SET_EVENT  >> 16)) {			screen_frame3(event3f);}
-		
+			temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+			temp16 &= 0x00ff;
+	
+			if(temp16 == (OCR50_1_SET_EVENT >> 16))        {			screen_frame3(event31);
+			} else if(temp16 == (OCR50_2_SET_EVENT >> 16)) {			screen_frame3(event32);
+			} else if(temp16 == (OCR51_1_SET_EVENT >> 16)) {			screen_frame3(event33);
+			} else if(temp16 == (OCR51_2_SET_EVENT >> 16)) {			screen_frame3(event34);
+			} else if(temp16 == (OCGR50_SET_EVENT >> 16)) {			screen_frame3(event35);
+			} else if(temp16 == (OCGR51_SET_EVENT >> 16)) {			screen_frame3(event36);
+			} else if(temp16 == (UVR_1_SET_EVENT  >> 16)) {			screen_frame3(event37);
+			} else if(temp16 == (UVR_2_SET_EVENT  >> 16)) {			screen_frame3(event38);
+			} else if(temp16 == (UVR_3_SET_EVENT  >> 16)) {			screen_frame3(event39);
+			} else if(temp16 == (P47_SET_EVENT  >> 16)) {			screen_frame3(event3a);
+			} else if(temp16 == (P47_SET_EVENT  >> 16)) {			screen_frame3(event3b);
+			} else if(temp16 == (OVR_SET_EVENT  >> 16)) {			screen_frame3(event3c);
+			} else if(temp16 == (OVGR_SET_EVENT  >> 16)) {		screen_frame3(event3d);
+			} else if(temp16 == (DGR_SET_EVENT  >> 16)) {			screen_frame3(event3e);
+			} else if(temp16 == (SGR_SET_EVENT  >> 16)) {			screen_frame3(event3f);
+			} else if(temp16 == (RELAY_ONOFF_EVENT  >> 16)) {			screen_frame3(event40);}
+				
+		}
 //		LCD.line_2nd_adder = event_relay[temp16];
 //		LCD.line_2nd_addressing = LCD_L2_05;
 //		LCD.line_2nd_status = 1;
