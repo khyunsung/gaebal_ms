@@ -538,6 +538,7 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == LR51_USE)
 	{
+//---------------- start current set
 		if(CORE.rated_ct == CT_5A) {
 			LR51.Pickup_Threshold_Start = (float)LR51.start_current_set;
 			LR51.Pickup_Threshold_Start *= 0.1;
@@ -547,13 +548,14 @@ void setting_post_handling(unsigned int *ar_address)
 		}
 		LR51.Start_Ratio_Set = LR51.Pickup_Threshold_Start / THR.Pickup_Threshold;
 
+//---------------- start time set
 		LR51.pickup_limit = DEFINITE_PICKUP_LIMIT;
 		LR51.delay_sec_time = LR51.start_delay_time * 0.1; //100msec -> sec로 변환
 		LR51.delay_ms_time = LR51.start_delay_time * 100; //100msec -> msec로 변환
-		
 		LR51.Start_OPLevel =((pow(LR51.Start_Ratio_Set, 2.0)-1)*LR51.delay_sec_time)/80.0;
+		LR51.Reactor_Start_Time = LR51.start_delay_time * 2 * 100; //2배 * 100msec -> msec로 변환
 
-
+//---------------- run current set
 		if(CORE.rated_ct == CT_5A) {
 			LR51.Pickup_Threshold = (float)LR51.current_set;
 			LR51.Pickup_Threshold *= 0.1;
@@ -561,11 +563,13 @@ void setting_post_handling(unsigned int *ar_address)
 //		LR51.Pickup_Threshold = (float)LR51.current_set;
 //		LR51.Pickup_Threshold *= 0.01;
 		}
+
+//---------------- run time set
 		LR51.delay_ms = LR51.delay_time * 100; //100msec -> msec로 변환
-		LR51.delay_ms = LR51.delay_ms - DEFINITE_PICKUP_LIMIT - TOTAL_DELAY_51LR;
+		LR51.delay_ms = LR51.delay_ms - DEFINITE_PICKUP_LIMIT - TOTAL_DELAY_51LR_2;
 
 		LR51.op_status = RELAY_NORMAL;
-//	LR51.Reactor_Start_Flag = STATE_NO;
+		LR51.Reactor_Start_Flag = STATE_NO;
 		LR51.Op_Ratio = 0.0;
 		LR51.Op_Phase = 0;
 		LR51.Op_Time = 0.0;
@@ -587,7 +591,28 @@ void setting_post_handling(unsigned int *ar_address)
 
 	else if(ar_address == NCHR_USE)
 	{
+		NCHR.Allow_Time_Threshold = NCHR.allow_time_set*60000;
+		NCHR.Trip_Number_Threshold = NCHR.trip_number_set;
+		NCHR.Limit_Time_Threshold = NCHR.limit_time_set*60000;
+		NCHR.Theta_D_Threshold = (float)NCHR.theta_d_set*0.01;
 
+		NCHR.op_status = RELAY_NORMAL;
+//		NCHR.Op_Ratio = 0.0;
+//		NCHR.Op_Phase = 0;
+//		NCHR.Op_Time = 0.0;
+
+		NCHR.do_output = 0;
+		for(i = 0; i < 8; i++)
+		{
+			if(NCHR.do_relay & (0x0001 << i))
+			NCHR.do_output |= DO_ON_BIT[i];
+		}
+		
+//	NCHR.event_ready = OCR50_1_SET_EVENT;
+//	NCHR.event_ready |= (unsigned long)(NCHR.mode << 8);
+		
+		RELAY_STATUS.pickup							&= ~F_NCHR; //계전요소 alarm ON
+		RELAY_STATUS.operation_realtime	&= ~F_NCHR; //계전요소 현재 상태 변수
 	}
 
 	else if(ar_address == H50_USE)
@@ -632,10 +657,10 @@ void setting_post_handling(unsigned int *ar_address)
 	else if(ar_address == UCR_USE)
 	{
 		UCR.Min_Pickup_Threshold = (float)UCR.min_current_set;
-		UCR.Min_Pickup_Threshold *= 0.01;
+		UCR.Min_Pickup_Threshold *= 0.1;
 
 		UCR.Max_Pickup_Threshold = (float)UCR.max_current_set;
-		UCR.Max_Pickup_Threshold *= 0.01;
+		UCR.Max_Pickup_Threshold *= 0.1;
 
 		UCR.RMS = 0.0;
 

@@ -299,15 +299,20 @@ struct
 {
 	unsigned int Stop_Count;
 	unsigned int Start_Count;
-	unsigned int Run_Count;
 	unsigned int OverRun_Count;
+	unsigned int Run_Count;
 
 	unsigned int Stop_Flag;
 	unsigned int Start_Flag;
+	unsigned int Overrun_Flag;
 	unsigned int Run_Flag;
-	unsigned int OverRun_Flag;
 
-	float DispStartmaxI;
+	unsigned long React_Count;
+
+	float Start_Imax;
+	float Disp_Start_Imax;
+	float Disp_Start_Imax_temp;
+	float Display_Start_Time;
 } M_STATE;
 
 struct
@@ -572,10 +577,10 @@ struct
 	float	Start_Ratio;
 	float	Start_Ratio_Set;
 	float	Start_OPLevel;
-	unsigned int delay_ms_time;
-	unsigned int delay_sec_time;
-	unsigned int delay_ms_start;
-	unsigned int delay_ms_temp;
+	unsigned long delay_ms_time;
+	unsigned long delay_sec_time;
+	unsigned long delay_ms_start;
+	unsigned long delay_ms_temp;
 
 	float Pickup_Threshold;
 	float Dropout_Threshold;
@@ -585,7 +590,11 @@ struct
 	unsigned int pickup_limit;
 	unsigned long event_ready;
 	unsigned int op_status;
+
 	unsigned int Reactor_Start_Flag;
+	unsigned long st_count;
+	unsigned long Reactor_Start_Time;
+	unsigned int Start_Time_Flag;
 
 	// 추가 부분
 	unsigned int use_temp;
@@ -613,15 +622,18 @@ struct
 	unsigned int theta_d_set;
 	unsigned int do_relay;
 	
-	unsigned int delay_ms;
+//	unsigned int delay_ms;
 	unsigned int do_output;
 	
 	// 내부운용	
-	float Pickup_Threshold;
-	float Dropout_Threshold;
+	unsigned long Allow_Time_Threshold;
+	unsigned int Trip_Number_Threshold;
+	unsigned long Limit_Time_Threshold;
+	float	Theta_D_Threshold;
 
 	unsigned long op_count;
-	unsigned int pickup_limit;
+	unsigned long start_count;
+//unsigned int pickup_limit;
 	unsigned long event_ready;
 	unsigned int op_status;
 	unsigned int Start_RNum;
@@ -634,12 +646,12 @@ struct
 	unsigned int theta_d_set_temp;
 	unsigned int do_relay_temp;
 
-	float Op_Ratio;
-	unsigned int Op_Phase;
-	float Op_Time;
+//	float Op_Ratio;
+//	unsigned int Op_Phase;
+//	float Op_Time;
 
-	unsigned long Pickup_Time;
-	unsigned long Delay_Time;
+//	unsigned long Pickup_Time;
+//	unsigned long Delay_Time;
 } NCHR;
 
 struct
@@ -1840,7 +1852,7 @@ const unsigned int UCR_Imin_MAX[2] = {25, 50};
 const unsigned int UCR_Imax_MIN[2] = {2, 4}; //자리수 다름
 const unsigned int UCR_Imax_MAX[2] = {25, 50};
 const unsigned int UCR_T_MIN = 1;
-const unsigned int UCR_T_MAX = 100;
+const unsigned int UCR_T_MAX = 600;
 
 const unsigned int DGR_I_MIN[2] = {2,4};
 const unsigned int DGR_I_MAX[2] = {20,40};

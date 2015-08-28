@@ -478,8 +478,8 @@ void RELAY_NSR(void)
 					Relay_On(NSR.do_output);
 
 					NSR.op_status	= RELAY_TRIP;
-					NSR.Op_Ratio	= PROTECT.I2_RMS / NSR.Pickup_Threshold; //배수 V_Op_Phase
-					NSR.Op_Phase	= PROTECT.V_Op_Phase; //상
+					NSR.Op_Ratio	= PROTECT.I2_RMS / NSR.Pickup_Threshold; //배수
+					NSR.Op_Phase	= PROTECT.I_Op_Phase; //상 정보 없음
 					NSR.Delay_Time = NSR.op_count;
 					NSR.Op_Time		= NSR.Delay_Time + NSR.Pickup_Time + TOTAL_DELAY_NSR; //동작 시간
 
@@ -518,192 +518,264 @@ void RELAY_NSR(void)
 
 void RELAY_51LR(void)
 {
-	LR51.Start_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold;	//START 시
-	LR51.Ratio 			 = PROTECT.Max_I_RMS / LR51.Pickup_Threshold;	//RUN 시
-
-	if(M_STATE.OverRun_Flag == ON)
+	if(LR51.use == 0xaaaa)
 	{
-		if((LR51.op_status != STATE_WITHIN_PICKUP) && (LR51.op_status != STATE_BEYOND_DETECT) && (LR51.op_status != STATE_WITHIN_DETECT) && (LR51.op_status != RELAY_TRIP) && (LR51.op_status != STATE_WITHIN_TRIP))	{LR51.op_status = STATE_WITHIN;}
-	}
-	if(M_STATE.Run_Flag == ON)
-	{
-		if((LR51.op_status != STATE_BEYOND_PICKUP) && (LR51.op_status != STATE_BEYOND_DETECT) && (LR51.op_status != STATE_WITHIN_DETECT) && (LR51.op_status != RELAY_TRIP) && (LR51.op_status != STATE_WITHIN_TRIP))	{LR51.op_status = STATE_BEYOND;}
-	}
-
-	if(LR51.Start_Ratio >= 1.0) //START 시
-	{
-		if(LR51.op_status == STATE_WITHIN)
+		LR51.Start_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold;	//START 시
+		LR51.Ratio 			 = PROTECT.Max_I_RMS / LR51.Pickup_Threshold;	//RUN 시
+	
+		if(M_STATE.Overrun_Flag == ON) //OverRun_Flag가 ON이 될때까지 시간이 걸림. 그럼 2번째 부터는 왜 잘 되나?
 		{
-			LR51.op_status = STATE_WITHIN_DETECT;
-			LR51.op_count = 0;
-	  }
-		else if(LR51.op_status == STATE_WITHIN_DETECT)
-		{
-			if(LR51.op_count >= LR51.pickup_limit)
-			{	
-				LR51.op_status = STATE_WITHIN_PICKUP;
-				RELAY_STATUS.pickup |= F_51LR;  //alarm ON
-				LR51.Pickup_Time = LR51.op_count;
-				LR51.op_count = 0;
-			}
-		}
-		else if(LR51.op_status == STATE_WITHIN_PICKUP)
-		{
-			LR51.delay_ms_temp = Inverse_51LR_GetDelayTime(LR51.Start_OPLevel, LR51.Start_Ratio);
-
-			if(LR51.delay_ms_temp >= (2*LR51.delay_ms_time))	{LR51.delay_ms_start = 2*LR51.delay_ms_time;}
-			else 																							{LR51.delay_ms_start = LR51.delay_ms_temp;}
-
-			if(LR51.op_count >= LR51.delay_ms_start)
+			if((LR51.op_status != STATE_WITHIN_PICKUP) && (LR51.op_status != STATE_BEYOND_DETECT) && (LR51.op_status != STATE_WITHIN_DETECT) && (LR51.op_status != RELAY_TRIP) && (LR51.op_status != STATE_WITHIN_TRIP))
 			{
-				Relay_On(LR51.do_output);
-
-				LR51.op_status	= STATE_WITHIN_TRIP;
-				LR51.Op_Ratio		= LR51.Start_Ratio;
-				LR51.Op_Phase		= PROTECT.I_Op_Phase; //상
-				LR51.Delay_Time = LR51.op_count;
-				LR51.Op_Time		= LR51.Delay_Time + LR51.Pickup_Time; //동작 시간
-
-				RELAY_STATUS.pickup									&= ~F_51LR; //계전요소 alarm OFF
-				RELAY_STATUS.operation_realtime			|= F_51LR;  //현재 동작 상태 변수 설정
-				RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
-
-				EVENT.optime = (unsigned long)LR51.Op_Time;
-				EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
-				Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
-				EVENT.fault_type = F_51LR;
-				Save_Relay_Event(LR51.Op_Ratio * 100.0F);
-				Save_Screen_Info(LR51.Op_Phase);	
+				LR51.op_status = STATE_WITHIN;
 			}
 		}
-	}
-	else if(LR51.Start_Ratio < 0.97)
-	{
-		if((LR51.op_status == STATE_WITHIN_DETECT) || (LR51.op_status == STATE_WITHIN_PICKUP))
+		if(M_STATE.Run_Flag == ON)
 		{
-			LR51.op_status = RELAY_NORMAL;
-			RELAY_STATUS.pickup &= ~F_51LR; //계전요소 alarm OFF
-		}
-		else if(LR51.op_status == STATE_WITHIN_TRIP)
-		{
-			Relay_Off(LR51.do_output); //DO open
-			LR51.op_status = RELAY_NORMAL; //51LR 상태 NORMAL
-			RELAY_STATUS.operation_realtime &= ~F_OCGR51; //동작 상태 변수 해제
-		}
-	}
-
-
-	if(LR51.Ratio >= 1.0) //RUN 시
-	{
-		if(LR51.op_status == STATE_BEYOND)
-		{
-			LR51.op_status = STATE_BEYOND_DETECT;
-			LR51.op_count = 0;
-	  }
-		else if(LR51.op_status == STATE_BEYOND_DETECT)
-		{
-			if(LR51.op_count >= LR51.pickup_limit)
-			{	
-				LR51.op_status = STATE_BEYOND_PICKUP;
-				RELAY_STATUS.pickup |= F_51LR;  //alarm ON
-				LR51.Pickup_Time = LR51.op_count;
-				LR51.op_count = 0;
-			}
-		}
-		else if(LR51.op_status == STATE_BEYOND_PICKUP)
-		{
-			if(LR51.op_count > LR51.delay_ms)
+			if((LR51.op_status != STATE_BEYOND_PICKUP) && (LR51.op_status != STATE_BEYOND_DETECT) && (LR51.op_status != STATE_WITHIN_DETECT) && (LR51.op_status != RELAY_TRIP) && (LR51.op_status != STATE_WITHIN_TRIP))
 			{
-				Relay_On(LR51.do_output);
-
-				LR51.op_status 	= RELAY_TRIP;
-				LR51.Op_Ratio		= LR51.Ratio;
-				LR51.Op_Phase		= PROTECT.I_Op_Phase; //상
-				LR51.Delay_Time = LR51.op_count;
-				LR51.Op_Time		= LR51.Delay_Time + LR51.Pickup_Time + TOTAL_DELAY_51LR; //동작 시간
-
-				RELAY_STATUS.pickup									&= ~F_51LR; //계전요소 alarm OFF
-				RELAY_STATUS.operation_realtime			|= F_51LR;  //현재 동작 상태 변수 설정
-				RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
-
-				EVENT.optime = (unsigned long)LR51.Op_Time;
-				EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
-				Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
-				EVENT.fault_type = F_51LR;
-				Save_Relay_Event(LR51.Op_Ratio * 100.0F);
-				Save_Screen_Info(LR51.Op_Phase);	
+				LR51.op_status = STATE_BEYOND;
 			}
 		}
-	}
-	else if(LR51.Ratio < 0.97)
-	{
-		if((LR51.op_status == STATE_BEYOND_DETECT) || (LR51.op_status == STATE_BEYOND_PICKUP))
+	
+		if(LR51.Start_Ratio >= 1.0) //START 시
 		{
-			LR51.op_status = RELAY_NORMAL;
-			RELAY_STATUS.pickup &= ~F_51LR; //계전요소 alarm OFF
+			if(LR51.op_status == STATE_WITHIN)
+			{
+				LR51.op_status = STATE_WITHIN_DETECT;
+				LR51.op_count = 0;
+		  }
+			else if(LR51.op_status == STATE_WITHIN_DETECT)
+			{
+				if(LR51.op_count >= LR51.pickup_limit)
+				{	
+					LR51.op_status = STATE_WITHIN_PICKUP;
+					RELAY_STATUS.pickup |= F_51LR;  //alarm ON
+					LR51.Pickup_Time = LR51.op_count;
+					LR51.op_count = 0;
+				}
+			}
+			else if(LR51.op_status == STATE_WITHIN_PICKUP)
+			{
+				LR51.delay_ms_temp = Inverse_51LR_GetDelayTime(LR51.Start_OPLevel, LR51.Start_Ratio);
+	
+				if(LR51.delay_ms_temp >= (2*LR51.delay_ms_time))	{LR51.delay_ms_start = 2*LR51.delay_ms_time;}
+				else 																							{LR51.delay_ms_start = LR51.delay_ms_temp;}
+	
+				LR51.delay_ms_start = LR51.delay_ms_start - LR51.Pickup_Time - TOTAL_DELAY_51LR;
+				
+				if(LR51.op_count >= LR51.delay_ms_start)
+				{
+					Relay_On(LR51.do_output);
+	
+					LR51.op_status	= STATE_WITHIN_TRIP;
+					LR51.Op_Ratio		= LR51.Start_Ratio;
+					LR51.Op_Phase		= PROTECT.I_Op_Phase; //상
+					LR51.Delay_Time = LR51.op_count;
+					LR51.Op_Time		= LR51.Delay_Time + LR51.Pickup_Time + TOTAL_DELAY_51LR; //동작 시간
+	
+					RELAY_STATUS.pickup									&= ~F_51LR; //계전요소 alarm OFF
+					RELAY_STATUS.operation_realtime			|= F_51LR;  //현재 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
+	
+					EVENT.optime = (unsigned long)LR51.Op_Time;
+					EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
+					EVENT.fault_type = F_51LR;
+					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
+					Save_Screen_Info(LR51.Op_Phase);	
+				}
+			}
 		}
-		else if(LR51.op_status == RELAY_TRIP)
+		else if(LR51.Start_Ratio < 0.97)
 		{
-			Relay_Off(LR51.do_output); //DO open
-			LR51.op_status = RELAY_NORMAL; //51LR 상태 NORMAL
-			RELAY_STATUS.operation_realtime &= ~F_OCGR51; //동작 상태 변수 해제
+			if((LR51.op_status == STATE_WITHIN_DETECT) || (LR51.op_status == STATE_WITHIN_PICKUP))
+			{
+				LR51.op_status = RELAY_NORMAL;
+				RELAY_STATUS.pickup &= ~F_51LR; //계전요소 alarm OFF
+			}
+			else if(LR51.op_status == STATE_WITHIN_TRIP)
+			{
+				Relay_Off(LR51.do_output); //DO open
+				RELAY_STATUS.operation_realtime &= ~F_51LR; //동작 상태 변수 해제
+				LR51.op_count = 0;
+				if(M_STATE.Overrun_Flag != ON)	{LR51.op_status = RELAY_NORMAL;} //51LR 상태 NORMAL
+			}
+		}
+	
+	
+		if(LR51.Ratio >= 1.0) //RUN 시
+		{
+			if(LR51.op_status == STATE_BEYOND)
+			{
+				LR51.op_status = STATE_BEYOND_DETECT;
+				LR51.op_count = 0;
+		  }
+			else if(LR51.op_status == STATE_BEYOND_DETECT)
+			{
+				if(LR51.op_count >= LR51.pickup_limit)
+				{	
+					LR51.op_status = STATE_BEYOND_PICKUP;
+					RELAY_STATUS.pickup |= F_51LR;  //alarm ON
+					LR51.Pickup_Time = LR51.op_count;
+					LR51.op_count = 0;
+				}
+			}
+			else if(LR51.op_status == STATE_BEYOND_PICKUP)
+			{
+				if(LR51.op_count > LR51.delay_ms)
+				{
+					Relay_On(LR51.do_output);
+	
+					LR51.op_status 	= RELAY_TRIP;
+					LR51.Op_Ratio		= LR51.Ratio;
+					LR51.Op_Phase		= PROTECT.I_Op_Phase; //상
+					LR51.Delay_Time = LR51.op_count;
+					LR51.Op_Time		= LR51.Delay_Time + LR51.Pickup_Time + TOTAL_DELAY_51LR_2; //동작 시간
+	
+					RELAY_STATUS.pickup									&= ~F_51LR; //계전요소 alarm OFF
+					RELAY_STATUS.operation_realtime			|= F_51LR;  //현재 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
+	
+					EVENT.optime = (unsigned long)LR51.Op_Time;
+					EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
+					EVENT.fault_type = F_51LR;
+					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
+					Save_Screen_Info(LR51.Op_Phase);	
+				}
+			}
+		}
+		else if(LR51.Ratio < 0.97)
+		{
+			if((LR51.op_status == STATE_BEYOND_DETECT) || (LR51.op_status == STATE_BEYOND_PICKUP))
+			{
+				LR51.op_status = RELAY_NORMAL;
+				RELAY_STATUS.pickup &= ~F_51LR; //계전요소 alarm OFF
+			}
+			else if(LR51.op_status == RELAY_TRIP)
+			{
+				Relay_Off(LR51.do_output); //DO open
+				RELAY_STATUS.operation_realtime &= ~F_51LR; //동작 상태 변수 해제
+				if(M_STATE.Run_Flag != ON) {LR51.op_status = RELAY_NORMAL;} //51LR 상태 NORMAL
+			}
 		}
 	}
 }
 
 void RELAY_NCHR(void)
 {
+	if((SET_66.Stop_Flag == ON) && (SET_66.Start_Flag != ON) && (NCHR.op_status == RELAY_NORMAL))
+	{
+		NCHR.op_status = RELAY_PICKUP;
+	}
+	if((SET_66.Start_Flag == ON) && (NCHR.op_status == RELAY_PICKUP))
+	{
+		if(NCHR.Start_RNum == 0)
+		{
+			NCHR.start_count = 0;
+		}
+		NCHR.Start_RNum += 1;
+		NCHR.op_status = RELAY_NORMAL;
+	}
 
+	if((NCHR.start_count <= NCHR.Allow_Time_Threshold) && (NCHR.op_status == RELAY_NORMAL))
+	{
+		if(NCHR.Start_RNum >= NCHR.Trip_Number_Threshold)
+		{
+			NCHR.op_status = STATE_WAIT_NO; //허용된 시간 내에 허용된 기동 횟수 만큼 기동하면 STATE_WAIT_NO 상태로 만듦
+		}
+	}
+	else if((NCHR.start_count > NCHR.Allow_Time_Threshold) && ((NCHR.op_status == RELAY_PICKUP) || (NCHR.op_status != RELAY_TRIP)))
+	{
+		if(NCHR.op_status == STATE_WAIT_NO)
+		{
+			NCHR.op_status = RELAY_NORMAL; //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 허용된 시간이 지나면 리셋
+		}
+		NCHR.Start_RNum = 0;
+	}
+
+	if(NCHR.op_status == STATE_WAIT_NO) //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 
+	{
+		if(SET_66.Stop_Flag == ON) //stop 상태이면-> 허용된 기동 횟수 만큼 기동 시도 하였으나, 결국 기동 성공(run)되지 못했다면,
+		{
+			Relay_On(NCHR.do_output);
+
+			NCHR.op_status = RELAY_TRIP;
+			NCHR.Start_RNum = 0;
+			NCHR.op_count = 0;
+
+//		RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
+			RELAY_STATUS.operation_sum_holding	|= F_NCHR;  //누적 동작 상태 변수 설정
+
+			//이벤트 저장 삽입
+		}
+	}
+
+	if(NCHR.op_status == RELAY_TRIP)
+	{
+		if((NCHR.Limit_Time_Threshold < NCHR.op_count) && (THR.present_theta <= NCHR.Theta_D_Threshold))
+		{
+			Relay_Off(NCHR.do_output); //DO open
+			NCHR.op_status = RELAY_NORMAL; //NCHR상태 NORMAL
+//		RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
+
+			NCHR.Start_RNum = 0;
+		}
+	}
 }
 
 void RELAY_50H(void)
 {
-	if(PROTECT.Max_I_RMS > H50.Pickup_Threshold) //50H 설정 값 이상
+	if(H50.use == 0xaaaa)
 	{
-		H50.op_status = RELAY_TRIP;
-		H50.save_flag = OFF;				//이벤트 저장 플래그
-		H50.display_flag = OFF;			//메인 화면 디스플레이 플래그
-		H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
-
-		Relay_Off(H50.do_output); 	//DO open
-		H50.trip_flag = ON;					//TRIP 조건 밖에서 ON 해서, TRIP 영역 진입 시 동작 가능 알림
-	}
-	else
-	{
-		if(PROTECT.Max_I_RMS < H50.Dropout_Threshold) //50H 설정 값 이하
+		if(PROTECT.Max_I_RMS > H50.Pickup_Threshold) //50H 설정 값 이상
 		{
-			H50.op_status = RELAY_NORMAL;
-			
-			if((PROTECT.Max_I_RMS >= THR.Pickup_Threshold) && (H50.trip_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이상 && TRIP 조건 밖에서 동작 조건으로 진입함
+			H50.op_status = RELAY_TRIP;
+			H50.save_flag = OFF;				//이벤트 저장 플래그
+			H50.display_flag = OFF;			//메인 화면 디스플레이 플래그
+			H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
+	
+			Relay_Off(H50.do_output); 	//DO open
+			H50.trip_flag = ON;					//TRIP 조건 밖에서 ON 해서, TRIP 영역 진입 시 동작 가능 알림
+		}
+		else
+		{
+			if(PROTECT.Max_I_RMS < H50.Dropout_Threshold) //50H 설정 값 이하
 			{
-				THR.Op_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold; //배수 정보
-
-				Relay_On(H50.do_output);
-				H50.trip_flag = OFF; // TRIP 조건 밖으로 나갔다 와야 다시 진입 가능 함
-
-//			Add_Fault(H50);	
-//			if(H50.save_flag == OFF) H50_save(F50H|FINST,ftmp,H50_Phase,0.03); //이벤트 저장 필요
+				H50.op_status = RELAY_NORMAL;
 				
-//			if(H50_ack_flag == 1)
-//			{
-//				FaultScreenReady = 1;	
-//				Fault_tp = F50H;
-//				H50_ack_flag = 0;
-//			}
-				H50.save_flag = ON;					//이벤트 저장 플래그
-				H50.display_flag = ON;			//메인 화면 디스플레이 플래그
-				H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
-			}
-			else if((PROTECT.Max_I_RMS < THR.Pickup_Threshold) && (H50.reset_ready_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이하
-			{
-				H50.save_flag = OFF;					//이벤트 저장 플래그
-				H50.display_flag = OFF;				//메인 화면 디스플레이 플래그
-				H50.reset_ready_flag = OFF;		//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
-
-				Relay_Off(H50.do_output); //DO open
-				H50.trip_flag = ON; 					//TRIP 조건 밖에서 ON 해서, TRIP 영역 진입 시 동작 가능 알림
-
-//			H50_ack_flag = 1;	//2007.11.7
+				if((PROTECT.Max_I_RMS >= THR.Pickup_Threshold) && (H50.trip_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이상 && TRIP 조건 밖에서 동작 조건으로 진입함
+				{
+					H50.Op_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold; //배수 정보
+	
+					Relay_On(H50.do_output);
+					H50.trip_flag = OFF; // TRIP 조건 밖으로 나갔다 와야 다시 진입 가능 함
+	
+	//			Add_Fault(H50);	
+	//			if(H50.save_flag == OFF) H50_save(F50H|FINST,ftmp,H50_Phase,0.03); //이벤트 저장 필요
+					
+	//			if(H50_ack_flag == 1)
+	//			{
+	//				FaultScreenReady = 1;	
+	//				Fault_tp = F50H;
+	//				H50_ack_flag = 0;
+	//			}
+					H50.save_flag = ON;					//이벤트 저장 플래그
+					H50.display_flag = ON;			//메인 화면 디스플레이 플래그
+					H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
+				}
+				else if((PROTECT.Max_I_RMS < THR.Pickup_Threshold) && (H50.reset_ready_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이하
+				{
+					H50.save_flag = OFF;					//이벤트 저장 플래그
+					H50.display_flag = OFF;				//메인 화면 디스플레이 플래그
+					H50.reset_ready_flag = OFF;		//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
+	
+					Relay_Off(H50.do_output); //DO open
+					H50.trip_flag = ON; 					//TRIP 조건 밖에서 ON 해서, TRIP 영역 진입 시 동작 가능 알림
+	
+	//			H50_ack_flag = 1;	//2007.11.7
+				}
 			}
 		}
 	}
@@ -713,23 +785,23 @@ void RELAY_UCR(void)
 {
 	if(UCR.use == 0xaaaa)
 	{
-		if(((MEASUREMENT.rms_value[Ia]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ib]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ic]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic]>=UCR.Min_Pickup_Threshold)))
+		if(((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ib]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ic]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic]>=UCR.Min_Pickup_Threshold)))
 		{
-			if((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))
-			{
-				UCR.Op_Phase = Ia+1; //상
-				UCR.RMS = MEASUREMENT.rms_value[Ia];
-			}
-			else if((MEASUREMENT.rms_value[Ib] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib] >= UCR.Min_Pickup_Threshold))
-			{
-				UCR.Op_Phase = Ib+1; //상
-				UCR.RMS = MEASUREMENT.rms_value[Ib];
-			}
-			else if((MEASUREMENT.rms_value[Ic] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic] >= UCR.Min_Pickup_Threshold))
-			{
-				UCR.Op_Phase = Ic+1; //상
-				UCR.RMS = MEASUREMENT.rms_value[Ic];
-			}
+//			if((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))
+//			{
+//				UCR.Op_Phase = Ia+1; //상
+//				UCR.RMS = MEASUREMENT.rms_value[Ia];
+//			}
+//			else if((MEASUREMENT.rms_value[Ib] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib] >= UCR.Min_Pickup_Threshold))
+//			{
+//				UCR.Op_Phase = Ib+1; //상
+//				UCR.RMS = MEASUREMENT.rms_value[Ib];
+//			}
+//			else if((MEASUREMENT.rms_value[Ic] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic] >= UCR.Min_Pickup_Threshold))
+//			{
+//				UCR.Op_Phase = Ic+1; //상
+//				UCR.RMS = MEASUREMENT.rms_value[Ic];
+//			}
 
 			if((UCR.op_status == RELAY_NORMAL) && (M_STATE.Run_Flag == ON))
 			{
@@ -742,7 +814,7 @@ void RELAY_UCR(void)
 				{	
 					UCR.op_status = RELAY_PICKUP;
 					RELAY_STATUS.pickup |= F_UCR;  //alarm ON
-					UCR.Pickup_Time = NSR.op_count;
+					UCR.Pickup_Time = UCR.op_count;
 					UCR.op_count = 0;
 				}
 			}
@@ -751,6 +823,22 @@ void RELAY_UCR(void)
 				if(UCR.op_count >= UCR.delay_ms)
 				{
 					Relay_On(UCR.do_output);
+
+					if((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))
+					{
+						UCR.Op_Phase = Ia+1; //상
+						UCR.RMS = MEASUREMENT.rms_value[Ia];
+					}
+					else if((MEASUREMENT.rms_value[Ib] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib] >= UCR.Min_Pickup_Threshold))
+					{
+						UCR.Op_Phase = Ib+1; //상
+						UCR.RMS = MEASUREMENT.rms_value[Ib];
+					}
+					else if((MEASUREMENT.rms_value[Ic] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic] >= UCR.Min_Pickup_Threshold))
+					{
+						UCR.Op_Phase = Ic+1; //상
+						UCR.RMS = MEASUREMENT.rms_value[Ic];
+					}
 
 					UCR.op_status	= RELAY_TRIP;
 					UCR.Op_Ratio = UCR.RMS / THR.Pickup_Threshold; //배수 
@@ -1015,7 +1103,7 @@ unsigned long Inverse_GetDelayTime(int mode, float OP_level, float Ratio)
 {
 	float DelayTime;
 
-	OP_level *= 0.01; 
+	OP_level *= 0.01;
 	switch(mode)
 	{
 		case  INVERSE:								//Normal inverse type
@@ -1091,23 +1179,47 @@ void MOTOR_STATE(void)
 	{
 		M_STATE.Stop_Flag		 = OFF;
 		M_STATE.Start_Flag	 = OFF;
-		M_STATE.OverRun_Flag = OFF;
+		M_STATE.Overrun_Flag = OFF;
 		M_STATE.Run_Flag		 = ON;
 
 		init_highLevel=0;
 		LR51.Reactor_Start_Flag = STATE_NO;
 	}
 
-	if(PROTECT.Thr49_Ratio < 0.05) 														{M_STATE.Stop_Count++;}
-	if((M_STATE.Stop_Flag==ON)&&(PROTECT.Thr49_Ratio>=0.1))		{M_STATE.Start_Count++;}
-	if((M_STATE.Start_Flag==ON)&&(PROTECT.Thr49_Ratio>=1.0))	{M_STATE.OverRun_Count++;}
-	if((M_STATE.OverRun_Flag == ON)&&(M_STATE.Start_Flag == ON)&&(PROTECT.Thr49_Ratio<1.0)&&(PROTECT.Thr49_Ratio>=0.1))	{M_STATE.Run_Count++;}
+	if(PROTECT.Thr49_Ratio < 0.05)
+	{
+		M_STATE.Stop_Count++;
+		M_STATE.Start_Count = 0;
+		M_STATE.OverRun_Count = 0;
+		M_STATE.Run_Count = 0;
+	}
+	if((M_STATE.Stop_Flag==ON) && (PROTECT.Thr49_Ratio>=0.1))
+	{
+		M_STATE.Stop_Count = 0;
+		M_STATE.Start_Count++;
+		M_STATE.OverRun_Count = 0;
+		M_STATE.Run_Count = 0;
+	}
+	if((M_STATE.Start_Flag==ON) && (PROTECT.Thr49_Ratio>=1.0))
+	{
+		M_STATE.Stop_Count = 0;
+		M_STATE.Start_Count = 0;
+		M_STATE.OverRun_Count++;
+		M_STATE.Run_Count = 0;
+	}
+	if((M_STATE.Overrun_Flag == ON) && (M_STATE.Start_Flag == ON) && (PROTECT.Thr49_Ratio < 1.0) && (PROTECT.Thr49_Ratio >= 0.1))
+	{
+		M_STATE.Stop_Count = 0;
+		M_STATE.Start_Count = 0;
+		M_STATE.OverRun_Count = 0;
+		M_STATE.Run_Count++;
+	}
 
 	if(M_STATE.Stop_Count >= 60) //MOTOR STOP
 	{
 		M_STATE.Stop_Flag		 = ON;
 		M_STATE.Start_Flag	 = OFF;
-		M_STATE.OverRun_Flag = OFF;
+		M_STATE.Overrun_Flag = OFF;
 		M_STATE.Run_Flag		 = OFF;
 
 		M_STATE.Stop_Count = 0;
@@ -1121,46 +1233,43 @@ void MOTOR_STATE(void)
 		M_STATE.Start_Flag = ON;
 
 		M_STATE.Start_Count = 0;
-		//MarkTime(StartTime);
+		M_STATE.React_Count = 0;
 	}
 
 	if((M_STATE.Start_Flag == ON) && (M_STATE.OverRun_Count >= 60)) //MOTOR OVERRUN
 	{
-		M_STATE.OverRun_Flag = ON; 
+		M_STATE.Overrun_Flag = ON; 
 		M_STATE.Run_Flag 		 = OFF;
 		
 		M_STATE.OverRun_Count = 0;
 		LR51.Reactor_Start_Flag = STATE_NO;
 	}
 
-	if((M_STATE.OverRun_Flag == ON) && (M_STATE.Start_Flag == ON) && (M_STATE.Run_Count >= 60)) //MOTOR RUN
+	if((M_STATE.Overrun_Flag == ON) && (M_STATE.Start_Flag == ON) && (M_STATE.Run_Count >= 60)) //MOTOR RUN
 	{
 		M_STATE.Start_Flag 	 = OFF;
-		M_STATE.OverRun_Flag = OFF;
+		M_STATE.Overrun_Flag = OFF;
 		M_STATE.Run_Flag		 = ON;
 
 		M_STATE.Run_Count = 0;
 		LR51.Reactor_Start_Flag = STATE_NO;
-//	startTimeflag = 1;
+		LR51.Start_Time_Flag = 1;
 	}
 
 	if((M_STATE.Run_Flag != ON)&&(M_STATE.Stop_Flag != ON))	
 	{
-//		ElapseStartTime=GetElapseTime(StartTime);
-//		if(OldStartmaxI < PROTECT.Max_I_RMS)
-//		{
-//			OldStartmaxI = PROTECT.Max_I_RMS;
-//			OldMAX_Phase = Thr_Ph;
-//		}
+		if(M_STATE.Start_Imax < PROTECT.Max_I_RMS)
+		{
+			M_STATE.Start_Imax = PROTECT.Max_I_RMS;
+		}
 	}	
-//	if(startTimeflag)
-//	{
-//		M_STATE.T_st=ElapseStartTime;
-//		startTimeflag=0;
-//		
-//		M_STATE.DispStartmaxI = (OldStartmaxI*360*Cur_fact)/(I_scale+(float)(CalFact_I[OldMAX_Phase]/TempValue2)) +0.05;
-//		OldStartmaxI = 0.;
-//	}
+	if(LR51.Start_Time_Flag)
+	{
+		M_STATE.Display_Start_Time = (float)M_STATE.React_Count / 1000; //run까지 걸린 시간
+		M_STATE.Disp_Start_Imax = M_STATE.Start_Imax * CPT.ct_ratio; //run까지 중에 가장 큰 전류
+		M_STATE.Start_Imax = 0;
+		LR51.Start_Time_Flag = 0;
+	}
 }
 
 void Theta_Cal(void)
@@ -1248,43 +1357,42 @@ float Get_thr_DelayTime(int flag)
 
 void MOTOR_START_CHECK(void)
 {
-//	if(LR51.op_status == STATE_WITHIN_TRIP || LR51.op_status == RELAY_TRIP)	return;
-//	
-//	startTime=GetElapseTime(LRStart);
-//	if(start_Flag==STATE_NO)
-//	{
-//		MarkTime(LRStart);
-//		start_Flag=STATE_WAIT;
-//		return;
-//	}
-//	else if(start_Flag==STATE_WAIT)
-//	{
-//		if(start_cnt < startTime)
-//		{
-//			Run_Flag=ON;
-//			OverRun_Flag = OFF;
-//			Start_Flag = OFF;
-//			start_Flag=STATE_NO;
-//			startTimeflag=1;
-//		}
-//	}
-//
-//	if((Run_Flag != ON)&&(Stop_Flag != ON))	
-//	{
-//		ElapseStartTime=GetElapseTime(StartTime);
-//		if(OldStartmaxI < Thr_Rms_Thr)
-//		{
-//			OldStartmaxI = Thr_Rms_Thr;
-//			OldMAX_Phase = Thr_Ph;
-//		}
-//	}	
-//	if(startTimeflag)
-//	{
-//		T_st=ElapseStartTime;
-//		startTimeflag=0;
-//		
-//		M_STATE.DispStartmaxI = (OldStartmaxI*360*Cur_fact)/(I_scale+(float)(CalFact_I[OldMAX_Phase]/TempValue2)) +0.05;
-//		OldStartmaxI = 0.;
-//	}
+	if((LR51.use == 0xaaaa) && (M_STATE.Start_Flag == ON) && (M_STATE.Overrun_Flag != ON))
+	{
+		if(LR51.op_status == STATE_WITHIN_TRIP || LR51.op_status == RELAY_TRIP)	return;
+		
+		if(LR51.Reactor_Start_Flag == STATE_NO)
+		{
+			LR51.Reactor_Start_Flag = STATE_WAIT;
+			LR51.st_count = 0;
+		}
+		else if(LR51.Reactor_Start_Flag == STATE_WAIT)
+		{
+			if(LR51.Reactor_Start_Time < LR51.st_count)
+			{
+				M_STATE.Start_Flag = OFF;
+				M_STATE.Overrun_Flag = OFF;
+				M_STATE.Run_Flag = ON;
+	
+				LR51.Reactor_Start_Flag = STATE_NO;
+				LR51.Start_Time_Flag = 1;
+			}
+		}
+	
+		if((M_STATE.Run_Flag != ON)&&(M_STATE.Stop_Flag != ON))	
+		{
+			if(M_STATE.Start_Imax < PROTECT.Max_I_RMS)
+			{
+				M_STATE.Start_Imax = PROTECT.Max_I_RMS;
+			}
+		}	
+		if(LR51.Start_Time_Flag)
+		{
+			M_STATE.Display_Start_Time = (float)M_STATE.React_Count / 1000; //run까지 걸린 시간
+			M_STATE.Disp_Start_Imax = M_STATE.Start_Imax * CPT.ct_ratio; //run까지 중에 가장 큰 전류
+			M_STATE.Start_Imax = 0;
+			LR51.Start_Time_Flag = 0;
+		}
+	}
 }
 

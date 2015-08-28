@@ -613,7 +613,8 @@ daum:		;
 	Theta_Cal();
 	Get_thr_P();
 	
-//	if(LR51Enable&&(Start_Flag==ON)&&(OverRun_Flag != ON))	MOTOR_START_CHECK();
+//if(LR51Enable&&(Start_Flag==ON)&&(OverRun_Flag != ON))	MOTOR_START_CHECK();
+	MOTOR_START_CHECK();
 
 
 	// wave 저장 시 di/do 값도 저장함. 1.38ms 마다 1회(12샘플)
@@ -847,7 +848,12 @@ interrupt void TINT1_ISR(void)
 
 	++NSR.op_count;			// NSR 
 	++LR51.op_count; 		// LR51
+	++LR51.st_count;
+	++M_STATE.React_Count;
+	
 	++NCHR.op_count;		// NCHR
+	++NCHR.start_count;
+	
 	++H50.op_count; 		// H50
 	++UCR.op_count; 		// UCR
 	++DGR.op_count; 		// DGR

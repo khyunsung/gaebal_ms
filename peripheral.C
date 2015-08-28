@@ -1479,8 +1479,8 @@ void led_handling(void)
 	SYSTEM.led_mode ^= 0x0001;	// fault led 점멸 작업용
 	if(SYSTEM.led_mode)
 	{
-		// 계전요소가 pickup 중이거나 또는 계전요소 동작이 발생했는데 ack가 안눌린경우
-		if((RELAY_STATUS.pickup) || (RELAY_STATUS.operation_sum_holding))	{SYSTEM.led_on |= FAULT_LED;} // 일단 led 켠다
+		// 계전요소가 pickup 중이거나 또는 계전요소 동작이 발생했는데 ack가 안눌린 경우, NCHR은 LED를 안 켬
+		if((RELAY_STATUS.pickup) || (RELAY_STATUS.operation_sum_holding) && (RELAY_STATUS.operation_sum_holding	!= F_NCHR))	{SYSTEM.led_on |= FAULT_LED;} // 일단 led 켠다
 	}
 	else
 	{

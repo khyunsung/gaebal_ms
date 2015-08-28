@@ -232,9 +232,10 @@
 #define TOTAL_DELAY_51G				 14 // 51G 확인 완료
 #define TOTAL_DELAY_THR	       17
 #define TOTAL_DELAY_H50	       17
-#define TOTAL_DELAY_NSR	       23
-#define TOTAL_DELAY_51LR			 14
-#define TOTAL_DELAY_UCR	       23
+#define TOTAL_DELAY_NSR	       22
+#define TOTAL_DELAY_51LR			 181
+#define TOTAL_DELAY_51LR_2		 20
+#define TOTAL_DELAY_UCR	       13
 #define TOTAL_DELAY_67GD       22
 #define TOTAL_DELAY_67GS       25 
 

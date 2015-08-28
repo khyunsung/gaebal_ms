@@ -912,6 +912,7 @@ void menu_02_01(unsigned int value, int display)
 		} else {
 			Screen_Position.y = 34;
 			Screen_Position.x = 2;
+			Screen_Position.data_change = REALTIME_MENU;
 			cursor_move(0, 0);
 		}
 	}
@@ -3264,25 +3265,32 @@ void menu_30_02(unsigned int value, int display)
 	if(value == UP_KEY) {
 		Screen_Position.y = 1;
 		Screen_Position.x = 1;
+		Screen_Position.data_change = NORMAL_MENU;
 		Screen_Position.select = 0;
 	}
 }
 
 void menu_34_02(unsigned int value, int display)
 {
-	char str[2][22];
+	char string[22];
 
-	sprintf(str[0],"MAX CURRENT [ST%cRN]%c\0",RIGHTARROW,UPARROW);
-	sprintf(str[1],"CURRENT  %7.1f[A]%c\0",M_STATE.DispStartmaxI,DOWNARROW);
+	const char *str[2] = {
+			"MAX CURRENT [ST\x07ERN]\1\0",
+			"CURRENT         [A]\2\0" };
 
-	if(display) {
-		screen_frame2(str);
+	if(display == 1) {
+		screen_frame3(str);
+		return;
+	} else if(display == 2) {
+		sprintf(string, "%7.1f\0", M_STATE.Disp_Start_Imax);
+		VFD_Single_Line_dump(LCD_L2_09, string);
 		return;
 	}
 
 	if(value == UP_KEY) {
 		Screen_Position.y = 2;
 		Screen_Position.x = 1;
+		Screen_Position.data_change = NORMAL_MENU;
 		Screen_Position.select = 0;
 	} else if(value == DOWN_KEY) {
 		Screen_Position.y = 34;
@@ -3293,19 +3301,25 @@ void menu_34_02(unsigned int value, int display)
 
 void menu_34_03(unsigned int value, int display)
 {
-	char str[2][22];
+	char string[22];
 
-	sprintf(str[0],"ELAPSE TIME [ST%cRN]%c\0",RIGHTARROW,UPARROW);
-	sprintf(str[1],"TIME   %7.2f[SEC]%c\0",M_STATE.T_st,DOWNARROW);
+	const char *str[2] = {
+			"ELAPSE TIME [ST\x07ERN]\1\0",
+			"TIME          [SEC]\2\0" };
 
-	if(display) {
-		screen_frame2(str);
+	if(display == 1) {
+		screen_frame3(str);
+		return;
+	} else if(display == 2) {
+		sprintf(string, "%7.2f\0", M_STATE.Display_Start_Time);
+		VFD_Single_Line_dump(LCD_L2_07, string);
 		return;
 	}
 
 	if(value == UP_KEY) {
 		Screen_Position.y = 2;
 		Screen_Position.x = 1;
+		Screen_Position.data_change = NORMAL_MENU;
 		Screen_Position.select = 0;
 	} else if(value == DOWN_KEY) {
 		Screen_Position.y = 34;
@@ -3316,19 +3330,25 @@ void menu_34_03(unsigned int value, int display)
 
 void menu_34_04(unsigned int value, int display)
 {
-	char str[2][22];
+	char string[22];
 
-	sprintf(str[0],"     START COUNT   %c\0",UPARROW);
-	sprintf(str[1],"         %2d [TIMES]%c\0",NCHR.Start_RNum,DOWNARROW);
+	const char *str[2] = {
+			"     START COUNT   \1\0",
+			"            [TIMES]\2\0" };
 
-	if(display) {
-		screen_frame2(str);
+	if(display == 1) {
+		screen_frame3(str);
+		return;
+	} else if(display == 2) {
+		sprintf(string, "%2d\0", NCHR.Start_RNum);
+		VFD_Single_Line_dump(LCD_L2_09, string);
 		return;
 	}
 
 	if(value == UP_KEY) {
 		Screen_Position.y = 2;
 		Screen_Position.x = 1;
+		Screen_Position.data_change = NORMAL_MENU;
 		Screen_Position.select = 0;
 	} else if(value == DOWN_KEY) {
 		Screen_Position.y = 34;
@@ -7829,7 +7849,7 @@ void menu_53_05(unsigned int value, int display)
 
 			Screen_Position.y = 53;
 			Screen_Position.x = 6;
-			Screen_Position.select = 1;
+			Screen_Position.select = 2;
 		}
 	} else { //1A
 		const unsigned int number_digit[2] = {10, 1};
@@ -7862,14 +7882,14 @@ void menu_53_05(unsigned int value, int display)
 
 			Screen_Position.y = 53;
 			Screen_Position.x = 6;
-			Screen_Position.select = 1;
+			Screen_Position.select = 2;
 		}
 	}
 }
 
 void menu_53_06(unsigned int value, int display)
 {
-	const unsigned int number_digit[2] = {10, 1};
+	const unsigned int number_digit[3] = {100, 10, 1};
 	char str[2][22];
 
 	sprintf(str[0],"PRE-SET  :%5.1f[SEC]\0",(float)(UCR.delay_time*0.1));
@@ -7878,23 +7898,25 @@ void menu_53_06(unsigned int value, int display)
 	if(display) {
 		screen_frame2(str);
 		if(Screen_Position.select == 0) {
-			cursor_move(1, 12);
+			cursor_move(1, 11);
 		} else if (Screen_Position.select == 1) {
+			cursor_move(1, 12);
+		} else if (Screen_Position.select == 2) {
 			cursor_move(1, 14);
-		}
+		}			
 		return;
 	}
 
 	if(value == LEFT_KEY) {
 		if(Screen_Position.select-- <= 0) Screen_Position.select = 0;
-		Screen_Position.select %= 2;
+		Screen_Position.select %= 3;
 	} else if(value == RIGHT_KEY) {
-		if(Screen_Position.select++ >= 1) Screen_Position.select = 1;
+		if(Screen_Position.select++ >= 2) Screen_Position.select = 2;
 	} else if(value == UP_KEY) {
-		UCR.delay_time_temp += number_digit[Screen_Position.select % 2];
+		UCR.delay_time_temp += number_digit[Screen_Position.select % 3];
 		if(UCR.delay_time_temp >= UCR_T_MAX) UCR.delay_time_temp = UCR_T_MAX;
 	} else if(value == DOWN_KEY) {
-		UCR.delay_time_temp -= number_digit[Screen_Position.select % 2];
+		UCR.delay_time_temp -= number_digit[Screen_Position.select % 3];
 		if(UCR.delay_time_temp <= UCR_T_MIN || UCR.delay_time_temp >= 60000)	UCR.delay_time_temp = UCR_T_MIN;
 	} else if(value == ENTER_KEY) {
 			Screen_Position.y = 53;
