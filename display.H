@@ -28,35 +28,29 @@ const char* event31[2]={"   ] 50   SETTING   ",
                        "                    "};
 const char* event32[2]={"   ] 50   SETTING   ",
                        "                    "};
-const char* event33[2]={"   ] 51   SETTING   ",
+const char* event33[2]={"   ] 50G  SETTING   ",
                        "                    "};
-const char* event34[2]={"   ] 51   SETTING   ",
+const char* event34[2]={"   ] 51G  SETTING   ",
                        "                    "};
-const char* event35[2]={"   ] 50G  SETTING   ",
+const char* event35[2]={"   ] THR  SETTING   ",
                        "                    "};
-const char* event36[2]={"   ] 51G  SETTING   ",
+const char* event36[2]={"   ] NSR  SETTING   ",
                        "                    "};
-const char* event37[2]={"   ] 27R  SETTING   ",
+const char* event37[2]={"   ] 51LR SETTING   ",
                        "                    "};
-const char* event38[2]={"   ] 27M  SETTING   ",
+const char* event38[2]={"   ] NCHR SETTING   ",
                        "                    "};
-const char* event39[2]={"   ] 27S  SETTING   ",
+const char* event39[2]={"   ] 50H  SETTING   ",
                        "                    "};
-const char* event3a[2]={"   ] 47P  SETTING   ",
+const char* event3a[2]={"   ] UCR  SETTING   ",
                        "                    "};
-const char* event3b[2]={"   ] 47N  SETTING   ",
+const char* event3b[2]={"   ] 67GD SETTING   ",
                        "                    "};
-const char* event3c[2]={"   ] 59  SETTING    ",
+const char* event3c[2]={"   ] 67GS SETTING   ",
                        "                    "};
-const char* event3d[2]={"   ] 64  SETTING    ",
-                       "                    "};
-const char* event3e[2]={"   ] 67GD  SETTING  ",
-                       "                    "};
-const char* event3f[2]={"   ] 67GS  SETTING  ",
-                       "                    "};
-const char* event40[2]={"   ] RLY PARAMETER  ",
+const char* event3d[2]={"   ] RLY PARAMETER  ",
                        "     RE-SETTING.    "};
-const char* event41[2]={"   ] SYS PARAMETER  ",
+const char* event3e[2]={"   ] SYS PARAMETER  ",
                        "     RE-SETTING.    "};
 
                       //12345678901234567890
@@ -119,39 +113,38 @@ const char* event_io[10]={ "1 ",
 const char* event_relay[16]=   {"",
 																"] 50-1",							// 01
                                 "] 50-2",             // 02
-                                "] 51-1",             // 03
-                                "] 51-2",             // 04
-                                "] 50G ",             // 05
-                                "] 51G ",             // 06
-                                "] 27R ",             // 07
-                                "] 27M ",             // 08
-                                "] 27S ",             // 09
-                                "] 47P ",             // 10, 이벤트에 상정보가 없다.
-                                "] 47N ",             // 11, 이벤트에 상정보가 없다.
-                                "] 59  ",             // 12
-                                "] 64  ",             // 13
-                                "] 67GD",             // 14, 이벤트에 상정보 자리에 각도 정보가 있다.
-                                "] 67GS"              // 15, 이벤트에 상정보 자리에 각도 정보가 있다.
+                                "] 50G ",             // 03
+                                "] 51G ",             // 04
+                                "] 49  ",             // 05
+                                "] 46  ",             // 06
+                                "] 51LR",             // 07
+                                "] 51LR",             // 08
+                                "] NCHR OPERATED.",   // 09
+                                "] 50H ",             // 10
+                                "] 37  ",             // 11
+                                "] 67GD",             // 12, 이벤트에 상정보 자리에 각도 정보가 있다.
+                                "] 67GS",             // 13, 이벤트에 상정보 자리에 각도 정보가 있다.
 																};
 //"ReBT","50-1","50-2","51-1","51-2","50G ","51G ","27R ",
 //"27M ","27S ","47P ","47N ","59  ","64  ","67GD","67GS","CCS ","TCS ","SYS ","50  ","51  "
 
-const char* Event_Volt_Curr[16]= {"",
+const char* Event_Volt_Curr[17]= {"",
 																"Ir",													  //] 50-1",
                                 "Ir",                           //] 50-2",
-                                "Ir",                           //] 51-1",
-                                "Ir",                           //] 51-2",
-                                "Ir",                           //] 50G", 
-                                "Ir",                           //] 51G", 
-                                "Vr",                           //] 27-1",
-                                "Vr",                           //] 27-2",
-                                "Vr",                           //] 27-3",
-                                "??",                           //] 47P", 
-                                "??",                           //] 47N", 
-                                "Vr",                           //] 59",  
-                                "Vr",                           //] 64",  
-                                "??",                           //] 67N", 
-                                "??",                           //] 67G"  
+                                "Ir",                           //] 50G",
+                                "Ir",                           //] 51G",
+                                "Ir",                           //] 49", 
+                                "Ir",                           //] 46", 
+                                "Ir",                           //] 51LR TOO LONG START",
+                                "Ir",                           //] 51LR LOCKED ROTOR",
+                                "Vr",                           //] NCHR OPERATED",
+                                "Vr",                           //] 50H",
+                                "Ir",                           //] 37", 
+                                "Ir",                           //] 67GD", 
+                                "Ir",                           //] 67GS",  
+                                "??",                           //] ",  
+                                "??",                           //] ", 
+                                "??",                           //] "  
 																};
 																
 const char* event_set[13]={ "CT/PT",
@@ -194,30 +187,26 @@ const char* Trip_Message[15][2]={
                            " [Fault Phase: Ia ] "},
 													{" 50-2 SHORT CIRCUIT ",    //1
                            " [Fault Phase: Ia ] "},
-													{" 51-1 SHORT CIRCUIT ",    //2
+													{"  50G GROUND FAULT  ",    //2
                            " [Fault Phase: Ia ] "},
-													{" 51-2 SHORT CIRCUIT ",    //3
+													{"  51G GROUND FAULT  ",    //3
                            " [Fault Phase: Ia ] "},
-													{" 50G GROUND FAULT   ",    //4
+													{" 49 THERMAL OVERLOAD",    //4
                            " [Fault Phase: Ia ] "},
-													{" 51G GROUND FAULT   ",    //5
+													{"46 UNBALANCE CURRENT",    //5
                            " [Fault Phase: Ia ] "},
-													{" 27R UNDER VOLTAGE1 ",    //6
+													{" 51LR TOO LONG START",    //6
                            " [Fault Phase: Ia ] "},
-													{" 27M UNDER VOLTAGE2 ",    //7
+													{" 51LR LOCKED ROTOR  ",    //7
                            " [Fault Phase: Ia ] "},
-													{" 27S UNDER VOLTAGE3 ",    //8
-                           " [Fault Phase: Ia ] "},
-													{"47 UNBALANCE VOLTAGE",    //9
+													{" 66 START INHIBIT   ",    //8
                            "                    "},
-													{"47 UNBALANCE VOLTAGE",    //10
-                           "                    "},
-													{"  59 OVER VOLTAGE   ",    //11
+													{"50H THERMAL BLOCKING",    //9
                            " [Fault Phase: Ia ] "},
-													{"  64 GROUND FAULT   ",    //12
+													{"  37 UNDER CURRENT  ",    //10
                            " [Fault Phase: Ia ] "},
-													{" 67GD GROUND FAULT  ",    //13
+													{" 67GD GROUND FAULT  ",    //11
                            " [Fault Phase: Ia ] "},
-													{" 67GS GROUND FAULT  ",    //14
-                           " [Fault Phase: Ia ] "}
+													{" 67GS GROUND FAULT  ",    //12
+                           " [Fault Phase: Ia ] "},
                          };

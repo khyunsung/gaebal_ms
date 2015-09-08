@@ -352,23 +352,24 @@ void RELAY_THR(void)
 		  THR.Pre_Curr = THR.Pickup_Threshold;
 		}
 		
-		if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
-		{
-			THR.op_status = RELAY_NORMAL;
-
-//			if((Alarm_Trip==0)&&(LR51.op_status!=STATE_WITHIN_PICKUP)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
-//			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(LR51.op_status!=STATE_BEYOND_PICKUP)&&
-//			   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
-//			{
-//				Alarm_Off();
-//				Alarm_Off();
-//			}
-			RELAY_STATUS.pickup	&= ~F_THR; //계전요소 alarm OFF
-		}
+//		if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
+//		{
+//			THR.op_status = RELAY_NORMAL;
+//
+////			if((Alarm_Trip==0)&&(LR51.op_status!=STATE_WITHIN_PICKUP)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
+////			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(LR51.op_status!=STATE_BEYOND_PICKUP)&&
+////			   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
+////			{
+////				Alarm_Off();
+////				Alarm_Off();
+////			}
+//			RELAY_STATUS.pickup	&= ~F_THR; //계전요소 alarm OFF
+//		}
 	          
 		if(THR.Op_Ratio > 1.03)
 		{
-			if((THR.op_status == RELAY_NORMAL) && (H50.op_status == RELAY_TRIP))
+//		if((THR.op_status == RELAY_NORMAL) && (H50.op_status == RELAY_TRIP))
+			if(THR.op_status == RELAY_NORMAL)
 			{
 				THR.op_count = 0;
 	
@@ -396,7 +397,14 @@ void RELAY_THR(void)
 
 					RELAY_STATUS.pickup									&= ~F_THR; //계전요소 alarm OFF
 					RELAY_STATUS.operation_realtime			|= F_THR;  //현재 동작 상태 변수 설정
-					RELAY_STATUS.operation_sum_holding	|= F_THR;  //누적 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_THR;  //누적 동작 상태 변수 설정\
+					
+					EVENT.optime = (unsigned long)THR.Op_Time;
+					EVENT.operation |= (INT_F_THR << 16) + THR.Op_Phase;
+					EVENT.fault_type = F_THR;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: THR.Op_Phase;
+					Save_Relay_Event(THR.Op_Ratio * 100.0F);
+					Save_Screen_Info(THR.Op_Phase);
 				}
 			}
 	  	else if(THR.op_status == STATE_WAIT_NO)
@@ -420,6 +428,13 @@ void RELAY_THR(void)
 					RELAY_STATUS.pickup									&= ~F_THR; //계전요소 alarm OFF
 					RELAY_STATUS.operation_realtime			|= F_THR;  //현재 동작 상태 변수 설정
 					RELAY_STATUS.operation_sum_holding	|= F_THR;  //누적 동작 상태 변수 설정
+					
+					EVENT.optime = (unsigned long)THR.Op_Time;
+					EVENT.operation |= (INT_F_THR << 16) + THR.Op_Phase;
+					EVENT.fault_type = F_THR;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: THR.Op_Phase;
+					Save_Relay_Event(THR.Op_Ratio * 100.0F);
+					Save_Screen_Info(THR.Op_Phase);
 				}
 			}
 		}
@@ -550,7 +565,7 @@ void RELAY_51LR(void)
 				if(LR51.op_count >= LR51.pickup_limit)
 				{	
 					LR51.op_status = STATE_WITHIN_PICKUP;
-					RELAY_STATUS.pickup |= F_51LR;  //alarm ON
+					RELAY_STATUS.pickup |= F_51LR_TOO;  //alarm ON
 					LR51.Pickup_Time = LR51.op_count;
 					LR51.op_count = 0;
 				}
@@ -566,7 +581,7 @@ void RELAY_51LR(void)
 				
 				if(LR51.op_count >= LR51.delay_ms_start)
 				{
-					Relay_On(LR51.do_output);
+					Relay_On(LR51.do_output);//TOO LONG START
 	
 					LR51.op_status	= STATE_WITHIN_TRIP;
 					LR51.Op_Ratio		= LR51.Start_Ratio;
@@ -574,14 +589,14 @@ void RELAY_51LR(void)
 					LR51.Delay_Time = LR51.op_count;
 					LR51.Op_Time		= LR51.Delay_Time + LR51.Pickup_Time + TOTAL_DELAY_51LR; //동작 시간
 	
-					RELAY_STATUS.pickup									&= ~F_51LR; //계전요소 alarm OFF
-					RELAY_STATUS.operation_realtime			|= F_51LR;  //현재 동작 상태 변수 설정
-					RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
+					RELAY_STATUS.pickup									&= ~F_51LR_TOO; //계전요소 alarm OFF
+					RELAY_STATUS.operation_realtime			|= F_51LR_TOO;  //현재 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_51LR_TOO;  //누적 동작 상태 변수 설정
 	
 					EVENT.optime = (unsigned long)LR51.Op_Time;
-					EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
+					EVENT.operation |= (INT_F_51LR_TOO << 16) + LR51.Op_Phase;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
-					EVENT.fault_type = F_51LR;
+					EVENT.fault_type = F_51LR_TOO;
 					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(LR51.Op_Phase);	
 				}
@@ -592,12 +607,12 @@ void RELAY_51LR(void)
 			if((LR51.op_status == STATE_WITHIN_DETECT) || (LR51.op_status == STATE_WITHIN_PICKUP))
 			{
 				LR51.op_status = RELAY_NORMAL;
-				RELAY_STATUS.pickup &= ~F_51LR; //계전요소 alarm OFF
+				RELAY_STATUS.pickup &= ~F_51LR_TOO; //계전요소 alarm OFF
 			}
 			else if(LR51.op_status == STATE_WITHIN_TRIP)
 			{
 				Relay_Off(LR51.do_output); //DO open
-				RELAY_STATUS.operation_realtime &= ~F_51LR; //동작 상태 변수 해제
+				RELAY_STATUS.operation_realtime &= ~F_51LR_TOO; //동작 상태 변수 해제
 				LR51.op_count = 0;
 				if(M_STATE.Overrun_Flag != ON)	{LR51.op_status = RELAY_NORMAL;} //51LR 상태 NORMAL
 			}
@@ -616,7 +631,7 @@ void RELAY_51LR(void)
 				if(LR51.op_count >= LR51.pickup_limit)
 				{	
 					LR51.op_status = STATE_BEYOND_PICKUP;
-					RELAY_STATUS.pickup |= F_51LR;  //alarm ON
+					RELAY_STATUS.pickup |= F_51LR_ROCK;  //alarm ON
 					LR51.Pickup_Time = LR51.op_count;
 					LR51.op_count = 0;
 				}
@@ -625,7 +640,7 @@ void RELAY_51LR(void)
 			{
 				if(LR51.op_count > LR51.delay_ms)
 				{
-					Relay_On(LR51.do_output);
+					Relay_On(LR51.do_output);//LOCKED ROTOR
 	
 					LR51.op_status 	= RELAY_TRIP;
 					LR51.Op_Ratio		= LR51.Ratio;
@@ -633,14 +648,14 @@ void RELAY_51LR(void)
 					LR51.Delay_Time = LR51.op_count;
 					LR51.Op_Time		= LR51.Delay_Time + LR51.Pickup_Time + TOTAL_DELAY_51LR_2; //동작 시간
 	
-					RELAY_STATUS.pickup									&= ~F_51LR; //계전요소 alarm OFF
-					RELAY_STATUS.operation_realtime			|= F_51LR;  //현재 동작 상태 변수 설정
-					RELAY_STATUS.operation_sum_holding	|= F_51LR;  //누적 동작 상태 변수 설정
+					RELAY_STATUS.pickup									&= ~F_51LR_ROCK; //계전요소 alarm OFF
+					RELAY_STATUS.operation_realtime			|= F_51LR_ROCK;  //현재 동작 상태 변수 설정
+					RELAY_STATUS.operation_sum_holding	|= F_51LR_ROCK;  //누적 동작 상태 변수 설정
 	
 					EVENT.optime = (unsigned long)LR51.Op_Time;
-					EVENT.operation |= (INT_F_OCGR51 << 16) + LR51.Op_Phase;
+					EVENT.operation |= (INT_F_51LR_ROCK << 16) + LR51.Op_Phase;
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: LR51.Op_Phase;
-					EVENT.fault_type = F_51LR;
+					EVENT.fault_type = F_51LR_ROCK;
 					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(LR51.Op_Phase);	
 				}
@@ -651,12 +666,12 @@ void RELAY_51LR(void)
 			if((LR51.op_status == STATE_BEYOND_DETECT) || (LR51.op_status == STATE_BEYOND_PICKUP))
 			{
 				LR51.op_status = RELAY_NORMAL;
-				RELAY_STATUS.pickup &= ~F_51LR; //계전요소 alarm OFF
+				RELAY_STATUS.pickup &= ~F_51LR_ROCK; //계전요소 alarm OFF
 			}
 			else if(LR51.op_status == RELAY_TRIP)
 			{
 				Relay_Off(LR51.do_output); //DO open
-				RELAY_STATUS.operation_realtime &= ~F_51LR; //동작 상태 변수 해제
+				RELAY_STATUS.operation_realtime &= ~F_51LR_ROCK; //동작 상태 변수 해제
 				if(M_STATE.Run_Flag != ON) {LR51.op_status = RELAY_NORMAL;} //51LR 상태 NORMAL
 			}
 		}
@@ -705,20 +720,24 @@ void RELAY_NCHR(void)
 			NCHR.Start_RNum = 0;
 			NCHR.op_count = 0;
 
-//		RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
+			RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
 			RELAY_STATUS.operation_sum_holding	|= F_NCHR;  //누적 동작 상태 변수 설정
 
 			//이벤트 저장 삽입
+			EVENT.operation |= (INT_F_NCHR << 16) + LR51.Op_Phase;
+			EVENT.fault_type = F_NCHR;
+			Save_Relay_Event(0.0F);
+			Save_Screen_Info(0);
 		}
 	}
 
 	if(NCHR.op_status == RELAY_TRIP)
 	{
+		RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
 		if((NCHR.Limit_Time_Threshold < NCHR.op_count) && (THR.present_theta <= NCHR.Theta_D_Threshold))
 		{
 			Relay_Off(NCHR.do_output); //DO open
 			NCHR.op_status = RELAY_NORMAL; //NCHR상태 NORMAL
-//		RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
 
 			NCHR.Start_RNum = 0;
 		}

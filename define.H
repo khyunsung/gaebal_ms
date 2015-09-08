@@ -96,12 +96,13 @@
 #define F_OCGR51          0x00000008L
 #define F_THR							0x00000010L
 #define F_NSR							0x00000020L
-#define F_51LR            0x00000040L
-#define F_NCHR						0x00000080L
-#define F_H50          		0x00000100L
-#define F_UCR							0x00000200L
-#define F_DGR             0x00000400L
-#define F_SGR             0x00000800L
+#define F_51LR_TOO        0x00000040L
+#define F_51LR_ROCK				0x00000080L
+#define F_NCHR         		0x00000100L
+#define F_H50 						0x00000200L
+#define F_UCR	            0x00000400L
+#define F_DGR             0x00000800L
+#define F_SGR             0x00001000L
 
 #define INT_F_OCR50_1     0x00000001L
 #define INT_F_OCR50_2     0x00000002L
@@ -109,12 +110,13 @@
 #define INT_F_OCGR51      0x00000004L
 #define INT_F_THR					0x00000005L
 #define INT_F_NSR					0x00000006L
-#define INT_F_51LR        0x00000007L
-#define INT_F_NCHR				0x00000008L
-#define INT_F_H50         0x00000009L
-#define INT_F_UCR					0x0000000AL
-#define INT_F_DGR         0x0000000BL
-#define INT_F_SGR         0x0000000CL
+#define INT_F_51LR_TOO    0x00000007L
+#define INT_F_51LR_ROCK		0x00000008L
+#define INT_F_NCHR        0x00000009L
+#define INT_F_H50 				0x0000000AL
+#define INT_F_UCR	        0x0000000BL
+#define INT_F_DGR         0x0000000CL
+#define INT_F_SGR         0x0000000DL
 
 //#define CBM             0x00008000
 //#define CBM2            0x00010000
@@ -326,54 +328,30 @@
 
 #define WAVE_OCR50_1_BIT  0x0001
 #define WAVE_OCR50_2_BIT  0x0002
-#define WAVE_OCR51_1_BIT  0x0004
-#define WAVE_OCR51_2_BIT  0x0008
-#define WAVE_OCGR50_BIT   0x0010
-#define WAVE_OCGR51_BIT   0x0020
-#define WAVE_DGR_BIT      0x0040
-#define WAVE_SGR_BIT      0x0080
-#define WAVE_OVR_BIT      0x0100
-#define WAVE_OVGR_BIT     0x0200
-#define WAVE_UVR_1_BIT    0x0400
-#define WAVE_UVR_2_BIT    0x0800
-#define WAVE_UVR_3_BIT    0x1000
-#define WAVE_47P_BIT      0x2000
-#define WAVE_47N_BIT      0x4000
-#define WAVE_25_BIT       0x8000
-
+#define WAVE_OCGR50_BIT   0x0004
+#define WAVE_OCGR51_BIT   0x0008
+#define WAVE_THR_BIT      0x0010
+#define WAVE_NSOCR_BIT    0x0020
+#define WAVE_51LR_BIT     0x0040
+#define WAVE_NCH_BIT      0x0080
+#define WAVE_50H_BIT      0x0100
 #define WAVE_UCR_BIT      0x0200
-#define WAVE_NSOCR_BIT    0x0200
-#define WAVE_UVR_M_BIT    0x0400
-#define WAVE_THR_BIT      0x0800
-#define WAVE_50H_BIT      0x1000
-#define WAVE_SL_BIT       0x2000
-#define WAVE_NCH_BIT      0x4000
+#define WAVE_DGR_BIT      0x0400
+#define WAVE_SGR_BIT      0x0800
 
 #define OCR50_1_SET_EVENT   0x00000000L
 #define OCR50_2_SET_EVENT   0x00010000L
-#define OCR51_1_SET_EVENT   0x00020000L
-#define OCR51_2_SET_EVENT   0x00030000L
-#define OCGR50_SET_EVENT    0x00040000L
-#define OCGR51_SET_EVENT    0x00050000L
-#define DGR_SET_EVENT       0x00060000L
-#define SGR_SET_EVENT       0x00070000L
-#define OVR_SET_EVENT       0x00080000L
-#define OVGR_SET_EVENT      0x00090000L
-#define UVR_1_SET_EVENT     0x000a0000L
-#define UVR_2_SET_EVENT     0x000b0000L
-#define UVR_3_SET_EVENT     0x000c0000L
-#define P47_SET_EVENT       0x000d0000L
-#define N47_SET_EVENT       0x000e0000L
-#define SYNCRO_SET_EVENT    0x000f0000L
-#define M_50_SET_EVENT      0x00100000L
-#define UCR_SET_EVENT       0x00110000L
-#define NSOCR_SET_EVENT     0x00120000L
-#define M_27_SET_EVENT      0x00130000L
-#define THR_SET_EVENT       0x00140000L
-#define H50_SET_EVENT       0x00150000L
-#define SL_SET_EVENT        0x00160000L
-#define NCH_SET_EVENT       0x00170000L
-#define RELAY_ONOFF_EVENT   0x00200000L
+#define OCGR50_SET_EVENT    0x00020000L
+#define OCGR51_SET_EVENT    0x00030000L
+#define THR_SET_EVENT       0x00040000L
+#define NSR_SET_EVENT       0x00050000L
+#define LR51_SET_EVENT      0x00060000L
+#define NCHR_SET_EVENT      0x00070000L
+#define H50_SET_EVENT       0x00080000L
+#define UCR_SET_EVENT       0x00090000L
+#define DGR_SET_EVENT       0x000a0000L
+#define SGR_SET_EVENT       0x000b0000L
+#define RELAY_ONOFF_EVENT   0x000c0000L
 
 #define CT_PT_SET_EVENT       0x00000000L
 #define DI_DEBOUNCE_EVENT     0x00010000L
@@ -527,15 +505,68 @@
 
 #define COMM_2_ADDRESS		(unsigned int *)0x4806
 #define COMM_2_BAUDRATE		(unsigned int *)0x4807
+#define COMM_2_MODBUS_RECV_CNT		(unsigned int *)0x4808
 
 
 #define COMM_2_DATA1			(unsigned int *)0x4ABC
+
+#define COMM2_IA				         (unsigned int *)(0x4800 + 700 + 0 )      //0x4ABC
+#define COMM2_IB                 (unsigned int *)(0x4800 + 700 + 4 )      //0x4AC0
+#define COMM2_IC                 (unsigned int *)(0x4800 + 700 + 8 )      //0x4AC4
+#define COMM2_IN                 (unsigned int *)(0x4800 + 700 + 12)      //0x4AC8
+#define COMM2_IAVG               (unsigned int *)(0x4800 + 700 + 16)      //0x4ACC
+#define COMM2_IPS                (unsigned int *)(0x4800 + 700 + 20)      //0x4AD0
+#define COMM2_INS                (unsigned int *)(0x4800 + 700 + 24)      //0x4AD4
+#define COMM2_IA_3RD             (unsigned int *)(0x4800 + 700 + 28)      //0x4AD8
+#define COMM2_IA_5TH             (unsigned int *)(0x4800 + 700 + 30)      //0x4ADA
+#define COMM2_IA_7TH             (unsigned int *)(0x4800 + 700 + 32)      //0x4ADC
+#define COMM2_IA_9TH             (unsigned int *)(0x4800 + 700 + 34)      //0x4ADE
+#define COMM2_IA_11TH            (unsigned int *)(0x4800 + 700 + 36)      //0x4AE0
+#define COMM2_IA_THDFACTER       (unsigned int *)(0x4800 + 700 + 38)      //0x4AE2
+#define COMM2_IA_TDDFACTER       (unsigned int *)(0x4800 + 700 + 40)      //0x4AE4
+#define COMM2_IB_3RD             (unsigned int *)(0x4800 + 700 + 42)      //0x4AE6
+#define COMM2_IB_5TH             (unsigned int *)(0x4800 + 700 + 44)      //0x4AE8
+#define COMM2_IB_7TH             (unsigned int *)(0x4800 + 700 + 46)      //0x4AEA
+#define COMM2_IB_9TH             (unsigned int *)(0x4800 + 700 + 48)      //0x4AEC
+#define COMM2_IB_11TH            (unsigned int *)(0x4800 + 700 + 50)      //0x4AEE
+#define COMM2_IB_THDFACTER       (unsigned int *)(0x4800 + 700 + 52)      //0x4AF0
+#define COMM2_IB_TDDFACTER       (unsigned int *)(0x4800 + 700 + 54)      //0x4AF2
+#define COMM2_IC_3RD             (unsigned int *)(0x4800 + 700 + 56)      //0x4AF4
+#define COMM2_IC_5TH             (unsigned int *)(0x4800 + 700 + 58)      //0x4AF6
+#define COMM2_IC_7TH             (unsigned int *)(0x4800 + 700 + 60)      //0x4AF8
+#define COMM2_IC_9TH             (unsigned int *)(0x4800 + 700 + 62)      //0x4AFA
+#define COMM2_IC_11TH            (unsigned int *)(0x4800 + 700 + 64)      //0x4AFC
+#define COMM2_IC_THDFACTER       (unsigned int *)(0x4800 + 700 + 66)      //0x4AFE
+#define COMM2_IC_TDDFACTER       (unsigned int *)(0x4800 + 700 + 68)      //0x4B00
+#define COMM2_VA                 (unsigned int *)(0x4800 + 700 + 70 )     //0x4B02
+#define COMM2_VB                 (unsigned int *)(0x4800 + 700 + 74 )     //0x4B06
+#define COMM2_VC                 (unsigned int *)(0x4800 + 700 + 78 )     //0x4B0A
+#define COMM2_VO                 (unsigned int *)(0x4800 + 700 + 82 )     //0x4B0E
+#define COMM2_VO_MAX             (unsigned int *)(0x4800 + 700 + 86 )     //0x4B12
+#define COMM2_VAVG               (unsigned int *)(0x4800 + 700 + 90 )     //0x4B16
+#define COMM2_VPS                (unsigned int *)(0x4800 + 700 + 94 )     //0x4B1A
+#define COMM2_VNS                (unsigned int *)(0x4800 + 700 + 98 )     //0x4B1E
+#define COMM2_ACTIVE_PWR           		(unsigned int *)(0x4800 + 700 + 102)//0x4B22
+#define COMM2_REACTIVE_PWR           	(unsigned int *)(0x4800 + 700 + 106)//0x4B26
+#define COMM2_POWER_FACTOR       			(unsigned int *)(0x4800 + 700 + 110)//0x4B2A
+#define COMM2_FREQUENCY          			(unsigned int *)(0x4800 + 700 + 114)//0x4B2E
+#define COMM2_ACTIVE_ENERGY         	(unsigned int *)(0x4800 + 700 + 118)//0x4B32
+#define COMM2_REACTIVE_ENERGY         (unsigned int *)(0x4800 + 700 + 122)//0x4B36
+#define COMM2_REVERSE_ENGERY       		(unsigned int *)(0x4800 + 700 + 126)//0x4B3A
+#define COMM2_REVERSE_REACTIVE_ENGERY (unsigned int *)(0x4800 + 700 + 130)//0x4B3E
+
+#define COMM2_DI_AND_CB_STATUS				(unsigned int *)(0x4800 + 700 + 160)//0x4B5C
+#define COMM2_REALY_STATUS						(unsigned int *)(0x4800 + 700 + 162)//0x4B5E
+#define COMM2_FAULT_PHASE_INFO				(unsigned int *)(0x4800 + 700 + 164)//0x4B60
+#define COMM2_FAULT_RATIO_INFO				(unsigned int *)(0x4800 + 700 + 166)//0x4B62
+#define COMM2_RELAY_OPERATION_TIME		(unsigned int *)(0x4800 + 700 + 168)//0x4B64
+#define COMM2_RUNNING_HOUR_METER			(unsigned int *)(0x4800 + 700 + 172)//0x4B68
+
 
 #define COMM_2_Ia         (unsigned int *)0x4ABC
 #define COMM_2_Ib         (unsigned int *)0x4Ac0
 #define COMM_2_Ic         (unsigned int *)0x4Ac4
 #define COMM_2_Io         (unsigned int *)0x4Ac8
-#define COMM_2_Io_max     (unsigned int *)0x4Acc
 #define COMM_2_Ips        (unsigned int *)0x4Ad0
 #define COMM_2_Ins        (unsigned int *)0x4Ad4
 #define COMM_2_Ia_3rd     (unsigned int *)0x4Ad8
@@ -1168,5 +1199,8 @@
 #define	HIMAP_TYPE		1		//(FI, MS, ML, T = 1, 2, 3, 4)
 #define	VERSION				700
 
+#define NIC_RESET_OFF  *GpioIntRegs_GPASET_High |= 0x0400
+#define NIC_RESET_ON *GpioIntRegs_GPACLEAR_High |= 0x0400
+ 
 //#endif	//_DEFINE_H_
 

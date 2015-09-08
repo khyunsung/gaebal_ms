@@ -15065,12 +15065,12 @@ void menu_popup(unsigned int value, int display)
 	if(i == 15) i = 0;
 	
 	sprintf(str[0], "%s\0", Trip_Message[i][0]);
-	/*if(Phase_Info == 9 || Phase_Info == 10) {
+	if(i == 5 || i == 8) {	// 5:46, 8:NCHR
 		sprintf(str[1], "                    \0");
-	} else */
-	//{
+	} else
+	{
 		sprintf(str[1], " [Fault Phase: %s ] \0", phase_character[Phase_Info % 11]);
-	//}
+	}
 
 	if(display) {
 		screen_frame2(str);
@@ -15163,15 +15163,19 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 		//"59  Vr:   1.35 "
 		//"  Ph:AB     Ot: 0.986"
 		if(str[0]) {
-			sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
-			/*if(str[0] == 10 || str[0] == 11) {	//47P, 47N
+			if(str[0] == 6) {	//46
+				sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
 				sprintf(str2[1],"          Ot: %.3f   \0", ((float)i_tmp[0])/1000.0F);
-			} else if(str[0] == 14 || str[0] == 15) {	//67GD, 67GS
+			} else if(str[0] == 12 || str[0] == 13) {	//67GD, 67GS
+				sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
 				sprintf(str2[1],"   %4d\x0DF   Ot: %.3f \0", (temp16_2 << 8) + temp16, ((float)i_tmp[0])/1000.0F);
-			} else {	// 나머지
-			*/
+			} else if(str[0] == 9) {	//NCHR
+				sprintf(str2[0],"   %s\0", event_relay[str[0]]);
+				sprintf(str2[1],"                    \0");
+			} else {
+				sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
 				sprintf(str2[1],"  Ph:%s   Ot: %.3f   \0", event_phase[temp16], ((float)i_tmp[0])/1000.0F);
-			//}
+			}
 		} else {
 			sprintf(str2[0],"   ] NO EVENT !    \x01\0");
 			sprintf(str2[1],"                     \0");
@@ -15186,28 +15190,26 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 		temp16 = *(EVENT_CONTENT2 + (EVENT.view_point * 18));
 		temp16 &= 0x00ff;
 		if(temp16 == 1) {
-			screen_frame3(event41);//{"   ] SYS PARAMETER  ",
+			screen_frame3(event3e);//{"   ] SYS PARAMETER  ",
 		} else {
 
 			temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
 			temp16 &= 0x00ff;
 	
-			if(temp16 == (OCR50_1_SET_EVENT >> 16))        {			screen_frame3(event31);
-			} else if(temp16 == (OCR50_2_SET_EVENT >> 16)) {			screen_frame3(event32);
-			} else if(temp16 == (OCR51_1_SET_EVENT >> 16)) {			screen_frame3(event33);
-			} else if(temp16 == (OCR51_2_SET_EVENT >> 16)) {			screen_frame3(event34);
-			} else if(temp16 == (OCGR50_SET_EVENT >> 16)) {			screen_frame3(event35);
-			} else if(temp16 == (OCGR51_SET_EVENT >> 16)) {			screen_frame3(event36);
-			} else if(temp16 == (UVR_1_SET_EVENT  >> 16)) {			screen_frame3(event37);
-			} else if(temp16 == (UVR_2_SET_EVENT  >> 16)) {			screen_frame3(event38);
-			} else if(temp16 == (UVR_3_SET_EVENT  >> 16)) {			screen_frame3(event39);
-			} else if(temp16 == (P47_SET_EVENT  >> 16)) {			screen_frame3(event3a);
-			} else if(temp16 == (P47_SET_EVENT  >> 16)) {			screen_frame3(event3b);
-			} else if(temp16 == (OVR_SET_EVENT  >> 16)) {			screen_frame3(event3c);
-			} else if(temp16 == (OVGR_SET_EVENT  >> 16)) {		screen_frame3(event3d);
-			} else if(temp16 == (DGR_SET_EVENT  >> 16)) {			screen_frame3(event3e);
-			} else if(temp16 == (SGR_SET_EVENT  >> 16)) {			screen_frame3(event3f);
-			} else if(temp16 == (RELAY_ONOFF_EVENT  >> 16)) {			screen_frame3(event40);}
+			if(temp16 == (OCR50_1_SET_EVENT >> 16))       	{			screen_frame3(event31);
+			} else if(temp16 == (OCR50_2_SET_EVENT >> 16))	{			screen_frame3(event32);
+			} else if(temp16 == (OCGR50_SET_EVENT >> 16))	{			screen_frame3(event33);
+			} else if(temp16 == (OCGR51_SET_EVENT >> 16))	{			screen_frame3(event34);
+			} else if(temp16 == (THR_SET_EVENT >> 16))		{			screen_frame3(event35);
+			} else if(temp16 == (NSR_SET_EVENT >> 16))		{			screen_frame3(event36);
+			} else if(temp16 == (LR51_SET_EVENT >> 16))		{			screen_frame3(event37);
+			} else if(temp16 == (NCHR_SET_EVENT >> 16))		{			screen_frame3(event38);
+			} else if(temp16 == (H50_SET_EVENT >> 16))		{			screen_frame3(event39);
+			} else if(temp16 == (UCR_SET_EVENT >> 16))		{			screen_frame3(event3a);
+			} else if(temp16 == (DGR_SET_EVENT >> 16))		{			screen_frame3(event3b);
+			} else if(temp16 == (SGR_SET_EVENT >> 16)) 		{			screen_frame3(event3c);
+			} else if(temp16 == (RELAY_ONOFF_EVENT >> 16))	{			screen_frame3(event3d);
+			}
 				
 		}
 //		LCD.line_2nd_adder = event_relay[temp16];
@@ -15248,11 +15250,6 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	// di off/on
 	else if((EVENT.temp == 0x05) || (EVENT.temp == 0x06))
 	{
-		//khs, 2015-04-03 오후 6:59:32
-		// open
-		//if(EVENT.temp == 0x05)	{screen_frame3(event6);}
-		// close
-		//else										{screen_frame3(event7);}
 		screen_frame3(event6);
 		
 		temp16 = *(EVENT_CONTENT1 + (EVENT.view_point * 18));
@@ -15260,22 +15257,13 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 		temp16 <<= 8;
 		temp16 |= (*(EVENT_CONTENT2 + (EVENT.view_point * 18)) & 0x00ff);
 
-		sprintf(str, "%d CHANNEL %s\0", temp16, (EVENT.temp == 0x05)? "ON": "OFF");
-		VFD_Single_Line_dump(LCD_L2_05, str);
-
-		
 		for(temp_char = 0; temp_char < 8; temp_char++)
 		{
-			if(temp16 & (0x0001 << temp_char))	{LCD.line_data2[temp_char << 1] = (temp_char + 1) + 0x30;}
-			else																{LCD.line_data2[temp_char << 1] = ' ';}
-			LCD.line_data2[(temp_char << 1) + 1] = ' ';
+			if(temp16 & (1 << temp_char)) break;
 		}
-		
-		LCD.line_data2[16] = 0;
-		
-		LCD.line_2nd_adder = LCD.line_data2;
-		LCD.line_2nd_addressing = LCD_L2_00;
-		LCD.line_2nd_status = 1;
+
+		sprintf(str, "%d CHANNEL %s\0", temp_char+1, (EVENT.temp == 0x05)? "OFF": "ON");
+		VFD_Single_Line_dump(LCD_L2_05, str);
 	}
 	
 	// do off/on

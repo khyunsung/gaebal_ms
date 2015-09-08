@@ -35,11 +35,11 @@ unsigned int setting_save(unsigned int *ar_temp, unsigned int *ar_address, unsig
 	}	else if(ar_address == THR_USE)			{
 		EVENT.relay_set |= THR_SET_EVENT;				event_direct_save(&EVENT.relay_set);
 	} else if(ar_address == NSR_USE)			{
-//	EVENT.relay_set |= NSR_SET_EVENT;				event_direct_save(&EVENT.relay_set);
+		EVENT.relay_set |= NSR_SET_EVENT;				event_direct_save(&EVENT.relay_set);
 	}	else if(ar_address == LR51_USE)			{
-//	EVENT.relay_set |= LR51_SET_EVENT;			event_direct_save(&EVENT.relay_set);
+		EVENT.relay_set |= LR51_SET_EVENT;			event_direct_save(&EVENT.relay_set);
 	}	else if(ar_address == NCHR_USE)			{
-//	EVENT.relay_set |= NCHR_SET_EVENT;			event_direct_save(&EVENT.relay_set);
+		EVENT.relay_set |= NCHR_SET_EVENT;			event_direct_save(&EVENT.relay_set);
 	}	else if(ar_address == H50_USE)			{
 		EVENT.relay_set |= H50_SET_EVENT;				event_direct_save(&EVENT.relay_set);
 	}	else if(ar_address == UCR_USE)			{
@@ -585,8 +585,10 @@ void setting_post_handling(unsigned int *ar_address)
 //	LR51.event_ready |= (unsigned long)(LR51.mode << 8);
 //	LR51.event_ready |= 0x00000008;
 
-		RELAY_STATUS.pickup							&= ~F_51LR;
-		RELAY_STATUS.operation_realtime	&= ~F_51LR;
+		RELAY_STATUS.pickup							&= ~F_51LR_TOO;
+		RELAY_STATUS.pickup							&= ~F_51LR_ROCK;
+		RELAY_STATUS.operation_realtime	&= ~F_51LR_TOO;
+		RELAY_STATUS.operation_realtime	&= ~F_51LR_ROCK;
 	}
 
 	else if(ar_address == NCHR_USE)

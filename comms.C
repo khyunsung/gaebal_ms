@@ -47,6 +47,7 @@ void manager_handling(void)
 {
 	unsigned int i, j;
 	float float_temp;
+	unsigned int buff[5];
 	
 	//core 정보
 	if(MANAGER.rx_buffer[2] == 0x00)
@@ -2055,7 +2056,7 @@ void comm_drive(void)
 	if(i)
 	{
 		//계측
-		if(i == 1)
+		/*if(i == 1)
 		{
 			if(COMM.index == 0)
 			{
@@ -2073,7 +2074,7 @@ void comm_drive(void)
 				float_to_integer(DISPLAY.rms_value[In], COMM_2_Io, 10.0F);
 				
 				//Io max
-				float_to_integer(ACCUMULATION.io_max, COMM_2_Io_max, 10.0F);
+				//float_to_integer(ACCUMULATION.io_max, COMM_2_Io_max, 10.0F);
 			}
 			
 			else if(COMM.index == 1)
@@ -2293,7 +2294,7 @@ void comm_drive(void)
 				
 				*COMM_2_DSP2COMM = i;
 			}
-		}
+		}*/
 	}
 	
 	else

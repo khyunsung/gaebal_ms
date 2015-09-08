@@ -155,6 +155,8 @@ extern void relay_dropout_to_normal(unsigned int);
 
 extern void float_to_8bit_fram(void *, unsigned int *, unsigned int);
 extern void float_to_integer(float, unsigned int *, float);
+extern void float_to_integer2(float, unsigned int *, float);
+
 
 extern void wave_dump_serial_sram(unsigned int *, unsigned int, unsigned int);
 extern void himix_drive(void);
@@ -176,3 +178,5 @@ extern void Event_Item_Display(void);
 extern void Event_Time_Display(void);
 extern void Save_Screen_Info(unsigned int);
 extern void Restore_Screen_Info(void);
+extern void modbus_comm_card_check(void);
+extern void SCI_Port_Err_Check(void);

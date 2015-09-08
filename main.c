@@ -172,7 +172,11 @@ void real_main(void)
 //-------- event 저장 END
 
 //-------- LED로 표시할 data 1초마다 체크
-		if(TIMER.led > 700)	{led_handling();}
+		if(TIMER.led > 700)	{
+			led_handling();
+			modbus_comm_card_check();
+			SCI_Port_Err_Check();
+		}
 		*LED_CS = SYSTEM.led_on; // 주기적으로 led값을 써주지 않으면 led가 꺼지는것 처럼 보임 (latch 회로가 없음), 1ms도 허용치 않음
 //-------- LED로 표시할 data 1초마다 체크 END
 
@@ -1217,6 +1221,17 @@ void float_to_integer(float ar_value, unsigned int *ar_address, float scale)
 	*(ar_address + 2) = (l_temp >> 8) & 0x00ff;   // 차하위 바이트
 	*(ar_address + 3) =  l_temp & 0x00ff;         // 최하위 바이트
 }
+
+void float_to_integer2(float ar_value, unsigned int *ar_address, float scale)
+{
+	unsigned long l_temp;
+	
+	// ar_value의 주소를 point_long 포인터 변수에 전달하여 포인팅 하게 한다.
+	l_temp = (unsigned long)(ar_value * scale);
+	
+	*ar_address = (l_temp >> 8) & 0x00ff;   // 최상위 바이트
+	*(ar_address + 1) =  l_temp & 0x00ff;   // 차상위 바이트
+}
 	
 // raw data로 정정하는 방법 생각해볼것
 // tcs/ccs 감시
@@ -1805,6 +1820,7 @@ void harmonics(void)
 	HARMONICS.timer = 0;
 }
 
+
 // 고조파 계산을 위해 미리 데이터를 백업함
 // ar_channel - 계산할 전류 채널 지정
 // 0-Ia, 1-Ib, 2-Ic
@@ -2082,6 +2098,7 @@ void measure2_display(void)
 	TIMER.measurement = 0;
 }
 
+
 // 1초에 한번씩 전력계산
 void power_update(void)
 {
@@ -2109,20 +2126,25 @@ void power_update(void)
 	if((MEASUREMENT.rms_value[Va] < 0.475) || (MEASUREMENT.rms_value[Ia] < 0.0475))
 	{
 		MEASUREMENT.Pa_value = 0.0;
+		
 		MEASUREMENT.Qa_value = 0.0;
 	}
 	
 	if((MEASUREMENT.rms_value[Vb] < 0.475) || (MEASUREMENT.rms_value[Ib] < 0.0475))
 	{
 		MEASUREMENT.Pb_value = 0.0;
+		
 		MEASUREMENT.Qb_value = 0.0;
 	}
 	
 	if((MEASUREMENT.rms_value[Vc] < 0.475) || (MEASUREMENT.rms_value[Ic] < 0.0475))
 	{
 		MEASUREMENT.Pc_value = 0.0;
+		
 		MEASUREMENT.Qc_value = 0.0;
 	}
+	
+		
 	
 	// real PQ	
 	MEASUREMENT.Pa_value *= DISPLAY.p_multipllier[0];
@@ -2133,6 +2155,7 @@ void power_update(void)
 	
 	MEASUREMENT.Pc_value *= DISPLAY.p_multipllier[2];
 	MEASUREMENT.Qc_value *= DISPLAY.p_multipllier[2];
+	
 	
 	// P/Qa
 	DISPLAY.power_p[0] = (MEASUREMENT.Pa_value * CALIBRATION.Power_Cos[0]) - (MEASUREMENT.Qa_value * CALIBRATION.Power_Sin[0]);	
@@ -2147,11 +2170,15 @@ void power_update(void)
 	DISPLAY.power_q[2] = (MEASUREMENT.Pc_value * CALIBRATION.Power_Sin[2]) + (MEASUREMENT.Qc_value * CALIBRATION.Power_Cos[2]);
 	DISPLAY.power_s[2] = sqrt((DISPLAY.power_p[2] * DISPLAY.power_p[2]) + (DISPLAY.power_q[2] * DISPLAY.power_q[2]));
 	
+	
+		
+	
 //	rma_bac[rmas_bac_count] = DISPLAY.power_q[0];
 //	
 //	++rmas_bac_count;
 //	if(rmas_bac_count == 500)
 //	rmas_bac_count = 0;
+	
 	
 //	// pf
 //	for(i = 0; i < 3; i++)
@@ -2160,6 +2187,7 @@ void power_update(void)
 //		if((DISPLAY.power_p[i] >= 0) && (DISPLAY.power_q[i] < 0))
 //		{
 //			j = 0x5555;
+//			
 //			float_temp = -1.0;
 //		}
 //		
@@ -2167,6 +2195,7 @@ void power_update(void)
 //		else if((DISPLAY.power_p[i] < 0) && (DISPLAY.power_q[i] < 0))
 //		{
 //			j = 0xaaaa;
+//			
 //			float_temp = -1.0;
 //		}
 //			
@@ -2174,6 +2203,7 @@ void power_update(void)
 //		else if((DISPLAY.power_p[i] < 0) && (DISPLAY.power_q[i] >= 0))
 //		{
 //			j = 0xaaaa;
+//			
 //			float_temp = 1.0;
 //		}
 //			
@@ -2181,6 +2211,7 @@ void power_update(void)
 //		else if((DISPLAY.power_p[i] >= 0) && (DISPLAY.power_q[i] >= 0))
 //		{
 //			j = 0x5555;
+//			
 //			float_temp = 1.0;
 //		}
 //		
@@ -2190,6 +2221,8 @@ void power_update(void)
 //		
 //		//k = i << 1;		
 //	}
+	
+	
 	
 	// 3상 P,Q, S
 	DISPLAY.p3 = DISPLAY.power_p[0] + DISPLAY.power_p[1] + DISPLAY.power_p[2];
@@ -2205,8 +2238,13 @@ void power_update(void)
 		float_temp  /= 1.732050807569;
 //	}
 	
+	
+	
 	DISPLAY.pf3 = DISPLAY.p3 / float_temp;
 	
+	
+	
+
 ////	// 3pf
 ////	// 1사분면
 //////	if((float_temp >= 0) && (float_temp1 < 0))
@@ -2414,8 +2452,14 @@ void power_update(void)
 //	
 //	
 	
+	
+	
+	
+	
+	
 	DISPLAY.Power_Up = 0;
 }
+
 
 // 사용하는 인터럽트 설정
 // 이 함수는 H/W 변동이 없는 한 수정 없음
@@ -2489,3 +2533,38 @@ void interrupt_control(void)
 	ERTM;
 }
 
+void modbus_comm_card_check(void)
+{
+	static unsigned char a = 0;
+	static unsigned char cnt = 0;
+	static unsigned int nic_reset_start = 0;
+	unsigned char tmp;
+
+	if(nic_reset_start == 1) {
+		nic_reset_start = 2;
+		NIC_RESET_ON;
+	} else if(nic_reset_start >= 2) {
+		nic_reset_start = 0;
+		NIC_RESET_OFF;
+	}
+
+	if(cnt++ > 5) {
+		cnt = 0;
+
+		tmp = *COMM_2_MODBUS_RECV_CNT & 0xff;
+
+		if(a == tmp) {
+			nic_reset_start = 1;
+			NIC_RESET_OFF;//통신카드 리셋 (Active Low 펄스신호 발생)
+		}
+
+		a = tmp;
+	}
+}
+
+void SCI_Port_Err_Check(void)
+{
+	if((*ScibRegs_SCIRXST & 0x80)||(*ScicRegs_SCIRXST & 0x80)) {
+		sci_setup();
+	}
+}
