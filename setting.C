@@ -603,6 +603,9 @@ void setting_post_handling(unsigned int *ar_address)
 //		NCHR.Op_Phase = 0;
 //		NCHR.Op_Time = 0.0;
 
+		NCHR.Start_RNum = 0;
+		Relay_Off(NCHR.do_output); //먼저 기존의 릴레이를 OFF 시킨다 //동작 중에 설정 값을 바꿀 수 있는 계전 요소는 적용해야 함. 27,50H,66
+
 		NCHR.do_output = 0;
 		for(i = 0; i < 8; i++)
 		{
@@ -647,6 +650,8 @@ void setting_post_handling(unsigned int *ar_address)
 
 		H50.pickup_limit = INSTANT_PICKUP_LIMIT;
 		H50.delay_ms = 40 - INSTANT_PICKUP_LIMIT - TOTAL_DELAY_H50; //순시 목표 40msec
+
+		H50.trip_flag = ON;
 
 //	H50.event_ready = H50_SET_EVENT;
 //	H50.event_ready |= (unsigned long)(H50.mode << 8);

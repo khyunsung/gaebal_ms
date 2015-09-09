@@ -352,24 +352,23 @@ void RELAY_THR(void)
 		  THR.Pre_Curr = THR.Pickup_Threshold;
 		}
 		
-//		if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
-//		{
-//			THR.op_status = RELAY_NORMAL;
-//
-////			if((Alarm_Trip==0)&&(LR51.op_status!=STATE_WITHIN_PICKUP)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
-////			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(LR51.op_status!=STATE_BEYOND_PICKUP)&&
-////			   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
-////			{
-////				Alarm_Off();
-////				Alarm_Off();
-////			}
-//			RELAY_STATUS.pickup	&= ~F_THR; //계전요소 alarm OFF
-//		}
+		if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
+		{
+			THR.op_status = RELAY_NORMAL;
+
+//			if((Alarm_Trip==0)&&(LR51.op_status!=STATE_WITHIN_PICKUP)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
+//			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(LR51.op_status!=STATE_BEYOND_PICKUP)&&
+//			   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
+//			{
+//				Alarm_Off();
+//				Alarm_Off();
+//			}
+			RELAY_STATUS.pickup	&= ~F_THR; //계전요소 alarm OFF
+		}
 	          
 		if(THR.Op_Ratio > 1.03)
 		{
-//		if((THR.op_status == RELAY_NORMAL) && (H50.op_status == RELAY_TRIP))
-			if(THR.op_status == RELAY_NORMAL)
+			if((THR.op_status == RELAY_NORMAL) && (H50.op_status == RELAY_TRIP))
 			{
 				THR.op_count = 0;
 	
@@ -680,66 +679,69 @@ void RELAY_51LR(void)
 
 void RELAY_NCHR(void)
 {
-	if((SET_66.Stop_Flag == ON) && (SET_66.Start_Flag != ON) && (NCHR.op_status == RELAY_NORMAL))
+	if(NCHR.use == 0xaaaa)
 	{
-		NCHR.op_status = RELAY_PICKUP;
-	}
-	if((SET_66.Start_Flag == ON) && (NCHR.op_status == RELAY_PICKUP))
-	{
-		if(NCHR.Start_RNum == 0)
+		if((SET_66.Stop_Flag == ON) && (SET_66.Start_Flag != ON) && (NCHR.op_status == RELAY_NORMAL))
 		{
-			NCHR.start_count = 0;
+			NCHR.op_status = RELAY_PICKUP;
 		}
-		NCHR.Start_RNum += 1;
-		NCHR.op_status = RELAY_NORMAL;
-	}
-
-	if((NCHR.start_count <= NCHR.Allow_Time_Threshold) && (NCHR.op_status == RELAY_NORMAL))
-	{
-		if(NCHR.Start_RNum >= NCHR.Trip_Number_Threshold)
+		if((SET_66.Start_Flag == ON) && (NCHR.op_status == RELAY_PICKUP))
 		{
-			NCHR.op_status = STATE_WAIT_NO; //허용된 시간 내에 허용된 기동 횟수 만큼 기동하면 STATE_WAIT_NO 상태로 만듦
+			if(NCHR.Start_RNum == 0)
+			{
+				NCHR.start_count = 0;
+			}
+			NCHR.Start_RNum += 1;
+			NCHR.op_status = RELAY_NORMAL;
 		}
-	}
-	else if((NCHR.start_count > NCHR.Allow_Time_Threshold) && ((NCHR.op_status == RELAY_PICKUP) || (NCHR.op_status != RELAY_TRIP)))
-	{
-		if(NCHR.op_status == STATE_WAIT_NO)
+	
+		if((NCHR.start_count <= NCHR.Allow_Time_Threshold) && (NCHR.op_status == RELAY_NORMAL))
 		{
-			NCHR.op_status = RELAY_NORMAL; //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 허용된 시간이 지나면 리셋
+			if(NCHR.Start_RNum >= NCHR.Trip_Number_Threshold)
+			{
+				NCHR.op_status = STATE_WAIT_NO; //허용된 시간 내에 허용된 기동 횟수 만큼 기동하면 STATE_WAIT_NO 상태로 만듦
+			}
 		}
-		NCHR.Start_RNum = 0;
-	}
-
-	if(NCHR.op_status == STATE_WAIT_NO) //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 
-	{
-		if(SET_66.Stop_Flag == ON) //stop 상태이면-> 허용된 기동 횟수 만큼 기동 시도 하였으나, 결국 기동 성공(run)되지 못했다면,
+		else if((NCHR.start_count > NCHR.Allow_Time_Threshold) && ((NCHR.op_status == RELAY_PICKUP) || (NCHR.op_status != RELAY_TRIP)))
 		{
-			Relay_On(NCHR.do_output);
-
-			NCHR.op_status = RELAY_TRIP;
+			if(NCHR.op_status == STATE_WAIT_NO)
+			{
+				NCHR.op_status = RELAY_NORMAL; //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 허용된 시간이 지나면 리셋
+			}
 			NCHR.Start_RNum = 0;
-			NCHR.op_count = 0;
-
-			RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
-			RELAY_STATUS.operation_sum_holding	|= F_NCHR;  //누적 동작 상태 변수 설정
-
-			//이벤트 저장 삽입
-			EVENT.operation |= (INT_F_NCHR << 16) + LR51.Op_Phase;
-			EVENT.fault_type = F_NCHR;
-			Save_Relay_Event(0.0F);
-			Save_Screen_Info(0);
 		}
-	}
-
-	if(NCHR.op_status == RELAY_TRIP)
-	{
-		RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
-		if((NCHR.Limit_Time_Threshold < NCHR.op_count) && (THR.present_theta <= NCHR.Theta_D_Threshold))
+	
+		if(NCHR.op_status == STATE_WAIT_NO) //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 
 		{
-			Relay_Off(NCHR.do_output); //DO open
-			NCHR.op_status = RELAY_NORMAL; //NCHR상태 NORMAL
-
-			NCHR.Start_RNum = 0;
+			if(SET_66.Stop_Flag == ON) //stop 상태이면-> 허용된 기동 횟수 만큼 기동 시도 하였으나, 결국 기동 성공(run)되지 못했다면,
+			{
+				Relay_On(NCHR.do_output);
+	
+				NCHR.op_status = RELAY_TRIP;
+				NCHR.Start_RNum = 0;
+				NCHR.op_count = 0;
+	
+				RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
+				RELAY_STATUS.operation_sum_holding	|= F_NCHR;  //누적 동작 상태 변수 설정
+	
+				//이벤트 저장 삽입
+				EVENT.operation |= (INT_F_NCHR << 16) + LR51.Op_Phase;
+				EVENT.fault_type = F_NCHR;
+				Save_Relay_Event(0.0F);
+				Save_Screen_Info(0);
+			}
+		}
+	
+		if(NCHR.op_status == RELAY_TRIP)
+		{
+			RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
+			if((NCHR.Limit_Time_Threshold < NCHR.op_count) && (THR.present_theta <= NCHR.Theta_D_Threshold))
+			{
+				Relay_Off(NCHR.do_output); //DO open
+				NCHR.op_status = RELAY_NORMAL; //NCHR상태 NORMAL
+	
+				NCHR.Start_RNum = 0;
+			}
 		}
 	}
 }
@@ -751,7 +753,7 @@ void RELAY_50H(void)
 		if(PROTECT.Max_I_RMS > H50.Pickup_Threshold) //50H 설정 값 이상
 		{
 			H50.op_status = RELAY_TRIP;
-			H50.save_flag = OFF;				//이벤트 저장 플래그
+			H50.save_flag = OFF;				//이벤트 저장 플래그 (현성이 형 참고)
 			H50.display_flag = OFF;			//메인 화면 디스플레이 플래그
 			H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
 	
@@ -771,29 +773,20 @@ void RELAY_50H(void)
 					Relay_On(H50.do_output);
 					H50.trip_flag = OFF; // TRIP 조건 밖으로 나갔다 와야 다시 진입 가능 함
 	
-	//			Add_Fault(H50);	
-	//			if(H50.save_flag == OFF) H50_save(F50H|FINST,ftmp,H50_Phase,0.03); //이벤트 저장 필요
+	//			if(H50.save_flag == OFF) H50_save(F50H|FINST,ftmp,H50_Phase,0.03); //이벤트 저장 필요 (현성이 형 참고)
 					
-	//			if(H50_ack_flag == 1)
-	//			{
-	//				FaultScreenReady = 1;	
-	//				Fault_tp = F50H;
-	//				H50_ack_flag = 0;
-	//			}
-					H50.save_flag = ON;					//이벤트 저장 플래그
+					H50.save_flag = ON;					//이벤트 저장 플래그 (현성이 형 참고)
 					H50.display_flag = ON;			//메인 화면 디스플레이 플래그
 					H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
 				}
 				else if((PROTECT.Max_I_RMS < THR.Pickup_Threshold) && (H50.reset_ready_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이하
 				{
-					H50.save_flag = OFF;					//이벤트 저장 플래그
+					H50.save_flag = OFF;					//이벤트 저장 플래그 (현성이 형 참고)
 					H50.display_flag = OFF;				//메인 화면 디스플레이 플래그
 					H50.reset_ready_flag = OFF;		//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
 	
 					Relay_Off(H50.do_output); //DO open
 					H50.trip_flag = ON; 					//TRIP 조건 밖에서 ON 해서, TRIP 영역 진입 시 동작 가능 알림
-	
-	//			H50_ack_flag = 1;	//2007.11.7
 				}
 			}
 		}
@@ -806,22 +799,6 @@ void RELAY_UCR(void)
 	{
 		if(((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ib]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ic]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic]>=UCR.Min_Pickup_Threshold)))
 		{
-//			if((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))
-//			{
-//				UCR.Op_Phase = Ia+1; //상
-//				UCR.RMS = MEASUREMENT.rms_value[Ia];
-//			}
-//			else if((MEASUREMENT.rms_value[Ib] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib] >= UCR.Min_Pickup_Threshold))
-//			{
-//				UCR.Op_Phase = Ib+1; //상
-//				UCR.RMS = MEASUREMENT.rms_value[Ib];
-//			}
-//			else if((MEASUREMENT.rms_value[Ic] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic] >= UCR.Min_Pickup_Threshold))
-//			{
-//				UCR.Op_Phase = Ic+1; //상
-//				UCR.RMS = MEASUREMENT.rms_value[Ic];
-//			}
-
 			if((UCR.op_status == RELAY_NORMAL) && (M_STATE.Run_Flag == ON))
 			{
 				UCR.op_status = RELAY_DETECT;
