@@ -74,6 +74,7 @@ void RELAY_OCR50_1(void)
 						Phase_Info = (Phase_Info == 0)? EVENT.operation: OCR50_1.Op_Phase;
 						Save_Relay_Event(OCR50_1.Op_Ratio * 100.0F);
 						Save_Screen_Info(OCR50_1.Op_Phase);
+						WAVE.post_start = 0x1234;						
 					}
 				}
 			}
@@ -160,6 +161,7 @@ void RELAY_OCR50_2(void)
 						EVENT.fault_type = F_OCR50_2;
 						Save_Relay_Event(OCR50_2.Op_Ratio * 100.0F);
 						Save_Screen_Info(OCR50_2.Op_Phase);
+						WAVE.post_start = 0x1234;
 					}
 				}
 			}
@@ -233,6 +235,7 @@ void RELAY_OCGR50(void)
 					EVENT.fault_type = F_OCGR50;
 					Save_Relay_Event(OCGR50.Op_Ratio * 100.0F);
 					Save_Screen_Info(OCGR50.Op_Phase);
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -305,6 +308,7 @@ void RELAY_OCGR51(void)
 					EVENT.fault_type = F_OCGR51;
 					Save_Relay_Event(OCGR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(OCGR51.Op_Phase);				
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -359,10 +363,10 @@ void RELAY_THR(void)
 //			if((Alarm_Trip==0)&&(LR51.op_status!=STATE_WITHIN_PICKUP)&&(Nsr_Flag!=STATE_WAIT)&&(Ocgr_def_Flag!=STATE_WAIT)&&
 //			   (Ocgr_inv_Flag!=STATE_WAIT)&&(UcrState != STATE_WAIT)&&(M87_def_Flag!=STATE_WAIT)&&(LR51.op_status!=STATE_BEYOND_PICKUP)&&
 //			   (CB_def_Flag1==RELAY_NORMAL)&&(CB_def_Flag2==RELAY_NORMAL)&&(!cbout_chk))
-//			{
+//		{
 //				Alarm_Off();
 //				Alarm_Off();
-//			}
+//		}
 			RELAY_STATUS.pickup	&= ~F_THR; //계전요소 alarm OFF
 		}
 	          
@@ -404,6 +408,7 @@ void RELAY_THR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: THR.Op_Phase;
 					Save_Relay_Event(THR.Op_Ratio * 100.0F);
 					Save_Screen_Info(THR.Op_Phase);
+					WAVE.post_start = 0x1234;
 				}
 			}
 	  	else if(THR.op_status == STATE_WAIT_NO)
@@ -434,6 +439,7 @@ void RELAY_THR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: THR.Op_Phase;
 					Save_Relay_Event(THR.Op_Ratio * 100.0F);
 					Save_Screen_Info(THR.Op_Phase);
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -507,6 +513,7 @@ void RELAY_NSR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: NSR.Op_Phase;
 					Save_Relay_Event(NSR.Op_Ratio * 100.0F);
 					Save_Screen_Info(NSR.Op_Phase);		
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -598,6 +605,7 @@ void RELAY_51LR(void)
 					EVENT.fault_type = F_51LR_TOO;
 					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(LR51.Op_Phase);	
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -657,6 +665,7 @@ void RELAY_51LR(void)
 					EVENT.fault_type = F_51LR_ROCK;
 					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(LR51.Op_Phase);	
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -681,69 +690,69 @@ void RELAY_NCHR(void)
 {
 	if(NCHR.use == 0xaaaa)
 	{
-		if((SET_66.Stop_Flag == ON) && (SET_66.Start_Flag != ON) && (NCHR.op_status == RELAY_NORMAL))
+	if((SET_66.Stop_Flag == ON) && (SET_66.Start_Flag != ON) && (NCHR.op_status == RELAY_NORMAL))
+	{
+		NCHR.op_status = RELAY_PICKUP;
+	}
+	if((SET_66.Start_Flag == ON) && (NCHR.op_status == RELAY_PICKUP))
+	{
+		if(NCHR.Start_RNum == 0)
 		{
-			NCHR.op_status = RELAY_PICKUP;
+			NCHR.start_count = 0;
 		}
-		if((SET_66.Start_Flag == ON) && (NCHR.op_status == RELAY_PICKUP))
+		NCHR.Start_RNum += 1;
+		NCHR.op_status = RELAY_NORMAL;
+	}
+
+	if((NCHR.start_count <= NCHR.Allow_Time_Threshold) && (NCHR.op_status == RELAY_NORMAL))
+	{
+		if(NCHR.Start_RNum >= NCHR.Trip_Number_Threshold)
 		{
-			if(NCHR.Start_RNum == 0)
-			{
-				NCHR.start_count = 0;
-			}
-			NCHR.Start_RNum += 1;
-			NCHR.op_status = RELAY_NORMAL;
-		}
-	
-		if((NCHR.start_count <= NCHR.Allow_Time_Threshold) && (NCHR.op_status == RELAY_NORMAL))
-		{
-			if(NCHR.Start_RNum >= NCHR.Trip_Number_Threshold)
-			{
-				NCHR.op_status = STATE_WAIT_NO; //허용된 시간 내에 허용된 기동 횟수 만큼 기동하면 STATE_WAIT_NO 상태로 만듦
-			}
-		}
-		else if((NCHR.start_count > NCHR.Allow_Time_Threshold) && ((NCHR.op_status == RELAY_PICKUP) || (NCHR.op_status != RELAY_TRIP)))
-		{
-			if(NCHR.op_status == STATE_WAIT_NO)
-			{
-				NCHR.op_status = RELAY_NORMAL; //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 허용된 시간이 지나면 리셋
-			}
-			NCHR.Start_RNum = 0;
-		}
-	
-		if(NCHR.op_status == STATE_WAIT_NO) //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 
-		{
-			if(SET_66.Stop_Flag == ON) //stop 상태이면-> 허용된 기동 횟수 만큼 기동 시도 하였으나, 결국 기동 성공(run)되지 못했다면,
-			{
-				Relay_On(NCHR.do_output);
-	
-				NCHR.op_status = RELAY_TRIP;
-				NCHR.Start_RNum = 0;
-				NCHR.op_count = 0;
-	
-				RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
-				RELAY_STATUS.operation_sum_holding	|= F_NCHR;  //누적 동작 상태 변수 설정
-	
-				//이벤트 저장 삽입
-				EVENT.operation |= (INT_F_NCHR << 16) + LR51.Op_Phase;
-				EVENT.fault_type = F_NCHR;
-				Save_Relay_Event(0.0F);
-				Save_Screen_Info(0);
-			}
-		}
-	
-		if(NCHR.op_status == RELAY_TRIP)
-		{
-			RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
-			if((NCHR.Limit_Time_Threshold < NCHR.op_count) && (THR.present_theta <= NCHR.Theta_D_Threshold))
-			{
-				Relay_Off(NCHR.do_output); //DO open
-				NCHR.op_status = RELAY_NORMAL; //NCHR상태 NORMAL
-	
-				NCHR.Start_RNum = 0;
-			}
+			NCHR.op_status = STATE_WAIT_NO; //허용된 시간 내에 허용된 기동 횟수 만큼 기동하면 STATE_WAIT_NO 상태로 만듦
 		}
 	}
+	else if((NCHR.start_count > NCHR.Allow_Time_Threshold) && ((NCHR.op_status == RELAY_PICKUP) || (NCHR.op_status != RELAY_TRIP)))
+	{
+		if(NCHR.op_status == STATE_WAIT_NO)
+		{
+			NCHR.op_status = RELAY_NORMAL; //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 허용된 시간이 지나면 리셋
+		}
+		NCHR.Start_RNum = 0;
+	}
+
+	if(NCHR.op_status == STATE_WAIT_NO) //허용된 기동 횟수 만큼 기동 시(STATE_WAIT_NO), 
+	{
+		if(SET_66.Stop_Flag == ON) //stop 상태이면-> 허용된 기동 횟수 만큼 기동 시도 하였으나, 결국 기동 성공(run)되지 못했다면,
+		{
+			Relay_On(NCHR.do_output);
+
+			NCHR.op_status = RELAY_TRIP;
+			NCHR.Start_RNum = 0;
+			NCHR.op_count = 0;
+
+			RELAY_STATUS.operation_realtime			|= F_NCHR;  //현재 동작 상태 변수 설정
+			RELAY_STATUS.operation_sum_holding	|= F_NCHR;  //누적 동작 상태 변수 설정
+
+			//이벤트 저장 삽입
+			EVENT.operation |= (INT_F_NCHR << 16) + LR51.Op_Phase;
+			EVENT.fault_type = F_NCHR;
+			Save_Relay_Event(0.0F);
+			Save_Screen_Info(0);
+		}
+	}
+
+	if(NCHR.op_status == RELAY_TRIP)
+	{
+		RELAY_STATUS.operation_realtime &= ~F_NCHR; //동작 상태 변수 해제
+		if((NCHR.Limit_Time_Threshold < NCHR.op_count) && (THR.present_theta <= NCHR.Theta_D_Threshold))
+		{
+			Relay_Off(NCHR.do_output); //DO open
+			NCHR.op_status = RELAY_NORMAL; //NCHR상태 NORMAL
+
+			NCHR.Start_RNum = 0;
+		}
+	}
+}
 }
 
 void RELAY_50H(void)
@@ -769,6 +778,7 @@ void RELAY_50H(void)
 				if((PROTECT.Max_I_RMS >= THR.Pickup_Threshold) && (H50.trip_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이상 && TRIP 조건 밖에서 동작 조건으로 진입함
 				{
 					H50.Op_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold; //배수 정보
+					H50.Op_Phase = PROTECT.I_Op_Phase; //상
 	
 					Relay_On(H50.do_output);
 					H50.trip_flag = OFF; // TRIP 조건 밖으로 나갔다 와야 다시 진입 가능 함
@@ -778,6 +788,14 @@ void RELAY_50H(void)
 					H50.save_flag = ON;					//이벤트 저장 플래그 (현성이 형 참고)
 					H50.display_flag = ON;			//메인 화면 디스플레이 플래그
 					H50.reset_ready_flag = ON;	//reset 조건에 들어가려면 한번은 전류가 인가되어야 함
+					
+					EVENT.optime = (unsigned long)H50.Op_Time;
+					EVENT.operation |= (INT_F_H50 << 16) + H50.Op_Phase;
+					EVENT.fault_type = F_H50;
+					Phase_Info = (Phase_Info == 0)? EVENT.operation: H50.Op_Phase;
+					Save_Relay_Event(H50.Op_Ratio * 100.0F);
+					Save_Screen_Info(H50.Op_Phase);
+					WAVE.post_start = 0x1234;	
 				}
 				else if((PROTECT.Max_I_RMS < THR.Pickup_Threshold) && (H50.reset_ready_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이하
 				{
@@ -851,6 +869,7 @@ void RELAY_UCR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: UCR.Op_Phase;
 					Save_Relay_Event(UCR.Op_Ratio * 100.0F);
 					Save_Screen_Info(UCR.Op_Phase);		
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -921,6 +940,7 @@ void RELAY_DGR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: DGR.Op_Phase;
 					Save_Relay_Event(DGR.Op_Ratio * 100.0F);
 					Save_Screen_Info(DGR.Op_Phase);
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}
@@ -994,6 +1014,7 @@ void RELAY_SGR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: SGR.Op_Phase;
 					Save_Relay_Event(SGR.Op_Ratio * 100.0F);
 					Save_Screen_Info(SGR.Op_Phase);
+					WAVE.post_start = 0x1234;
 				}
 			}
 		}

@@ -902,13 +902,13 @@ void flash_word_write(unsigned int *ar_address, unsigned int ar_data)
 //khs, 2015-04-08 오전 11:42:47
 void wave_flash_word_write(unsigned int *ar_address, unsigned int ar_data)
 {
-	*FLASH_5555 = 0xaa;	
-	*FLASH_2aaa = 0x55;	
-	*FLASH_5555 = 0xa0;	
+//	*FLASH_5555 = 0xaa;	
+//	*FLASH_2aaa = 0x55;	
+//	*FLASH_5555 = 0xa0;	
 	
 	*ar_address = ar_data;
 		
-	delay_us(20);
+//	delay_us(20);
 	
 	++FLASH.destination_count;
 	++FLASH.source_count;
@@ -1053,14 +1053,11 @@ void wave_save_process(void)
 		//setcor 지우기 : 전체 54개
 		if(WAVE.hold == 0)
 		{
-			temp32 = (unsigned long)WAVE.save_index;
-			
-			temp32 *= 0x800;
-			
-			wave_flash_sector_erase(FLASH_SECTOR000 + temp32);
+			//temp32 = (unsigned long)WAVE.save_index;
+			//temp32 *= 0x800;
+			//wave_flash_sector_erase(FLASH_SECTOR000 + temp32);
 			
 			WAVE.timer = 0;
-			
 			WAVE.hold = 1;
 		}
 		

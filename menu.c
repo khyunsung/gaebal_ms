@@ -15166,6 +15166,9 @@ void Event_Item_Display(void)		//khs, 2015-03-31 ¿ÀÈÄ 7:36:32
 			if(str[0] == 6) {	//46
 				sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
 				sprintf(str2[1],"          Ot: %.3f   \0", ((float)i_tmp[0])/1000.0F);
+			} else if(str[0] == 10) {	//50H
+				sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
+				sprintf(str2[1],"  Ph:%s   Ot: INST   \0", event_phase[temp16]);
 			} else if(str[0] == 12 || str[0] == 13) {	//67GD, 67GS
 				sprintf(str2[0],"   %s  %s: %.2f   \0", event_relay[str[0]], Event_Volt_Curr[str[0]], ((float)i_tmp[1])/100.0F);
 				sprintf(str2[1],"   %4d\x0DF   Ot: %.3f \0", (temp16_2 << 8) + temp16, ((float)i_tmp[0])/1000.0F);
