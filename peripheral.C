@@ -885,7 +885,8 @@ void flash_sector_erase(unsigned int *ar_sector)
 	*FLASH_2aaa = 0x55;	
 	*ar_sector = 0x30;
 	
-	delay_us(20000);
+	//delay_us(20000);	2015-09-14 ¿ÀÈÄ 1:07:28
+	delay_us(30000);
 }
 
 void flash_word_write(unsigned int *ar_address, unsigned int ar_data)
