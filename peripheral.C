@@ -896,7 +896,8 @@ void flash_word_write(unsigned int *ar_address, unsigned int ar_data)
 	
 	*ar_address = ar_data;
 		
-	delay_us(20);
+	//delay_us(20);		2015-09-11 오후 3:49:41
+	delay_us(200);
 }
 
 //khs, 2015-04-08 오전 11:42:47
