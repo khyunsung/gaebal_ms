@@ -637,6 +637,8 @@ void setting_post_handling(unsigned int *ar_address)
 		}
 
 		H50.op_status = RELAY_NORMAL;
+		if(H50.use == DISABLE)	{H50.op_status = RELAY_TRIP;}
+        	
 		H50.Op_Ratio = 0.0;
 		H50.Op_Phase = 0;
 		H50.Op_Time = 0.0;
@@ -1259,7 +1261,7 @@ void SYSTEM_ALARM_Default_Settings(void)
 void OCR50_1_Default_Settings(void)
 {
 	//default
-	OCR50_1.use = 0;
+	OCR50_1.use = DISABLE;
 	OCR50_1.mode = DEFINITE;
 	if(CORE.rated_ct == CT_5A)	{OCR50_1.current_set = OCR50_I_MAX[0];}
 	else												{OCR50_1.current_set = OCR50_I_MAX[1];}
@@ -1279,7 +1281,7 @@ void OCR50_1_Default_Settings(void)
 void OCR50_2_Default_Settings(void)
 {
 	//default
-	OCR50_2.use = 0;
+	OCR50_2.use = DISABLE;
 	OCR50_2.mode = DEFINITE;
 	if(CORE.rated_ct == CT_5A)	{OCR50_2.current_set = OCR50_I_MAX[0];}
 	else												{OCR50_2.current_set = OCR50_I_MAX[1];}
@@ -1299,7 +1301,7 @@ void OCR50_2_Default_Settings(void)
 void OCGR50_Default_Settings(void)
 {
 	//default
-	OCGR50.use = 0;
+	OCGR50.use = DISABLE;
 	OCGR50.mode = DEFINITE;
 	if(CORE.rated_ct == CT_5A)	{OCGR50.current_set = OCGR50_I_MAX[0];}
 	else												{OCGR50.current_set = OCGR50_I_MAX[1];}
@@ -1319,7 +1321,7 @@ void OCGR50_Default_Settings(void)
 void OCGR51_Default_Settings(void)
 {
 	//default
-	OCGR51.use = 0;
+	OCGR51.use = DISABLE;
 	OCGR51.mode = INVERSE;
 	if(CORE.rated_ct == CT_5A)	{OCGR51.current_set = OCGR51_I_MAX[0];}
 	else												{OCGR51.current_set = OCGR51_I_MAX[1];}
@@ -1339,7 +1341,7 @@ void OCGR51_Default_Settings(void)
 void THR_Default_Settings(void)
 {
 	//default
-	THR.use = 0;
+	THR.use = DISABLE;
 	if(CORE.rated_ct == CT_5A)	{THR.current_set = THR_I_MAX[0];}
 	else												{THR.current_set = THR_I_MAX[1];}
 	THR.cold_limit = THR_COLD_MAX;
@@ -1360,7 +1362,7 @@ void THR_Default_Settings(void)
 void NSR_Default_Settings(void)
 {
 	//default
-	NSR.use = 0;
+	NSR.use = DISABLE;
 	if(CORE.rated_ct == CT_5A)	{NSR.current_set = NSR_I_MAX[0];}
 	else												{NSR.current_set = NSR_I_MAX[1];}
 	NSR.delay_time = NSR_T_MAX;
@@ -1379,7 +1381,7 @@ void NSR_Default_Settings(void)
 void LR51_Default_Settings(void)
 {
 	//default
-	LR51.use = 0;
+	LR51.use = DISABLE;
 	if(CORE.rated_ct == CT_5A)	{LR51.start_current_set = LR51_ST_I_MAX[0];}
 	else												{LR51.start_current_set = LR51_ST_I_MAX[1];}
 	LR51.start_delay_time = LR51_ST_T_MAX;
@@ -1402,7 +1404,7 @@ void LR51_Default_Settings(void)
 void NCHR_Default_Settings(void)
 {
 	//default
-	NCHR.use = 0;
+	NCHR.use = DISABLE;
 	NCHR.allow_time_set = NCHR_AL_T_MAX;
 	NCHR.trip_number_set = NCHR_TRIP_NO_MAX;
 	NCHR.limit_time_set = NCHR_LIMIT_T_MAX;
@@ -1422,7 +1424,7 @@ void NCHR_Default_Settings(void)
 void H50_Default_Settings(void)
 {
 	//default
-	H50.use = 0;
+	H50.use = DISABLE;
 	if(CORE.rated_ct == CT_5A)	{H50.current_set = H50_I_MAX[0];}
 	else												{H50.current_set = H50_I_MAX[1];}
 	H50.do_relay = 0;
@@ -1440,7 +1442,7 @@ void H50_Default_Settings(void)
 void UCR_Default_Settings(void)
 {
 	//default
-	UCR.use = 0;
+	UCR.use = DISABLE;
 	if(CORE.rated_ct == CT_5A)	{UCR.min_current_set = UCR_Imin_MIN[0];}
 	else												{UCR.min_current_set = UCR_Imin_MIN[1];}
 	if(CORE.rated_ct == CT_5A)	{UCR.max_current_set = UCR_Imax_MIN[0];}
@@ -1461,7 +1463,7 @@ void UCR_Default_Settings(void)
 void DGR_Default_Settings(void)
 {
 	//default
-	DGR.use = 0;
+	DGR.use = DISABLE;
 	if(CORE.rated_ct == CT_5A)			{DGR.current_set = DGR_I_MAX[0];}
 	else														{DGR.current_set = DGR_I_MAX[1];}
 	if(GPT.pt_tertiary == 110)			{DGR.voltage_set = DGR_V_MAX[0];}
@@ -1484,7 +1486,7 @@ void DGR_Default_Settings(void)
 void SGR_Default_Settings(void)
 {
 	//default
-	SGR.use = 0;
+	SGR.use = DISABLE;
 	SGR.current_set = SGR_I_MAX;
 	if(GPT.pt_tertiary == 110)			{SGR.voltage_set = SGR_V_MAX[0];}
 	else if(GPT.pt_tertiary == 120) {SGR.voltage_set = SGR_V_MAX[1];}

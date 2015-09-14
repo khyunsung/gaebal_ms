@@ -858,6 +858,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((OCR50_1.use != ENABLE) && (OCR50_1.use != DISABLE))
+		{
+			OCR50_1.use = DISABLE;
+			i = 1;
+		}
 		if((OCR50_1.mode != INSTANT) && (OCR50_1.mode != DEFINITE))
 		{
 			OCR50_1.mode = DEFINITE;
@@ -871,7 +876,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		OCR50_1.use = 0;
+		OCR50_1.use = DISABLE;
 		OCR50_1.mode = DEFINITE;
 		if(CORE.rated_ct == CT_5A)	{OCR50_1.current_set = OCR50_I_MAX[0];}
 		else												{OCR50_1.current_set = OCR50_I_MAX[1];}
@@ -897,6 +902,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((OCR50_2.use != ENABLE) && (OCR50_2.use != DISABLE))
+		{
+			OCR50_2.use = DISABLE;
+			i = 1;
+		}
 		if((OCR50_2.mode != INSTANT) && (OCR50_2.mode != DEFINITE))
 		{
 			OCR50_2.mode = DEFINITE;
@@ -910,7 +920,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		OCR50_2.use = 0;
+		OCR50_2.use = DISABLE;
 		OCR50_2.mode = DEFINITE;
 		if(CORE.rated_ct == CT_5A)	{OCR50_2.current_set = OCR50_I_MAX[0];}
 		else												{OCR50_2.current_set = OCR50_I_MAX[1];}
@@ -936,6 +946,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((OCGR50.use != ENABLE) && (OCGR50.use != DISABLE))
+		{
+			OCGR50.use = DISABLE;
+			i = 1;
+		}
 		if((OCGR50.mode != INSTANT) && (OCGR50.mode != DEFINITE))
 		{
 			OCGR50.mode = DEFINITE;
@@ -949,7 +964,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		OCGR50.use = 0;
+		OCGR50.use = DISABLE;
 		OCGR50.mode = DEFINITE;
 		if(CORE.rated_ct == CT_5A)	{OCGR50.current_set = OCGR50_I_MAX[0];}
 		else												{OCGR50.current_set = OCGR50_I_MAX[1];}
@@ -975,6 +990,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((OCGR51.use != ENABLE) && (OCGR51.use != DISABLE))
+		{
+			OCGR51.use = DISABLE;
+			i = 1;
+		}
 		if((OCGR51.mode != INVERSE) && (OCGR51.mode != V_INVERSE) && (OCGR51.mode != E_INVERSE))
 		{
 			OCGR51.mode = INVERSE;
@@ -988,7 +1008,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		OCGR51.use = 0;
+		OCGR51.use = DISABLE;
 		OCGR51.mode = INVERSE;
 		if(CORE.rated_ct == CT_5A)	{OCGR51.current_set = OCGR51_I_MAX[0];}
 		else												{OCGR51.current_set = OCGR51_I_MAX[1];}
@@ -1014,6 +1034,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((THR.use != ENABLE) && (THR.use != DISABLE))
+		{
+			THR.use = DISABLE;
+			i = 1;
+		}
 		if(CORE.rated_ct == CT_5A)	{i |= setting_min_max_check(&THR.current_set, THR_I_MIN[0], THR_I_MAX[0]);}
 		else												{i |= setting_min_max_check(&THR.current_set, THR_I_MIN[1], THR_I_MAX[1]);}
 		i |= setting_min_max_check(&THR.cold_limit, THR_COLD_MIN, THR_COLD_MAX);
@@ -1024,7 +1049,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		THR.use = 0;
+		THR.use = DISABLE;
 		if(CORE.rated_ct == CT_5A)	{THR.current_set = THR_I_MAX[0];}
 		else												{THR.current_set = THR_I_MAX[1];}
 		THR.cold_limit = THR_COLD_MAX;
@@ -1043,6 +1068,7 @@ void booting_setting_check(void)
 		else
 		{
 			//FLASH WRITE ERROR pop up 화면
+			
 		}
 	}
 
@@ -1051,6 +1077,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((NSR.use != ENABLE) && (NSR.use != DISABLE))
+		{
+			NSR.use = DISABLE;
+			i = 1;
+		}
 		if(CORE.rated_ct == CT_5A)	{i |= setting_min_max_check(&NSR.current_set, NSR_I_MIN[0], NSR_I_MAX[0]);}
 		else												{i |= setting_min_max_check(&NSR.current_set, NSR_I_MIN[1], NSR_I_MAX[1]);}
 		i |= setting_min_max_check(&NSR.delay_time, NSR_T_MIN, NSR_T_MAX);
@@ -1059,7 +1090,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		NSR.use = 0;
+		NSR.use = DISABLE;
 		if(CORE.rated_ct == CT_5A)	{NSR.current_set = NSR_I_MAX[0];}
 		else												{NSR.current_set = NSR_I_MAX[1];}
 		NSR.delay_time = NSR_T_MAX;
@@ -1084,6 +1115,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((LR51.use != ENABLE) && (LR51.use != DISABLE))
+		{
+			LR51.use = DISABLE;
+			i = 1;
+		}
 		if(CORE.rated_ct == CT_5A)	{i |= setting_min_max_check(&LR51.start_current_set, LR51_ST_I_MIN[0], LR51_ST_I_MAX[0]);}
 		else												{i |= setting_min_max_check(&LR51.start_current_set, LR51_ST_I_MIN[1], LR51_ST_I_MAX[1]);}
 		i |= setting_min_max_check(&LR51.start_delay_time, LR51_ST_T_MIN, LR51_ST_T_MAX);
@@ -1097,7 +1133,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		LR51.use = 0;
+		LR51.use = DISABLE;
 		if(CORE.rated_ct == CT_5A)	{LR51.start_current_set = LR51_ST_I_MAX[0];}
 		else												{LR51.start_current_set = LR51_ST_I_MAX[1];}
 		LR51.start_delay_time = LR51_ST_T_MAX;
@@ -1126,6 +1162,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((NCHR.use != ENABLE) && (NCHR.use != DISABLE))
+		{
+			NCHR.use = DISABLE;
+			i = 1;
+		}
 		i |= setting_min_max_check(&NCHR.allow_time_set, NCHR_AL_T_MIN, NCHR_AL_T_MAX);
 		i |= setting_min_max_check(&NCHR.trip_number_set, NCHR_TRIP_NO_MIN, NCHR_TRIP_NO_MAX);
 		i |= setting_min_max_check(&NCHR.limit_time_set, NCHR_LIMIT_T_MIN, NCHR_LIMIT_T_MAX);
@@ -1135,7 +1176,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		NCHR.use = 0;
+		NCHR.use = DISABLE;
 		NCHR.allow_time_set = NCHR_AL_T_MAX;
 		NCHR.trip_number_set = NCHR_TRIP_NO_MAX;
 		NCHR.limit_time_set = NCHR_LIMIT_T_MAX;
@@ -1161,6 +1202,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((H50.use != ENABLE) && (H50.use != DISABLE))
+		{
+			H50.use = DISABLE;
+			i = 1;
+		}
 		if(CORE.rated_ct == CT_5A)	{i |= setting_min_max_check(&H50.current_set, H50_I_MIN[0], H50_I_MAX[0]);}
 		else												{i |= setting_min_max_check(&H50.current_set, H50_I_MIN[1], H50_I_MAX[1]);}
 		i |= aux_do_check(&H50.do_relay);
@@ -1168,7 +1214,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		H50.use = 0;
+		H50.use = DISABLE;
 		if(CORE.rated_ct == CT_5A)	{H50.current_set = H50_I_MAX[0];}
 		else												{H50.current_set = H50_I_MAX[1];}
 		H50.do_relay = 0;
@@ -1192,6 +1238,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((UCR.use != ENABLE) && (UCR.use != DISABLE))
+		{
+			UCR.use = DISABLE;
+			i = 1;
+		}
 		if(CORE.rated_ct == CT_5A)	{i |= setting_min_max_check(&UCR.min_current_set, UCR_Imin_MIN[0], UCR_Imin_MAX[0]);}
 		else												{i |= setting_min_max_check(&UCR.min_current_set, UCR_Imin_MIN[1], UCR_Imin_MAX[1]);}
 		if(CORE.rated_ct == CT_5A)	{i |= setting_min_max_check(&UCR.max_current_set, UCR_Imax_MIN[0], UCR_Imax_MAX[0]);}
@@ -1202,7 +1253,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		UCR.use = 0;
+		UCR.use = DISABLE;
 		if(CORE.rated_ct == CT_5A)	{UCR.min_current_set = UCR_Imin_MIN[0];}
 		else												{UCR.min_current_set = UCR_Imin_MIN[1];}
 		if(CORE.rated_ct == CT_5A)	{UCR.max_current_set = UCR_Imax_MIN[0];}
@@ -1229,6 +1280,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((DGR.use != ENABLE) && (DGR.use != DISABLE))
+		{
+			DGR.use = DISABLE;
+			i = 1;
+		}
 		if(CORE.rated_ct == CT_5A)			{i |= setting_min_max_check(&DGR.current_set, DGR_I_MIN[0], DGR_I_MAX[0]);}
 		else														{i |= setting_min_max_check(&DGR.current_set, DGR_I_MIN[1], DGR_I_MAX[1]);}
 		if(GPT.pt_tertiary == 110)			{i |= setting_min_max_check(&DGR.voltage_set, DGR_V_MIN[0], DGR_V_MAX[0]);}
@@ -1241,7 +1297,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		DGR.use = 0;
+		DGR.use = DISABLE;
 		if(CORE.rated_ct == CT_5A)			{DGR.current_set = DGR_I_MAX[0];}
 		else														{DGR.current_set = DGR_I_MAX[1];}
 		if(GPT.pt_tertiary == 110)			{DGR.voltage_set = DGR_V_MAX[0];}
@@ -1270,6 +1326,11 @@ void booting_setting_check(void)
 	{
 		i = 0;
 		//범위check
+		if((SGR.use != ENABLE) && (SGR.use != DISABLE))
+		{
+			SGR.use = DISABLE;
+			i = 1;
+		}
 		i |= setting_min_max_check(&SGR.current_set, SGR_I_MIN, SGR_I_MAX);
 		if(GPT.pt_tertiary == 110)			{i |= setting_min_max_check(&SGR.voltage_set, SGR_V_MIN[0], SGR_V_MAX[0]);}
 		else if(GPT.pt_tertiary == 120) {i |= setting_min_max_check(&SGR.voltage_set, SGR_V_MIN[1], SGR_V_MAX[1]);}
@@ -1281,7 +1342,7 @@ void booting_setting_check(void)
 	else
 	{
 		//default
-		SGR.use = 0;
+		SGR.use = DISABLE;
 		SGR.current_set = SGR_I_MAX;
 		if(GPT.pt_tertiary == 110)			{SGR.voltage_set = SGR_V_MAX[0];}
 		else if(GPT.pt_tertiary == 120) {SGR.voltage_set = SGR_V_MAX[1];}

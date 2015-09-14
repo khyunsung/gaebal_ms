@@ -6312,6 +6312,7 @@ void menu_48_13(unsigned int value, int display)
 			else
 			{
 				//FLASH WRITE ERROR pop up È­¸é
+				SYSTEM.diagnostic |= CALIBRATION_NOT;
 			}
 
 			Screen_Position.y = 48;

@@ -20,7 +20,7 @@ void relay_dropout_to_normal(unsigned int ar_relay_bit)
 
 void RELAY_OCR50_1(void)
 {
-	if(OCR50_1.use == 0xaaaa)
+	if(OCR50_1.use == ENABLE)
 	{
 		if((OCR_MODE_SET.ocr_mode == OCR_NORMAL) || ((OCR_MODE_SET.ocr_mode == OCR_SELECT) && (OCR_MODE_SET.ocr_di_mask == 0x0008))) //DI접점이 4인 경우
 		{
@@ -107,7 +107,7 @@ void RELAY_OCR50_1(void)
 
 void RELAY_OCR50_2(void)
 {
-	if(OCR50_2.use == 0xaaaa)
+	if(OCR50_2.use == ENABLE)
 	{
 		if((OCR_MODE_SET.ocr_mode == OCR_NORMAL) || ((OCR_MODE_SET.ocr_mode == OCR_SELECT) && (OCR_MODE_SET.ocr_di_mask == 0x0010))) //DI접점이 5인 경우
 		{
@@ -194,7 +194,7 @@ void RELAY_OCR50_2(void)
 
 void RELAY_OCGR50(void)
 {
-	if(OCGR50.use == 0xaaaa)
+	if(OCGR50.use == ENABLE)
 	{
 		if(PROTECT.Max_In_RMS >= OCGR50.Pickup_Threshold)
 		{
@@ -261,7 +261,7 @@ void RELAY_OCGR50(void)
 
 void RELAY_OCGR51(void)
 {
-	if(OCGR51.use == 0xaaaa)
+	if(OCGR51.use == ENABLE)
 	{
 		if(PROTECT.Max_In_RMS >= OCGR51.Pickup_Threshold)
 		{
@@ -334,7 +334,7 @@ void RELAY_OCGR51(void)
 
 void RELAY_THR(void)
 {
-	if(THR.use == 0xaaaa)
+	if(THR.use == ENABLE)
 	{
 		THR.Op_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold; //배수 정보
 	
@@ -356,7 +356,8 @@ void RELAY_THR(void)
 		  THR.Pre_Curr = THR.Pickup_Threshold;
 		}
 		
-		if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
+//	if((H50.op_status == RELAY_NORMAL) && (THR.op_status != RELAY_TRIP))
+		if((THR.op_status != RELAY_TRIP) && (H50.op_status == RELAY_NORMAL))
 		{
 			THR.op_status = RELAY_NORMAL;
 
@@ -472,7 +473,7 @@ void RELAY_THR(void)
 
 void RELAY_NSR(void)
 {
-	if(NSR.use == 0xaaaa)
+	if(NSR.use == ENABLE)
 	{
 		if(PROTECT.I2_RMS >= NSR.Pickup_Threshold)
 		{
@@ -539,7 +540,7 @@ void RELAY_NSR(void)
 
 void RELAY_51LR(void)
 {
-	if(LR51.use == 0xaaaa)
+	if(LR51.use == ENABLE)
 	{
 		LR51.Start_Ratio = PROTECT.Max_I_RMS / THR.Pickup_Threshold;	//START 시
 		LR51.Ratio 			 = PROTECT.Max_I_RMS / LR51.Pickup_Threshold;	//RUN 시
@@ -688,7 +689,7 @@ void RELAY_51LR(void)
 
 void RELAY_NCHR(void)
 {
-	if(NCHR.use == 0xaaaa)
+	if(NCHR.use == ENABLE)
 	{
 	if((SET_66.Stop_Flag == ON) && (SET_66.Start_Flag != ON) && (NCHR.op_status == RELAY_NORMAL))
 	{
@@ -757,7 +758,7 @@ void RELAY_NCHR(void)
 
 void RELAY_50H(void)
 {
-	if(H50.use == 0xaaaa)
+	if(H50.use == ENABLE)
 	{
 		if(PROTECT.Max_I_RMS > H50.Pickup_Threshold) //50H 설정 값 이상
 		{
@@ -813,7 +814,7 @@ void RELAY_50H(void)
 
 void RELAY_UCR(void)
 {
-	if(UCR.use == 0xaaaa)
+	if(UCR.use == ENABLE)
 	{
 		if(((MEASUREMENT.rms_value[Ia] <= UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ia] >= UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ib]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ib]>=UCR.Min_Pickup_Threshold))||((MEASUREMENT.rms_value[Ic]<=UCR.Max_Pickup_Threshold)&&(MEASUREMENT.rms_value[Ic]>=UCR.Min_Pickup_Threshold)))
 		{
@@ -892,7 +893,7 @@ void RELAY_UCR(void)
 
 void RELAY_DGR(void)
 {
-	if(DGR.use == 0xaaaa)
+	if(DGR.use == ENABLE)
 	{
 		// 위상차
 		DGR.diff_angle_rad = MEASUREMENT.angle[In] - MEASUREMENT.angle[Vn];
@@ -966,7 +967,7 @@ void RELAY_DGR(void)
 
 void RELAY_SGR(void)
 {
-	if(SGR.use == 0xaaaa)
+	if(SGR.use == ENABLE)
 	{
 		// 위상차
 		SGR.diff_angle_rad = MEASUREMENT.angle[Is] - MEASUREMENT.angle[Vn];
@@ -1109,6 +1110,7 @@ void PROTECTIVE_RELAY(void)
 	RELAY_51LR();
 	RELAY_NCHR();
 	RELAY_50H();
+	if(H50.use == DISABLE)	{H50.op_status = RELAY_TRIP;}
 	RELAY_UCR();
 	if(CORE.gr_select == NCT_SELECT)	{RELAY_DGR();}
 	if(CORE.gr_select == ZCT_SELECT)	{RELAY_SGR();}
@@ -1374,7 +1376,7 @@ float Get_thr_DelayTime(int flag)
 
 void MOTOR_START_CHECK(void)
 {
-	if((LR51.use == 0xaaaa) && (M_STATE.Start_Flag == ON) && (M_STATE.Overrun_Flag != ON))
+	if((LR51.use == ENABLE) && (M_STATE.Start_Flag == ON) && (M_STATE.Overrun_Flag != ON))
 	{
 		if(LR51.op_status == STATE_WITHIN_TRIP || LR51.op_status == RELAY_TRIP)	return;
 		
