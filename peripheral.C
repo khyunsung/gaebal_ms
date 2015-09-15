@@ -885,8 +885,7 @@ void flash_sector_erase(unsigned int *ar_sector)
 	*FLASH_2aaa = 0x55;	
 	*ar_sector = 0x30;
 	
-	//delay_us(20000);	2015-09-14 오후 1:07:28
-	delay_us(30000);
+	delay_us(20000);
 }
 
 void flash_word_write(unsigned int *ar_address, unsigned int ar_data)
@@ -897,8 +896,7 @@ void flash_word_write(unsigned int *ar_address, unsigned int ar_data)
 	
 	*ar_address = ar_data;
 		
-	//delay_us(20);		2015-09-11 오후 3:49:41
-	delay_us(200);
+	delay_us(20);
 }
 
 //khs, 2015-04-08 오전 11:42:47
@@ -978,17 +976,6 @@ void wave_di_initial_post(void)
 			
 	FLASH.end_flag = 1;
 }
-
-void wave_flash_sector_erase(unsigned int *ar_sector)
-{
-	*FLASH_5555 = 0xaa;	
-	*FLASH_2aaa = 0x55;	
-	*FLASH_5555 = 0x80;	
-	*FLASH_5555 = 0xaa;	
-	*FLASH_2aaa = 0x55;	
-	*ar_sector = 0x30;
-}
-//khs, 2015-04-08 오전 11:42:47
 
 /*
 wave 저장방식

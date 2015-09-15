@@ -878,7 +878,7 @@
 
 //-------- 이전 FLASH MEMORY ADDRESS(MRAM으로 수정 필요)
 // Flash
-#define FLASH_SECTOR000 (unsigned int *)0x180000
+//#define FLASH_SECTOR000 (unsigned int *)0x180000
 #define FLASH_WAVE_Ia   (unsigned int *)0x140000
 #define FLASH_WAVE_Ib   (unsigned int *)0x142a30
 #define FLASH_WAVE_Ic   (unsigned int *)0x145460

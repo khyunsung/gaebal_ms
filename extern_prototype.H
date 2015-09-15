@@ -138,7 +138,6 @@ extern void wave_vi_initial_post(void);
 extern void wave_di_initial_pre1(void);
 extern void wave_di_initial_pre2(void);
 extern void wave_di_initial_post(void);
-extern void wave_flash_sector_erase(unsigned int *);
 
 extern void led_handling(void);
 

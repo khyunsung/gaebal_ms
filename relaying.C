@@ -796,7 +796,7 @@ void RELAY_50H(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: H50.Op_Phase;
 					Save_Relay_Event(H50.Op_Ratio * 100.0F);
 					Save_Screen_Info(H50.Op_Phase);
-					WAVE.post_start = 0x1234;	
+					//WAVE.post_start = 0x1234;	여기서는 사고를 사용하지 않는다.
 				}
 				else if((PROTECT.Max_I_RMS < THR.Pickup_Threshold) && (H50.reset_ready_flag == ON)) //50H 설정 값 이하 && 49 설정 값 이하
 				{
