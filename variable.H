@@ -133,11 +133,7 @@ struct
 
 struct
 {
-	float True_RMS[10];
-	float True_RMS_sum[10];
 	float line2line[3];
-	float line2line_real[3];
-	float line2line_imag[3];
 
 	float multipllier[10];
 	float p_multipllier[3];
@@ -202,7 +198,6 @@ struct
 	unsigned int cb_open;
 	unsigned int cb_close;
 	unsigned int measurement;
-	unsigned long current_on;
 } TIMER;
 
 struct
@@ -1030,6 +1025,17 @@ struct
 	unsigned int Run_Flag;
 	unsigned int OverRun_Flag;
 } SET_66;
+
+struct
+{
+	unsigned long op_count;
+	unsigned long RunningHourCNT;
+
+	float Cut_Current;
+	unsigned long RunningMeterHour;
+	unsigned int RunningMeterHour_F;
+} RUNNING;
+
 //--------- SYSTEM VARIABLE END
 
 struct
@@ -1147,11 +1153,6 @@ struct
 	unsigned int temp16_1;
 	unsigned int temp16_2;
 } TIMER1;
-
-struct
-{
-	float current_display;
-} MIN_MAX;
 
 struct
 {

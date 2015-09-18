@@ -860,18 +860,10 @@ interrupt void TINT1_ISR(void)
 	++SGR.op_count; 		// SGR
 
 	// R-Hour용 타이머
-	// #define DISPLAY_CUT_I_1A        0.021 // (0.04 / 2) * 1.05
-  // #define DISPLAY_CUT_I_5A        0.105 // (0.2 / 2) * 1.05
-  // 차단기 close 판단의 근거
-	// cb close
-//	if((DISPLAY.True_RMS[Ia] >= MIN_MAX.current_display) || (DISPLAY.True_RMS[Ib] >= MIN_MAX.current_display) || (DISPLAY.True_RMS[Ic] >= MIN_MAX.current_display))
-//	{
-//		++TIMER.current_on;
-//	}
-//	else
-//	TIMER.current_on = 0;
-
-//-------- 타이머 증가 END
+	if((DISPLAY.rms_value[Ia] >= RUNNING.Cut_Current) || (DISPLAY.rms_value[Ib] >= RUNNING.Cut_Current) || (DISPLAY.rms_value[Ic] >= RUNNING.Cut_Current))
+	{
+		++RUNNING.op_count;
+	}
 }
 
 // 전면 시리얼포트를 통해 한 바이트가 수신되면 이리로 인터럽트 발생

@@ -581,9 +581,6 @@ void menu_01_06(unsigned int value, int display)
 
 void menu_01_07(unsigned int value, int display)
 {
-	float ftest_value1 = 1.2;//temporary test valu
-	float ftest_value2 = 2.3;//temporary test valu
-	float ftest_value3 = 3.4;//temporary test valu
 	char string[22];
 
 	const char *str[2] = {
@@ -594,11 +591,11 @@ void menu_01_07(unsigned int value, int display)
 		screen_frame3(str);
 		return;
 	} else if(display == 2) {
-		sprintf(string, "%3.1f\0", ftest_value1);//1
+		sprintf(string, "%3.1f\0", HARMONICS.ia[0]);//3조파
 		VFD_Single_Line_dump(LCD_L2_04, string);
-		sprintf(string, "%3.1f\0", ftest_value2);//2
+		sprintf(string, "%3.1f\0", HARMONICS.ia[1]);//5조파
 		VFD_Single_Line_dump(LCD_L2_10, string);
-		sprintf(string, "%3.1f\0", ftest_value3);//3
+		sprintf(string, "%3.1f\0", HARMONICS.ia[2]);//7조파
 		VFD_Single_Line_dump(LCD_L2_16, string);
 		return;
 	}
@@ -1083,9 +1080,10 @@ void menu_03_01(unsigned int value, int display)
 		Screen_Position.y = 0;
 		Screen_Position.x = 1;
 	}	else if(value == ENTER_KEY) {
-//			Screen_Position.y = 34;
-//			Screen_Position.x = 2;
-//			cursor_move(0, 0);//cursor off
+		Screen_Position.y = 35;
+		Screen_Position.x = 2;
+		Screen_Position.data_change = REALTIME_MENU;
+		cursor_move(0, 0);//cursor off
 	}
 }
 
@@ -2694,7 +2692,7 @@ void menu_18_04(unsigned int value, int display)
 	}
 
 	if(value == ENTER_KEY) {
-			Screen_Position.y = 23;
+			Screen_Position.y = 18;
 			Screen_Position.x = 5;
 			cursor_move(0, 0);//cursor off
 	}
@@ -2713,7 +2711,7 @@ void menu_18_05(unsigned int value, int display)
 	}
 
 	if(value == ENTER_KEY) {
-			Screen_Position.y = 23;
+			Screen_Position.y = 18;
 			Screen_Position.x = 6;
 			cursor_move(0, 0);//cursor off
 	}
@@ -2732,7 +2730,7 @@ void menu_18_06(unsigned int value, int display)
 	}
 
 	if(value == ENTER_KEY) {
-			Screen_Position.y = 23;
+			Screen_Position.y = 18;
 			Screen_Position.x = 7;
 			cursor_move(0, 0);//cursor off
 	}
@@ -2760,7 +2758,7 @@ void menu_18_07(unsigned int value, int display)
 	}
 
 	if(value == ENTER_KEY) {
-			Screen_Position.y = 23;
+			Screen_Position.y = 18;
 			Screen_Position.x = 8;
 			cursor_move(0, 0);//cursor off
 	}
@@ -3248,15 +3246,15 @@ void menu_30_02(unsigned int value, int display)
 	char string[22];
 
 	const char *str[2] = {
-			" \6d :   [%]        \1\0",
+			" \6d :     [%]      \1\0",
 			" P_LIMIT :          \0" };
 
 	if(display == 1) {
 		screen_frame3(str);
 		return;
 	} else if(display == 2) {
-		sprintf(string, "%3d\0", THR.Tem_State);
-		VFD_Single_Line_dump(LCD_L1_05, string);
+		sprintf(string, "%4d\0", THR.Tem_State);
+		VFD_Single_Line_dump(LCD_L1_06, string);
 		sprintf(string, "%5.2f\0", THR.P_limit);
 		VFD_Single_Line_dump(LCD_L2_11, string);
 		return;
@@ -3356,6 +3354,39 @@ void menu_34_04(unsigned int value, int display)
 		cursor_move(0, 0);//cursor off
 	} 
 }
+
+void menu_35_02(unsigned int value, int display)
+{
+	char string[22];
+	int temp;
+
+	const char *str[2] = {
+			"  [ RUNNING HOUR ] \1\0",
+			"            Hours   " };
+
+	if(display == 1) {
+		screen_frame3(str);
+		return;
+	} else if(display == 2) {
+		RUNNING.RunningMeterHour = RUNNING.RunningHourCNT / 3600;
+		temp = RUNNING.RunningHourCNT % 3600;
+
+		RUNNING.RunningMeterHour_F = temp / 60;
+		RUNNING.RunningMeterHour_F = RUNNING.RunningMeterHour_F / 6;  //6분 == 0.1시간
+
+		sprintf(string, "%5ld.%1d\0", RUNNING.RunningMeterHour, RUNNING.RunningMeterHour_F);
+		VFD_Single_Line_dump(LCD_L2_04, string);
+		return;
+	}
+
+	if(value == UP_KEY) {
+		Screen_Position.y = 3;
+		Screen_Position.x = 1;
+		Screen_Position.data_change = NORMAL_MENU;
+		Screen_Position.select = 0;
+	}
+}
+
 
 void menu_41_02(unsigned int value, int display)
 {
@@ -12205,6 +12236,12 @@ void menu_98_04(unsigned int value, int display)
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
+
+			//MRAM CLEAR
+			*(MRAM_RUNNING_HOUR1) = 0;
+			*(MRAM_RUNNING_HOUR2) = 0;
+			RUNNING.RunningHourCNT = 0;
+
 			Screen_Position.y = 98;
 			Screen_Position.x = 5;
 			cursor_move(0, 0);//cursor off
@@ -15430,7 +15467,7 @@ const Screen_Function_Pointer menu_tables[200][18] = { //2015.02.17
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 32
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 33
 		{menu_dummy, menu_dummy, menu_34_02, menu_34_03, menu_34_04,},                                                                             // 34
-		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 35
+		{menu_dummy, menu_dummy, menu_35_02, },                                                                                                    // 35
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 36
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 37
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 38

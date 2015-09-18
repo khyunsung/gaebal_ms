@@ -139,11 +139,7 @@ extern struct
 
 extern struct
 {
-	float True_RMS[10];
-	float True_RMS_sum[10];
 	float line2line[3];
-	float line2line_real[3];
-	float line2line_imag[3];
 
 	float multipllier[10];
 	float p_multipllier[3];
@@ -211,8 +207,6 @@ extern struct
 	unsigned int cb_close;
 	
 	unsigned int measurement;
-	
-	unsigned long current_on;
 } TIMER;
 
 extern struct
@@ -1039,6 +1033,17 @@ extern struct
 
 	float RatioSet_66;
 } SET_66;
+
+extern struct
+{
+	unsigned long op_count;
+	unsigned long RunningHourCNT;
+
+	float Cut_Current;
+	unsigned long RunningMeterHour;
+	unsigned int RunningMeterHour_F;
+} RUNNING;
+
 //--------- SYSTEM VARIABLE END
 
 extern struct
@@ -1155,11 +1160,6 @@ extern struct
 	unsigned int temp16_1;
 	unsigned int temp16_2;
 } TIMER1;
-
-extern struct
-{
-	float current_display;
-} MIN_MAX;
 
 extern struct
 {
