@@ -47,44 +47,60 @@ void manager_handling(void)
 {
 	unsigned int i, j;
 	float float_temp;
-	unsigned int buff[5];
+	unsigned int buff[10];
 	
 	//core 정보
 	if(MANAGER.rx_buffer[2] == 0x00)
 	{
-			MANAGER.tx_buffer[0] = 0x23;
-			MANAGER.tx_buffer[1] = ADDRESS.address;
-			MANAGER.tx_buffer[2] = 0;		//타입정보 프레임: 0
-			MANAGER.tx_buffer[3] = 0;		//타입정보 프레임: 0
-
-			// length
-			MANAGER.tx_buffer[4] = 0;
-			MANAGER.tx_buffer[5] = 6;
-			
-			MANAGER.tx_buffer[ 6] = HIMAP_TYPE;	//HiMAP Type (FI, MS, ML, T = 1, 2, 3, 4)
-			MANAGER.tx_buffer[ 7] = ((GPT.pt_secondary % 190) == 0)?4:((GPT.pt_secondary % 120) == 0)?3:
+			buff[0] = HIMAP_TYPE;
+			buff[0] <<= 8;
+			buff[0] |= ((GPT.pt_secondary % 190) == 0)?4:((GPT.pt_secondary % 120) == 0)?3:
 									((GPT.pt_secondary % 110) == 0)?2:1;	//PT Type (100, 110, 120, 190 = 1, 2, 3, 4)
-			MANAGER.tx_buffer[ 8] = ((GPT.pt_tertiary % 190) == 0)?3:((GPT.pt_tertiary % 120) == 2)?2:1;//GPT Type (110, 120, 190 = 1, 2, 3)
-			MANAGER.tx_buffer[ 9] = (CORE.rated_ct == 0x5678)?1:2;	//CT Type (5A, 1A = 1, 2)
-			MANAGER.tx_buffer[10] = VERSION >> 8;	//Version 1	정수
-			MANAGER.tx_buffer[11] = VERSION;	//Version 2	소수
 
+			buff[1] = ((GPT.pt_tertiary % 190) == 0)?3:((GPT.pt_tertiary % 120) == 2)?2:1;//GPT Type (110, 120, 190 = 1, 2, 3)
+			buff[1] <<= 8;
+			buff[1] |= (CORE.rated_ct == 0x5678)?2:1;	//CT Type (5A, 1A = 2, 1)
 			
-			i = COMM_CRC(MANAGER.tx_buffer, 11);
+			buff[2] = VERSION >> 8;	//Version 1	정수
+			buff[2] <<= 8;
+			buff[2] |= VERSION;	//Version 2	소수
 			
-			MANAGER.tx_buffer[12] = i >> 8;
-			MANAGER.tx_buffer[13] = i & 0x00ff;
+			make_crc_send(MANAGER.tx_buffer, buff, 6);
 			
-			MANAGER.tx_length = 14;
-			
-			MANAGER.isr_tx = MANAGER.tx_buffer;
-			
-			// tx interrupt 활성
-			*ScibRegs_SCICTL2 |= 0x0001;
-			
-			// tx intrrupt 활성화 후 최초 한번 써야함
-			MANAGER.tx_count = 1;
-			*ScibRegs_SCITXBUF = *MANAGER.isr_tx;
+//			MANAGER.tx_buffer[0] = 0x23;
+//			MANAGER.tx_buffer[1] = ADDRESS.address;
+//			MANAGER.tx_buffer[2] = 0;		//타입정보 프레임: 0
+//			MANAGER.tx_buffer[3] = 0;		//타입정보 프레임: 0
+//
+//			// length
+//			MANAGER.tx_buffer[4] = 0;
+//			MANAGER.tx_buffer[5] = 6;
+//			
+//			MANAGER.tx_buffer[6] = HIMAP_TYPE;	//HiMAP Type (FI, MS, ML, T = 1, 2, 3, 4)
+//			MANAGER.tx_buffer[7] = ((GPT.pt_secondary % 190) == 0)?4:((GPT.pt_secondary % 120) == 0)?3:
+//									((GPT.pt_secondary % 110) == 0)?2:1;	//PT Type (100, 110, 120, 190 = 1, 2, 3, 4)
+//			MANAGER.tx_buffer[8] = ((GPT.pt_tertiary % 190) == 0)?3:((GPT.pt_tertiary % 120) == 2)?2:1;//GPT Type (110, 120, 190 = 1, 2, 3)
+//			MANAGER.tx_buffer[9] = (CORE.rated_ct == 0x5678)?1:2;	//CT Type (5A, 1A = 1, 2)
+//			MANAGER.tx_buffer[10] = VERSION >> 8;	//Version 1	정수
+//			MANAGER.tx_buffer[11] = VERSION;	//Version 2	소수
+//
+//			
+//			i = COMM_CRC(&MANAGER.tx_buffer[0], 12);
+//			//i = COMM_CRC(&MANAGER.tx_buffer[0], 10);
+//			
+//			MANAGER.tx_buffer[12] = i >> 8;
+//			MANAGER.tx_buffer[13] = i & 0x00ff;
+//			
+//			MANAGER.tx_length = 14;
+//			
+//			MANAGER.isr_tx = MANAGER.tx_buffer;
+//			
+//			// tx interrupt 활성
+//			*ScibRegs_SCICTL2 |= 0x0001;
+//			
+//			// tx intrrupt 활성화 후 최초 한번 써야함
+//			MANAGER.tx_count = 1;
+//			*ScibRegs_SCITXBUF = *MANAGER.isr_tx;
 	}
 
 	// 계전요소 read
@@ -107,33 +123,115 @@ void manager_handling(void)
 13	- 67GD
 14	- 67GS		*/
 		// ocr50-1
-		if(MANAGER.rx_buffer[3] == 0x00)			{make_crc_send(MANAGER.tx_buffer, &OCR50_1.use, 10);}
+		if(MANAGER.rx_buffer[3] == 0x00) {
+			buff[0] = OCR50_1.use;
+			buff[1] = OCR50_1.mode;
+			buff[2] = OCR50_1.current_set;
+			buff[3] = OCR50_1.delay_time;
+			buff[4] = OCR50_1.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 10);
+		}
 		// ocr50-2
-		else if(MANAGER.rx_buffer[3] == 0x01)	{make_crc_send(MANAGER.tx_buffer, &OCR50_2.use, 10);}
+		else if(MANAGER.rx_buffer[3] == 0x01)	{
+			buff[0] = OCR50_2.use;
+			buff[1] = OCR50_2.mode;
+			buff[2] = OCR50_2.current_set;
+			buff[3] = OCR50_2.delay_time;
+			buff[4] = OCR50_2.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 10);
+		}
 		// ocgr50
-		else if(MANAGER.rx_buffer[3] == 0x02)	{make_crc_send(MANAGER.tx_buffer, &OCGR50.use, 10);}
-		// ocr51-1
-//	else if(MANAGER.rx_buffer[3] == 0x03)	{make_crc_send(MANAGER.tx_buffer, &OCR51_1.use, 10);}
-		// ocr51-2
-//	else if(MANAGER.rx_buffer[3] == 0x04)	{make_crc_send(MANAGER.tx_buffer, &OCR51_2.use, 10);}
+		else if(MANAGER.rx_buffer[3] == 0x02)	{
+			buff[0] = OCGR50.use;
+			buff[1] = OCGR50.mode;
+			buff[2] = OCGR50.current_set;
+			buff[3] = OCGR50.delay_time;
+			buff[4] = OCGR50.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 10);
+		}
 		// ocgr51
-		else if(MANAGER.rx_buffer[3] == 0x05)	{make_crc_send(MANAGER.tx_buffer, &OCGR51.use, 10);}
-		// 47P
-//		else if(MANAGER.rx_buffer[3] == 0x06)	{make_crc_send(MANAGER.tx_buffer, &P47.use, 8);}
-		// 47N
-//		else if(MANAGER.rx_buffer[3] == 0x07)	{make_crc_send(MANAGER.tx_buffer, &N47.use, 8);}
-		// 27-1
-//		else if(MANAGER.rx_buffer[3] == 0x08)	{make_crc_send(MANAGER.tx_buffer, &UVR_1.use, 10);}
-		// 27-2
-//		else if(MANAGER.rx_buffer[3] == 0x09)	{make_crc_send(MANAGER.tx_buffer, &UVR_2.use, 10);}
-		// 27-3
-//		else if(MANAGER.rx_buffer[3] == 0x0a)	{make_crc_send(MANAGER.tx_buffer, &UVR_3.use, 10);}
-		//DGR/SGR
-//khs, 2015-04-08 오전 11:21:40		else if(MANAGER.rx_buffer[3] == 0x06)	{make_crc_send(MANAGER.tx_buffer, &DSGR.use, 12);}
-		// 59
-//		else if(MANAGER.rx_buffer[3] == 0x0b)	{make_crc_send(MANAGER.tx_buffer, &OVR.use, 10);}
-		// 64
-//		else if(MANAGER.rx_buffer[3] == 0x0c)	{make_crc_send(MANAGER.tx_buffer, &OVGR.use, 10);}
+		else if(MANAGER.rx_buffer[3] == 0x03)	{
+			buff[0] = OCGR51.use;
+			buff[1] = OCGR51.mode;
+			buff[2] = OCGR51.current_set;
+			buff[3] = OCGR51.time_lever;
+			buff[4] = OCGR51.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 10);			
+		}
+		// THR(49)
+		else if(MANAGER.rx_buffer[3] == 0x04)	{
+			buff[0] = THR.use;
+			buff[1] = THR.current_set;
+			buff[2] = THR.cold_limit;
+			buff[3] = THR.hot_limit;
+			buff[4] = THR.tau_limit;
+			buff[5] = THR.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 12);
+		}
+		// NSR(46)
+		else if(MANAGER.rx_buffer[3] == 0x05)	{
+			buff[0] = NSR.use;
+			buff[1] = NSR.current_set;
+			buff[2] = NSR.delay_time;
+			buff[3] = NSR.do_relay;			
+			make_crc_send(MANAGER.tx_buffer, buff, 8);			
+		}
+		// 51LR
+		else if(MANAGER.rx_buffer[3] == 0x06)	{
+			buff[0] = LR51.use;
+			buff[1] = LR51.start_current_set;
+			buff[2] = LR51.start_delay_time;
+			buff[3] = LR51.current_set;
+			buff[4] = LR51.delay_time;
+			buff[5] = LR51.do_relay;			
+			make_crc_send(MANAGER.tx_buffer, buff, 12);
+		}
+		// NCHR(66)
+		else if(MANAGER.rx_buffer[3] == 0x07)	{
+			buff[0] = NCHR.use;
+			buff[1] = NCHR.allow_time_set;
+			buff[2] = NCHR.trip_number_set;
+			buff[3] = NCHR.limit_time_set;
+			buff[4] = NCHR.theta_d_set;
+			buff[5] = NCHR.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 12);
+		}
+		// 50H
+		else if(MANAGER.rx_buffer[3] == 0x08)	{
+			buff[0] = H50.use;
+			buff[1] = H50.current_set;
+			buff[2] = H50.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 6);
+		}
+		// UCR(37)
+		else if(MANAGER.rx_buffer[3] == 0x09)	{
+			buff[0] = UCR.use;
+			buff[1] = UCR.min_current_set;
+			buff[2] = UCR.max_current_set;
+			buff[3] = UCR.delay_time;
+			buff[4] = UCR.do_relay;			
+			make_crc_send(MANAGER.tx_buffer, buff, 10);
+		}
+		//DGR
+		else if(MANAGER.rx_buffer[3] == 0x0a)	{
+			buff[0] = DGR.use;
+			buff[1] = DGR.current_set;
+			buff[2] = DGR.voltage_set;
+			buff[3] = DGR.angle_set;
+			buff[4] = DGR.delay_time;
+			buff[5] = DGR.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 12);
+		}
+		//SGR
+		else if(MANAGER.rx_buffer[3] == 0x0b)	{
+			buff[0] = SGR.use;
+			buff[1] = SGR.current_set;
+			buff[2] = SGR.voltage_set;
+			buff[3] = SGR.angle_set;
+			buff[4] = SGR.delay_time;
+			buff[5] = SGR.do_relay;
+			make_crc_send(MANAGER.tx_buffer, buff, 12);
+		}
 		//25
 		////khs, 2015-04-08 오전 11:21:40 else if(MANAGER.rx_buffer[3] == 0x0e)	{make_crc_send(MANAGER.tx_buffer, &SYNCRO.use, 14);}
 
@@ -177,12 +275,12 @@ void manager_handling(void)
 		}
 		// c/pt
 		else if(MANAGER.rx_buffer[3] == 0x02) {
-//			CPT.ct_primary;
-//			CPT.nct_primary;
-//			CPT.pt_primary_high;
-//			CPT.pt_primary_low;
-//			CPT.rated_current;
-			make_crc_send(MANAGER.tx_buffer, &CPT.ct_primary, 10);
+			buff[0] = CPT.ct_primary;
+			buff[1] = CPT.nct_primary;
+			buff[2] = CPT.pt_primary_high;
+			buff[3] = CPT.pt_primary_low;
+			buff[4] = CPT.rated_current;
+			make_crc_send(MANAGER.tx_buffer, buff, 10);
 		}
 		// Supservison & System Alarm
 		else if(MANAGER.rx_buffer[3] == 0x03) {
@@ -237,28 +335,32 @@ void manager_handling(void)
 			float_to_integer(DISPLAY.rms_value[Vb], &MANAGER.tx_buffer[10], 1.0F);
 			//Vc
 			float_to_integer(DISPLAY.rms_value[Vc], &MANAGER.tx_buffer[14], 1.0F);
-			//Vn
+			//Vo
 			float_to_integer(DISPLAY.rms_value[Vn], &MANAGER.tx_buffer[18], 1.0F);
-			//Vp
-			float_to_integer(MEASUREMENT.V1_value, &MANAGER.tx_buffer[22], 1.0F);
-			//Vn
-			float_to_integer(MEASUREMENT.V2_value, &MANAGER.tx_buffer[26], 1.0F);
-			//Vb 위상
-			float_to_integer(DISPLAY.angle[1], &MANAGER.tx_buffer[30], 1.0F);
-			//Vc 위상
-			float_to_integer(DISPLAY.angle[2], &MANAGER.tx_buffer[34], 1.0F);
-			//Vo max
-			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[38], 1.0F);
-			//주파수
-			float_to_integer(MEASUREMENT.frequency, &MANAGER.tx_buffer[42], 1.0F);
+			//Vom
+			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[22], 1.0F);
+			//Vavg
+			float_to_integer(DISPLAY.rms_Vavg_value, &MANAGER.tx_buffer[26], 1.0F);
+			//Vps
+			float_to_integer(DISPLAY.V1_value, &MANAGER.tx_buffer[30], 1.0F);
+			//Vns
+			float_to_integer(DISPLAY.V2_value, &MANAGER.tx_buffer[34], 1.0F);
+			//∠Vab
+			float_to_integer(DISPLAY.angle[0], &MANAGER.tx_buffer[38], 10.0F);
+			//∠Vbc
+			float_to_integer(DISPLAY.angle[1], &MANAGER.tx_buffer[42], 10.0F);
+			//∠Vca
+			float_to_integer(DISPLAY.angle[2], &MANAGER.tx_buffer[46], 10.0F);
+			//∠Vo
+			float_to_integer(DISPLAY.angle[3], &MANAGER.tx_buffer[50], 10.0F);
 			
 			
-			i = COMM_CRC(MANAGER.tx_buffer, 46);
+			i = COMM_CRC(MANAGER.tx_buffer, 54);
 			
-			MANAGER.tx_buffer[46] = i >> 8;
-			MANAGER.tx_buffer[47] = i & 0x00ff;
+			MANAGER.tx_buffer[54] = i >> 8;
+			MANAGER.tx_buffer[55] = i & 0x00ff;
 			
-			MANAGER.tx_length = 48;
+			MANAGER.tx_length = 56;
 			
 			MANAGER.isr_tx = MANAGER.tx_buffer;
 			
@@ -275,7 +377,7 @@ void manager_handling(void)
 		{
 			// length
 			MANAGER.tx_buffer[4] = 0;
-			MANAGER.tx_buffer[5] = 40;
+			MANAGER.tx_buffer[5] = 0x4e;
 			
 			//Ia
 			float_to_integer(DISPLAY.rms_value[Ia], &MANAGER.tx_buffer[6], 10.0F);
@@ -284,31 +386,78 @@ void manager_handling(void)
 			//Ic
 			float_to_integer(DISPLAY.rms_value[Ic], &MANAGER.tx_buffer[14], 10.0F);
 			//Io
-			if(CORE.gr_select == ZCT_SELECT)
-			float_to_integer(DISPLAY.rms_value[Is], &MANAGER.tx_buffer[18], 10.0F);
+			if(CORE.gr_select == NCT_SELECT)
+			float_to_integer(DISPLAY.rms_value[In], &MANAGER.tx_buffer[18], 10.0F);
 			
 			else
-			float_to_integer(DISPLAY.rms_value[In], &MANAGER.tx_buffer[18], 10.0F);
-			//Ip
-			float_to_integer(MEASUREMENT.I1_value, &MANAGER.tx_buffer[22], 10.0F);
+			float_to_integer(DISPLAY.rms_value[Is], &MANAGER.tx_buffer[18], 10.0F);
+			//Iavg
+			float_to_integer(DISPLAY.rms_Iavg_value, &MANAGER.tx_buffer[22], 10.0F);
+			//Ips
+			float_to_integer(DISPLAY.I1_value, &MANAGER.tx_buffer[26], 10.0F);
 			//Ins
-			float_to_integer(MEASUREMENT.I2_value, &MANAGER.tx_buffer[26], 10.0F);
-			//IA 위상
-			float_to_integer(DISPLAY.angle[3], &MANAGER.tx_buffer[30], 1.0F);
-			//Ib 위상
-			float_to_integer(DISPLAY.angle[4], &MANAGER.tx_buffer[34], 1.0F);
-			//Ic 위상
-			float_to_integer(DISPLAY.angle[5], &MANAGER.tx_buffer[38], 1.0F);
-			//Io max
-			float_to_integer(ACCUMULATION.io_max, &MANAGER.tx_buffer[42], 1.0F);
+			float_to_integer(DISPLAY.I2_value, &MANAGER.tx_buffer[30], 10.0F);
 			
+			//Ia 3rd
+			float_to_integer2(1, &MANAGER.tx_buffer[34], 10.0F);
+			//Ia 5th           
+			float_to_integer2(2, &MANAGER.tx_buffer[36], 10.0F);
+			//Ia 7th           
+			float_to_integer2(3, &MANAGER.tx_buffer[38], 10.0F);
+			//Ia 9th           
+			float_to_integer2(4, &MANAGER.tx_buffer[40], 10.0F);
+			//Ia 11th          
+			float_to_integer2(5, &MANAGER.tx_buffer[42], 10.0F);
+			//Ia THDFacter     
+			float_to_integer2(6, &MANAGER.tx_buffer[44], 10.0F);
+			//Ia TDDFacter     
+			float_to_integer2(7, &MANAGER.tx_buffer[46], 10.0F);
 			
-			i = COMM_CRC(MANAGER.tx_buffer, 46);
+			//Ib 3rd
+			float_to_integer2(1, &MANAGER.tx_buffer[48], 10.0F);
+			//Ib 5th           
+			float_to_integer2(2, &MANAGER.tx_buffer[50], 10.0F);
+			//Ib 7th           
+			float_to_integer2(3, &MANAGER.tx_buffer[52], 10.0F);
+			//Ib 9th           
+			float_to_integer2(4, &MANAGER.tx_buffer[54], 10.0F);
+			//Ib 11th          
+			float_to_integer2(5, &MANAGER.tx_buffer[56], 10.0F);
+			//Ib THDFacter     
+			float_to_integer2(6, &MANAGER.tx_buffer[58], 10.0F);
+			//Ib TDDFacter     
+			float_to_integer2(7, &MANAGER.tx_buffer[60], 10.0F);
 			
-			MANAGER.tx_buffer[46] = i >> 8;
-			MANAGER.tx_buffer[47] = i & 0x00ff;
+			//Ic 3rd
+			float_to_integer2(1, &MANAGER.tx_buffer[62], 10.0F);
+			//Ic 5th
+			float_to_integer2(2, &MANAGER.tx_buffer[64], 10.0F);
+			//Ic 7th
+			float_to_integer2(3, &MANAGER.tx_buffer[66], 10.0F);
+			//Ic 9th
+			float_to_integer2(4, &MANAGER.tx_buffer[68], 10.0F);
+			//Ic 11th
+			float_to_integer2(5, &MANAGER.tx_buffer[70], 10.0F);
+			//Ic THDFacter
+			float_to_integer2(6, &MANAGER.tx_buffer[72], 10.0F);
+			//Ic TDDFacter
+			float_to_integer2(7, &MANAGER.tx_buffer[74], 10.0F);
 			
-			MANAGER.tx_length = 48;
+			//∠Ia
+			float_to_integer2(DISPLAY.angle[4], &MANAGER.tx_buffer[76], 10.0F);
+			//∠Ib
+			float_to_integer2(DISPLAY.angle[5], &MANAGER.tx_buffer[78], 10.0F);
+			//∠Ic
+			float_to_integer2(DISPLAY.angle[6], &MANAGER.tx_buffer[80], 10.0F);
+			//∠Io
+			float_to_integer2(DISPLAY.angle[7], &MANAGER.tx_buffer[82], 10.0F);
+			
+			i = COMM_CRC(MANAGER.tx_buffer, 84);
+			
+			MANAGER.tx_buffer[84] = i >> 8;
+			MANAGER.tx_buffer[85] = i & 0x00ff;
+			
+			MANAGER.tx_length = 86;
 			
 			MANAGER.isr_tx = MANAGER.tx_buffer;
 			
@@ -438,27 +587,31 @@ void manager_handling(void)
 			MANAGER.tx_buffer[4] = 0;
 			MANAGER.tx_buffer[5] = 28;
 			
-			//유효
+			//참고 - 전력값은 아직 값 구현이 안되어 있기 때문에 나중에 넣기로 함. 2015-06-18 오후 5:34:35
+			//밑에 있는 전송 값은 임의의 무관한 값임.
+			//유효전력
 			float_to_integer(DISPLAY.p3, &MANAGER.tx_buffer[6], 10.0F);
-			//무효
+			//무효전력	
 			float_to_integer(DISPLAY.q3, &MANAGER.tx_buffer[10], 10.0F);
-			//유효량
+			//power factor
 			float_to_integer(ACCUMULATION.energy_p, &MANAGER.tx_buffer[14], 1.0F);
-			//무효량
+			//frequency	
 			float_to_integer(ACCUMULATION.energy_q, &MANAGER.tx_buffer[18], 1.0F);			
-			//역유효량
+			//유효전력량	
 			float_to_integer(ACCUMULATION.energy_rp, &MANAGER.tx_buffer[22], 1.0F);
-			//역무효량
+			//무효전력량	
 			float_to_integer(ACCUMULATION.energy_rq, &MANAGER.tx_buffer[26], 1.0F);
-			//역률
+			//역유효전력량
 			float_to_integer(DISPLAY.pf3, &MANAGER.tx_buffer[30], 100.0F);
+			//역무효전력량	
+			float_to_integer(DISPLAY.pf3, &MANAGER.tx_buffer[34], 100.0F);
 			
 			i = COMM_CRC(MANAGER.tx_buffer, 34);
 			
-			MANAGER.tx_buffer[34] = i >> 8;
-			MANAGER.tx_buffer[35] = i & 0x00ff;
+			MANAGER.tx_buffer[38] = i >> 8;
+			MANAGER.tx_buffer[39] = i & 0x00ff;
 			
-			MANAGER.tx_length = 36;
+			MANAGER.tx_length = 40;
 			
 			MANAGER.isr_tx = MANAGER.tx_buffer;
 			
@@ -470,10 +623,59 @@ void manager_handling(void)
 			*ScibRegs_SCITXBUF = *MANAGER.isr_tx;
 		}
 		
-		//di/do status
-		else if(MANAGER.rx_buffer[3] == 0x06)
-		make_crc_send(MANAGER.tx_buffer, &DIDO.di_status, 4);
+		//상태값 요청 쿼리
+		else if(MANAGER.rx_buffer[3] == 0x06) {
+			buff[0] = DIGITAL_INPUT.di_status;
+			buff[1] = OCR50_1.mode;//REALY상태
+			buff[2] = OCR50_1.current_set;//사고 상 정보
+			buff[3] = OCR50_1.delay_time;//사고 Ratio 정보
+			buff[4] = OCR50_1.do_relay;//계전기 동작 시간
+																//Running hour meter
+			
+			*(MANAGER.tx_buffer) = '#';
+			*(MANAGER.tx_buffer + 1) = ADDRESS.address;
+			*(MANAGER.tx_buffer + 2) = MANAGER.rx_buffer[2]; // F/C1 수신된 function code를 그대로 되돌려 줌. 왜. 정상 프레임이니까
+			*(MANAGER.tx_buffer + 3) = MANAGER.rx_buffer[3]; // F/C2 수신된 function code를 그대로 되돌려 줌. 왜. 정상 프레임이니까
+			// 넘겨받은 ar_bytelength 개수 저장 
+			*(MANAGER.tx_buffer + 4) = 0;
+			*(MANAGER.tx_buffer + 5) = 16;
+			
+			//데이타
+			*(MANAGER.tx_buffer +  6) = 0;
+			*(MANAGER.tx_buffer +  7) = DIGITAL_INPUT.di_status;
+			*(MANAGER.tx_buffer +  8) = RELAY_STATUS.operation_sum_holding >> 8;//REALY상태
+			*(MANAGER.tx_buffer +  9) = RELAY_STATUS.operation_sum_holding;			//REALY상태
+			*(MANAGER.tx_buffer + 10) = EVENT.operation >> 8;	//사고 상 정보
+			*(MANAGER.tx_buffer + 11) = EVENT.operation;			//사고 상 정보
+			*(MANAGER.tx_buffer + 12) = EVENT.ratio >> 8;	//사고 Ratio 정보
+			*(MANAGER.tx_buffer + 13) = EVENT.ratio;			//사고 Ratio 정보
+			*(MANAGER.tx_buffer + 14) = EVENT.optime >> 24;	//계전기 동작 시간
+			*(MANAGER.tx_buffer + 15) = EVENT.optime >> 16;	//계전기 동작 시간
+			*(MANAGER.tx_buffer + 16) = EVENT.optime >> 8;	//계전기 동작 시간
+			*(MANAGER.tx_buffer + 17) = EVENT.optime;				//계전기 동작 시간
+			*(MANAGER.tx_buffer + 18) = 0;//Running hour meter
+			*(MANAGER.tx_buffer + 19) = 0;//Running hour meter
+			*(MANAGER.tx_buffer + 20) = 0;//Running hour meter
+			*(MANAGER.tx_buffer + 21) = 0;//Running hour meter
+			
+			// 헤더와 설정값들이 모두 나열된 후 프레임의 crc를 계산함
+			i = COMM_CRC(MANAGER.tx_buffer, 6 + 16);
+			
+			// 데이터 개수를 알고 있기 때문에 전체 송신데이터가 몇개인지 알수 있음
+			// 마지막 두바이트에 crc값을 저장함
+			*(MANAGER.tx_buffer + 6 + 16) = i >> 8;     // crc상위바이트
+			*(MANAGER.tx_buffer + 7 + 16) = i & 0x00ff; // crc하위바이트
 		
+			// 시리얼 송신 인터럽트에서 보낼 바이트 개수 지정
+			MANAGER.tx_length = 16 + 8; // 데이터 바이트개수 + 헤더(6) + crc(2)
+			// 시리얼 송신 인터럽트에서 보낼 송신버퍼 주소 지정
+			MANAGER.isr_tx = MANAGER.tx_buffer;
+			// tx interrupt 활성
+			*ScibRegs_SCICTL2 |= 0x0001;
+			// tx intrrupt 활성화 후 최초 한번 써야함
+			MANAGER.tx_count = 1;
+			*ScibRegs_SCITXBUF = *MANAGER.isr_tx;
+		}
 		//열량
 		else if(MANAGER.rx_buffer[3] == 0x07)
 		{
@@ -1054,20 +1256,20 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			MANAGER.tx_buffer[5] = 32;
 			
 			//internal ct ratio
-//			float_temp = INTERNAL_CT_RATIO;
-//			float_to_integer(float_temp, &MANAGER.tx_buffer[6], 1.0F);
-//			
-//			//internal nct ratio
-//			float_temp = INTERNAL_NCT_RATIO;
-//			float_to_integer(float_temp, &MANAGER.tx_buffer[10], 1.0F);
-//			
-//			//internal pt ratio
-//			float_temp = INTERNAL_PT_RATIO;
-//			float_to_integer(float_temp, &MANAGER.tx_buffer[14], 1.0F);
-//			
-//			//internal gpt ratio
-//			float_temp = INTERNAL_GPT_RATIO;
-//			float_to_integer(float_temp, &MANAGER.tx_buffer[18], 1.0F);
+			float_temp = CPT.ct_ratio;
+			float_to_integer(float_temp, &MANAGER.tx_buffer[6], 1.0F);
+			
+			//internal nct ratio
+			float_temp = CPT.nct_ratio;
+			float_to_integer(float_temp, &MANAGER.tx_buffer[10], 1.0F);
+			
+			//internal pt ratio
+			float_temp = CPT.pt_ratio;
+			float_to_integer(float_temp, &MANAGER.tx_buffer[14], 1.0F);
+			
+			//internal gpt ratio
+			float_temp = CPT.gpt_ratio;
+			float_to_integer(float_temp, &MANAGER.tx_buffer[18], 1.0F);
 
 //khs, 2015-04-08 오전 11:21:40
 //			//1차측 ct ratio
@@ -1521,103 +1723,125 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 		//word count
 		// ocr50-1
 		if(MANAGER.rx_buffer[3] == 0x00) {
+			OCR50_1.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			OCR50_1.mode = 				(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			OCR50_1.current_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			OCR50_1.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			OCR50_1.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
 			serial_write(5, &OCR50_1.use, OCR50_1_USE);
-			event_direct_save(&EVENT.relay_set);
 		// ocr50-2
-		} else if(MANAGER.rx_buffer[3] == 0x01)
+		} else if(MANAGER.rx_buffer[3] == 0x01) {
+			OCR50_2.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			OCR50_2.mode = 				(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			OCR50_2.current_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			OCR50_2.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			OCR50_2.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
 		serial_write(5, &OCR50_2.use, OCR50_2_USE);
-		
-		// ocr51-1
-//		else if(MANAGER.rx_buffer[3] == 0x02)
-//	serial_write(5, &OCR51_1.use, OCR51_1_USE);
-		
-		// ocr51-2
-//		else if(MANAGER.rx_buffer[3] == 0x03)
-//	serial_write(5, &OCR51_2.use, OCR51_2_USE);
-				
 		// ocgr50
-		else if(MANAGER.rx_buffer[3] == 0x04)
+		} else if(MANAGER.rx_buffer[3] == 0x02) {
+			OCGR50.use = 					(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			OCGR50.mode = 				(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			OCGR50.current_set = 	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			OCGR50.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			OCGR50.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
 		serial_write(5, &OCGR50.use, OCGR50_USE);
-		
 		// ocgr51
-		else if(MANAGER.rx_buffer[3] == 0x05)
+		} else if(MANAGER.rx_buffer[3] == 0x03) {
+			OCGR51.use = 					(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			OCGR51.mode = 				(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			OCGR51.current_set = 	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			OCGR51.time_lever = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			OCGR51.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
 		serial_write(5, &OCGR51.use, OCGR51_USE);
-
-//2015.02.24
-// DGR, SGR 나누어서 보내는 것 필요
-		// DGR/SGR
-//		else if(MANAGER.rx_buffer[3] == 0x06)
-//		serial_write(6, &DSGR.use, DSGR_USE);
-//2015.02.24 END
-		
-		// UCR 37
-		else if(MANAGER.rx_buffer[3] == 0x07)
-		serial_write(5, &UCR.use, UCR_USE);
-		
-		// THR 49
-		else if(MANAGER.rx_buffer[3] == 0x09)
-		serial_write(4, &THR.use, THR_USE);
-		
-		// NSR 46
-		else if(MANAGER.rx_buffer[3] == 0x0a)
+		// THR(49)
+		} else if(MANAGER.rx_buffer[3] == 0x04) {
+			THR.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			THR.current_set = (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			THR.cold_limit =	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			THR.hot_limit =		(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			THR.tau_limit =		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			THR.do_relay =		(MANAGER.rx_buffer[16] << 8) + MANAGER.rx_buffer[17];			
+			serial_write(6, &THR.use, THR_USE);
+		// NSR(46)
+		} else if(MANAGER.rx_buffer[3] == 0x05) {
+			NSR.use =         (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			NSR.current_set = (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			NSR.delay_time  = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			NSR.do_relay    = (MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
 		serial_write(4, &NSR.use, NSR_USE);
-		
-		// LR51
-		else if(MANAGER.rx_buffer[3] == 0x0b)
-		serial_write(4, &LR51.use, LR51_USE);
-		
-		// NCHR 66
-		else if(MANAGER.rx_buffer[3] == 0x0c)
-		;//serial_write(4, &NCHR.use, NCHR_USE); //2015.02.24
-		
-		// H50
-		else if(MANAGER.rx_buffer[3] == 0x0d)
-		;//serial_write(4, &H50.use, H50_USE); //2015.02.24
-
-//2015.02.24
-		// 25
-//		else if(MANAGER.rx_buffer[3] == 0x0e)
-//		serial_write(6, &SYNCRO.use, SYNCRO_USE);
-//		
-//		
-//		// 37
-//		else if(MANAGER.rx_buffer[3] == 0x0f)
-//		serial_write(5, &UCR.use, UCR_USE);
-//		
-//		// 46
-//		else if(MANAGER.rx_buffer[3] == 0x10)
-//		serial_write(4, &NSOCR.use, NSOCR_USE);
-//		
-//		// 49
-//		else if(MANAGER.rx_buffer[3] == 0x11)
-//		serial_write(6, &THR.use, THR_USE);
-//		
-//		// 50H
-//		else if(MANAGER.rx_buffer[3] == 0x12)
-//		serial_write(4, &H50.use, H50_USE);
-//		
-//		// 51LR
-//		else if(MANAGER.rx_buffer[3] == 0x13)
-//		serial_write(6, &SL.use, S_L_USE);
-//		
-//		// 66
-//		else if(MANAGER.rx_buffer[3] == 0x14)
-//		serial_write(6, &NCH.use, NCH_USE);
-//2015.02.24 END
+		// 51LR
+		} else if(MANAGER.rx_buffer[3] == 0x06) {
+			LR51.use =               (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			LR51.start_current_set = (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			LR51.start_delay_time =  (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			LR51.current_set =       (MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			LR51.delay_time =        (MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			LR51.do_relay =          (MANAGER.rx_buffer[16] << 8) + MANAGER.rx_buffer[17];
+			serial_write(6, &LR51.use, LR51_USE);
+		// NCHR(66)
+		} else if(MANAGER.rx_buffer[3] == 0x07) {
+			NCHR.use =             (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			NCHR.allow_time_set =  (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			NCHR.trip_number_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			NCHR.limit_time_set =  (MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			NCHR.theta_d_set =     (MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			NCHR.do_relay = 		   (MANAGER.rx_buffer[16] << 8) + MANAGER.rx_buffer[17];
+			serial_write(6, &NCHR.use, NCHR_USE);
+		// 50H
+		} else if(MANAGER.rx_buffer[3] == 0x08) {
+			H50.use =          (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			H50.current_set =  (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			H50.do_relay =     (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			serial_write(3, &H50.use, H50_USE);
+		// UCR(37)
+		} else if(MANAGER.rx_buffer[3] == 0x09) {
+			UCR.use =             (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			UCR.min_current_set = (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			UCR.max_current_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			UCR.delay_time =      (MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			UCR.do_relay =		    (MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			serial_write(5, &UCR.use, UCR_USE);
+		//DGR
+		} else if(MANAGER.rx_buffer[3] == 0x0a) {
+			DGR.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			DGR.current_set =	(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			DGR.voltage_set =	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			DGR.angle_set = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			DGR.delay_time =	(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			DGR.do_relay = 		(MANAGER.rx_buffer[16] << 8) + MANAGER.rx_buffer[17];
+			serial_write(6, &DGR.use, DGR_USE);
+		//SGR
+		} else if(MANAGER.rx_buffer[3] == 0x0b) {
+			SGR.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			SGR.current_set =	(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			SGR.voltage_set =	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			SGR.angle_set = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			SGR.delay_time =	(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			SGR.do_relay = 		(MANAGER.rx_buffer[16] << 8) + MANAGER.rx_buffer[17];
+			serial_write(6, &SGR.use, SGR_USE);
+		}
 	}
-	
 	// system write
 	else if(MANAGER.rx_buffer[2] == 0x90)
 	{
 		
 //MANAGER_SYSTEM_SET
-//		if(MANAGER.rx_buffer[3] == 0x01) {
-//			
-//		}
+		if(MANAGER.rx_buffer[3] == 0x01) {
+			
+		}	
+		// c/pt
+		else if(MANAGER.rx_buffer[3] == 0x02) {
+			CPT.ct_primary =			(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			CPT.nct_primary =			(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
+			CPT.pt_primary_high = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
+			CPT.pt_primary_low = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
+			CPT.rated_current =		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
+			serial_write(5, &CPT.ct_primary, CT_PRIMARY);
+		}
+		//Supervision & System Alarm				
+		else if(MANAGER.rx_buffer[3] == 0x03) {
 		
-//		// c/pt
-//		if(MANAGER.rx_buffer[3] == 0x00)
-//		;//khs, 2015-04-08 오전 11:30:47 serial_write(6, &TRANSFORMER.ct_primary, CT_PRIMARY);
+		}
 //		
 //		// di debounce / do property
 //		else if(MANAGER.rx_buffer[3] == 0x01)
@@ -1938,7 +2162,6 @@ void serial_write(unsigned int ar_length, unsigned int *ar_data, unsigned int *a
 //		EVENT.group_extra = 0;
 //	}
 	
-	
 	// ack
 	// 일단 설정값 저장 함수를 호출하고 결과가 양호하면 후처리 실행
 	if(setting_save(MANAGER.temp, ar_address, ar_length))
@@ -2056,95 +2279,105 @@ void comm_drive(void)
 	if(i)
 	{
 		//계측
-		/*if(i == 1)
+		if(i == 1)
 		{
 			if(COMM.index == 0)
 			{
 				//Ia
-				float_to_integer(DISPLAY.rms_value[Ia], COMM_2_Ia, 10.0F);
+				float_to_integer(DISPLAY.rms_value[Ia], COMM2_IA, 10.0F);
 				//Ib
-				float_to_integer(DISPLAY.rms_value[Ib], COMM_2_Ib, 10.0F);
+				float_to_integer(DISPLAY.rms_value[Ib], COMM2_IB, 10.0F);
 				//Ic
-				float_to_integer(DISPLAY.rms_value[Ic], COMM_2_Ic, 10.0F);
+				float_to_integer(DISPLAY.rms_value[Ic], COMM2_IC, 10.0F);
+
 				//Io
 				if(CORE.gr_select == ZCT_SELECT)
-				float_to_integer(DISPLAY.rms_value[Is], COMM_2_Io, 10.0F);
-				
+				float_to_integer(DISPLAY.rms_value[Is], COMM2_IN, 10.0F);
 				else
-				float_to_integer(DISPLAY.rms_value[In], COMM_2_Io, 10.0F);
+				float_to_integer(DISPLAY.rms_value[In], COMM2_IN, 10.0F);
 				
-				//Io max
-				//float_to_integer(ACCUMULATION.io_max, COMM_2_Io_max, 10.0F);
+				//Iavg
+				float_to_integer(DISPLAY.rms_Iavg_value, COMM2_IAVG, 10.0F);
+				//Ips
+				float_to_integer(DISPLAY.I1_value, COMM2_IPS, 10.0F);
+				//Ins
+				float_to_integer(DISPLAY.I2_value, COMM2_INS, 10.0F);
 			}
 			
 			else if(COMM.index == 1)
-			{
-				//Ips
-				float_to_integer(MEASUREMENT.I1_value, COMM_2_Ips, 10.0F);
-				//Ins
-				float_to_integer(MEASUREMENT.I2_value, COMM_2_Ins, 10.0F);
+			{	//2015-07-09 오후 8:10:13 아직 전달 값이 없어 매핑 안됨.
 				//Ia 3rd
-				float_to_integer(HARMONICS.ia[0], COMM_2_Ia_3rd, 10.0F);
+				float_to_integer2(HARMONICS.ia[0], COMM2_IA_3RD, 10.0F);
 				//Ia 5th
-				float_to_integer(HARMONICS.ia[1], COMM_2_Ia_5th, 10.0F);
+				float_to_integer2(HARMONICS.ia[1], COMM2_IA_5TH, 10.0F);
 				//Ia 7th
-				float_to_integer(HARMONICS.ia[2], COMM_2_Ia_7th, 10.0F);
+				float_to_integer2(HARMONICS.ia[2], COMM2_IA_7TH, 10.0F);
 				//Ia 9th
-				float_to_integer(HARMONICS.ia[3], COMM_2_Ia_9th, 10.0F);
+				float_to_integer2(HARMONICS.ia[3], COMM2_IA_9TH, 10.0F);
+				//Ia 11th
+				float_to_integer2(HARMONICS.ia[3], COMM2_IA_11TH, 10.0F);
+				//Ia thd
+				float_to_integer2(HARMONICS.ia[4], COMM2_IA_THDFACTER, 1);
+				//Ia tdd
+				float_to_integer2(HARMONICS.ia[5], COMM2_IA_TDDFACTER, 1);
 			}
 			
 			else if(COMM.index == 2)
-			{
-				//Ia thd
-				float_to_integer(HARMONICS.ia[4], COMM_2_Ia_thd, 1);
-				//Ia tdd
-				float_to_integer(HARMONICS.ia[5], COMM_2_Ia_tdd, 1);
+			{ //2015-07-09 오후 8:10:13 아직 전달 값이 없어 매핑 안됨.
 				//Ib 3rd
-				float_to_integer(HARMONICS.ib[0], COMM_2_Ib_3rd, 1);
+				float_to_integer2(HARMONICS.ib[0], COMM2_IB_3RD, 10.0F);
 				//Ib 5th
-				float_to_integer(HARMONICS.ib[1], COMM_2_Ib_5th, 1);
+				float_to_integer2(HARMONICS.ib[1], COMM2_IB_5TH, 10.0F);
 				//Ib 7th
-				float_to_integer(HARMONICS.ib[2], COMM_2_Ib_7th, 1);
+				float_to_integer2(HARMONICS.ib[2], COMM2_IB_7TH, 10.0F);
 				//Ib 9th
-				float_to_integer(HARMONICS.ib[3], COMM_2_Ib_9th, 1);
+				float_to_integer2(HARMONICS.ib[3], COMM2_IB_9TH, 10.0F);
+				//Ib 11th
+				float_to_integer2(HARMONICS.ib[3], COMM2_IB_11TH, 10.0F);
+				//Ib thd
+				float_to_integer2(HARMONICS.ib[4], COMM2_IB_THDFACTER, 1);
+				//Ib tdd
+				float_to_integer2(HARMONICS.ib[5], COMM2_IB_TDDFACTER, 1);
 			}
 			
 			else if(COMM.index == 3)
-			{
-				//Ib thd
-				float_to_integer(HARMONICS.ib[4], COMM_2_Ib_thd, 1);
-				//Ib tdd
-				float_to_integer(HARMONICS.ib[5], COMM_2_Ib_tdd, 1);
+			{ //2015-07-09 오후 8:10:13 아직 전달 값이 없어 매핑 안됨.
 				//Ic 3rd
-				float_to_integer(HARMONICS.ic[0], COMM_2_Ic_3rd, 1);
+				float_to_integer2(HARMONICS.ic[0], COMM2_IC_3RD, 10.0F);
 				//Ic 5th
-				float_to_integer(HARMONICS.ic[1], COMM_2_Ic_5th, 1);
+				float_to_integer2(HARMONICS.ic[1], COMM2_IC_5TH, 10.0F);
 				//Ic 7th
-				float_to_integer(HARMONICS.ic[2], COMM_2_Ic_7th, 1);
+				float_to_integer2(HARMONICS.ic[2], COMM2_IC_7TH, 10.0F);
 				//Ic 9th
-				float_to_integer(HARMONICS.ic[3], COMM_2_Ic_9th, 1);
-			}
-			
-			else if(COMM.index == 4)
-			{
+				float_to_integer2(HARMONICS.ic[3], COMM2_IC_9TH, 10.0F);
+				//Ic 11th
+				float_to_integer2(HARMONICS.ic[3], COMM2_IC_11TH, 10.0F);
 				//Ic thd
-				float_to_integer(HARMONICS.ic[4], COMM_2_Ic_thd, 1);
+				float_to_integer2(HARMONICS.ic[4], COMM2_IC_THDFACTER, 1);
 				//Ic tdd
-				float_to_integer(HARMONICS.ic[5], COMM_2_Ic_tdd, 1);
+				float_to_integer2(HARMONICS.ic[5], COMM2_IC_TDDFACTER, 1);
+			}
 				
-//			if(TRANSFORMER.pt_wiring == P3W3)
+			else if(COMM.index == 4)
 				{
-					//선간
+					//선간, 2015-07-09 오후 8:16:17 확인
 					//Vab
-					float_to_integer(DISPLAY.rms_value[Va], COMM_2_Vab, 1);
+					float_to_integer(DISPLAY.rms_value[Va], COMM2_VA, 1);
 					//Vbc
-					float_to_integer(DISPLAY.rms_value[Vb], COMM_2_Vbc, 1);
+					float_to_integer(DISPLAY.rms_value[Vb], COMM2_VB, 1);
 					//Vca
-					float_to_integer(DISPLAY.rms_value[Vc], COMM_2_Vca, 1);
+					float_to_integer(DISPLAY.rms_value[Vc], COMM2_VC, 1);
+					//Vo
+					float_to_integer(DISPLAY.rms_value[Vn], COMM2_VO, 1);
+					//Vo_max
+					float_to_integer(ACCUMULATION.vo_max, COMM2_VO_MAX, 1);
+					//Vavg
+					float_to_integer(DISPLAY.rms_Vavg_value, COMM2_VAVG, 1);
+					//Vps
+					float_to_integer(DISPLAY.V1_value, COMM2_VPS, 1);
+					//Vns
+					float_to_integer(DISPLAY.V2_value, COMM2_VNS, 1);
 					
-					//Va 허당
-					float_to_integer(float_temp, COMM_2_Va, 1);
-				}
 //				else //3상4선
 //				{
 //					//선간
@@ -2163,67 +2396,52 @@ void comm_drive(void)
 			
 			else if(COMM.index == 5)
 			{
-//			if(TRANSFORMER.pt_wiring == P3W3)
-				{
-					//Vb 허당
-					float_to_integer(float_temp, COMM_2_Vb, 1);
-					//Vc 허당
-					float_to_integer(float_temp, COMM_2_Vc, 1);
-				}
-//				else //3상4선
-//				{
-//					//Vb
-//					float_to_integer(DISPLAY.rms_value[Vb], COMM_2_Vb, 1);
-//					//Vc
-//					float_to_integer(DISPLAY.rms_value[Vc], COMM_2_Vc, 1);
-//				}
+				*(COMM2_DI_AND_CB_STATUS + 1) = (RELAY_STATUS.operation_sum_holding)?1: 0;
+				*COMM2_DI_AND_CB_STATUS = DIGITAL_INPUT.di_status;
 				
-				//Vn
-				float_to_integer(DISPLAY.rms_value[Vn], COMM_2_Vo, 1);
-				//Vn max
-				float_to_integer(ACCUMULATION.vo_max, COMM_2_Vo_max, 1);
-				//Vp
-				float_to_integer(MEASUREMENT.V1_value, COMM_2_Vps, 1);
-				//Vn
-				float_to_integer(MEASUREMENT.V2_value, COMM_2_Vns, 1);
+				*(COMM2_REALY_STATUS + 1) = RELAY_STATUS.operation_sum_holding >> 2;
+				*(COMM2_REALY_STATUS + 1) &= ~0x0f;
+				*(COMM2_REALY_STATUS + 1) |= (RELAY_STATUS.operation_sum_holding & 0x03)? 0x01: 0;
+				*(COMM2_REALY_STATUS + 1) |= (RELAY_STATUS.operation_sum_holding & 0x0c)? 0x02: 0;
+				*COMM2_REALY_STATUS = RELAY_STATUS.operation_sum_holding >> 8;
+																						                                      
+				*(COMM2_FAULT_PHASE_INFO + 1) = 0;
+				*(COMM2_FAULT_PHASE_INFO + 1) = (Phase_Info <= 4)? Phase_Info: (Phase_Info - 6);
+				//  0     1    2    3    4     5    6     7     8     9   10
+				//{" ", "Ia","Ib","Ic","In","In2","Is","Vab","Vbc","Vca","Vn"};
+				
+				//COMM2_FAULT_RATIO_INFO		<=== 서비스 없음
+				//COMM2_RELAY_OPERATION_TIME	<=== 서비스 없음
+				//COMM2_RUNNING_HOUR_METER		<=== 값이 구현되어 매핑되면 넣을 것.
 			}
 			
 			else if(COMM.index == 6)
 			{
-				//Vb 위상
-				float_to_integer(DISPLAY.angle[1], COMM_2_Vb_degree, 1);
-				//Vc 위상
-				float_to_integer(DISPLAY.angle[2], COMM_2_Vc_degree, 1);
-				//Ia 위상
-				float_to_integer(DISPLAY.angle[3], COMM_2_Ia_degree, 1);
-				//Ib 위상
-				float_to_integer(DISPLAY.angle[4], COMM_2_Ib_degree, 1);
-				//Ic 위상
-				float_to_integer(DISPLAY.angle[5], COMM_2_Ic_degree, 1);
-				//역률
-				float_to_integer(DISPLAY.pf3, COMM_2_pf, 1);
+
 			}
 			
 			else if(COMM.index == 7)
-			{
-				//주파수
-				float_to_integer(MEASUREMENT.frequency, COMM_2_frequency, 1);
+			{ //2015-07-09 오후 8:10:13 아직 전달 값이 없어 매핑 안됨.
 				//유효전력
-				float_to_integer(DISPLAY.p3, COMM_2_P, 1);
+				float_to_integer(DISPLAY.p3, COMM2_ACTIVE_PWR, 1);
 				//무효전력
-				float_to_integer(DISPLAY.q3, COMM_2_Q, 1);
+				float_to_integer(DISPLAY.q3, COMM2_REACTIVE_PWR, 1);
+				//역률
+				float_to_integer(DISPLAY.pf3, COMM2_POWER_FACTOR, 1);
+				//주파수
+				float_to_integer(MEASUREMENT.frequency, COMM2_FREQUENCY, 1);
 				//유효전력량
-				float_to_integer(ACCUMULATION.energy_p, COMM_2_PE, 1);
+				float_to_integer(ACCUMULATION.energy_p, COMM2_ACTIVE_ENERGY, 1);
 				//무효전력량
-				float_to_integer(ACCUMULATION.energy_q, COMM_2_QE, 1);
+				float_to_integer(ACCUMULATION.energy_q, COMM2_REACTIVE_ENERGY, 1);
 				//역유효전력량
-				float_to_integer(ACCUMULATION.energy_rp, COMM_2_PEr, 1);
+				float_to_integer(ACCUMULATION.energy_rp, COMM2_REVERSE_ENGERY, 1);
+				//역무효전력량
+				float_to_integer(ACCUMULATION.energy_rq, COMM2_REVERSE_REACTIVE_ENGERY, 1);
 			}
 			
 			else if(COMM.index == 8)
-			{
-				//역무효전력량
-				float_to_integer(ACCUMULATION.energy_rq, COMM_2_QEr, 1);
+			{/*
 				
 				//syncro 계측
 //				if(SYNCRO.use == 0xaaaa)
@@ -2260,10 +2478,10 @@ void comm_drive(void)
 				//do status
 				*COMM_2_DO1 = DIDO.do_status >> 8;
 				*COMM_2_DO2 = DIDO.do_status;
-			}
+			*/}
 			
 			else if(COMM.index == 9)
-			{
+			{/*
 				//cb status
 				*COMM_2_CB = DIDO.do_status;
 				
@@ -2282,7 +2500,7 @@ void comm_drive(void)
 				float_to_integer(SUPERVISION.cb_close_time, COMM_2_runhour, 1);
 				//이벤트 sp
 				*COMM_2_SP = EVENT.sp;
-			}
+			*/}
 			
 			++COMM.index;
 			
@@ -2294,7 +2512,7 @@ void comm_drive(void)
 				
 				*COMM_2_DSP2COMM = i;
 			}
-		}*/
+		}
 	}
 	
 	else

@@ -261,7 +261,7 @@
 
 #define CALIBRATION_NOT  0x0001
 #define SRAM_FAIL        0x0002
-#define FRAM_FAIL        0x0004
+#define MRAM_FAIL        0x0004
 #define ADC_FAIL         0x0008
 #define COMM_IF_FAIL     0x0010
 #define FLASH_FAIL       0x0020
@@ -657,8 +657,8 @@
 #define EVENT_OPTIME3     (unsigned int *)(0x140012 + WAVE_SAVE_OFFSET)
 #define EVENT_OPTIME4     (unsigned int *)(0x140013 + WAVE_SAVE_OFFSET)
 
-// EVENT 저장 8bit임
-#define FRAM2_START				(unsigned int *)0x140000	//khs, 요것이 MRAM
+#define MRAM_START				(unsigned int *)0x140000	//khs, 요것이 MRAM
+
 
 #define MRAM_RUNNING_HOUR1	(unsigned int *)0x15d0f0	//RUNNING HOUR METER MRAM 주소
 #define MRAM_RUNNING_HOUR2	(unsigned int *)0x15d0f1	//RUNNING HOUR METER MRAM 주소
@@ -897,7 +897,7 @@
 #define FLASH_WAVE_DI   (unsigned int *)0x15B3F0
 #define FLASH_WAVE_DO   (unsigned int *)0x15C200
 #define WAVE_WRITE_CHECK (unsigned int *)0x15d011	//0x19AFFF//0x1d020
-//#define FLASH_CHECK_SECTOR (unsigned int *)0x19e000
+#define FLASH_CHECK_SECTOR (unsigned int *)0x19e000
 //-------- 이전 FLASH MEMORY ADDRESS END
 
 //-------- SRAM1 MEMORY ADDRESS
@@ -927,6 +927,7 @@
 #define Post_DI_wave_buffer     (unsigned int *)0x21BAF8 // 150주기
 #define Pre_DO_wave_buffer      (unsigned int *)0x21C200 // 150주기
 #define Post_DO_wave_buffer     (unsigned int *)0x21C908 // 150주기
+#define SRAM_HEALTH_CHECK     	(unsigned int *)0x220000
 #define Manager_tx_long         (unsigned int *)0x230000 // 0x2200
 #define Manager_tx_long_six     (unsigned int *)0x230006 // 0x2200
 #define Manager_tx_long_seven   (unsigned int *)0x230007 // 0x2200

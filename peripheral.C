@@ -19,6 +19,13 @@
 #define		C_OFFnBlink 	0x0d
 #define		C_ONnBlink 	0x0f
 
+/*------------- DMA --------------*/
+#pragma DATA_SECTION(DmaRegs,"DmaRegsFile");
+volatile struct DMA_REGS DmaRegs;
+#pragma DATA_SECTION(PieCtrlRegs,"PieCtrlRegsFile");
+volatile struct PIE_CTRL_REGS PieCtrlRegs;
+
+
 // LCD version
 //int *LCD_CS 	= (int *)0x400020;
 //int *LCD_CS	 	= (int *)0x400020;
@@ -1594,3 +1601,170 @@ void Relay_Off(unsigned int ar_value)
 }
 
 
+// C:\tidcs\c28\DSP2833x\v131\DSP2833x_headers\source\DSP2833x_GlobalVariableDefs.c
+// C:\tidcs\c28\DSP2833x\v131\DSP2833x_common\source\DSP2833x_DMA.c
+// This function initializes the DMA to a known state.
+void DMAInitialize(void)
+{
+	EALLOW;
+
+	// Perform a hard reset on DMA
+	DmaRegs.DMACTRL.bit.HARDRESET = 1;
+    asm (" nop"); // one NOP required after HARDRESET
+
+	// Allow DMA to run free on emulation suspend
+	DmaRegs.DEBUGCTRL.bit.FREE = 1;
+
+	EDIS;
+}
+
+void DMACH1AddrConfig(volatile Uint16 *DMA_Dest,volatile Uint16 *DMA_Source)
+{
+	EALLOW;
+	// Set up SOURCE address:
+	DmaRegs.CH1.SRC_BEG_ADDR_SHADOW = (Uint32)DMA_Source;	// Point to beginning of source buffer
+	DmaRegs.CH1.SRC_ADDR_SHADOW =     (Uint32)DMA_Source;
+
+	// Set up DESTINATION address:
+	DmaRegs.CH1.DST_BEG_ADDR_SHADOW = (Uint32)DMA_Dest;	    // Point to beginning of destination buffer
+	DmaRegs.CH1.DST_ADDR_SHADOW =     (Uint32)DMA_Dest;
+
+
+	EDIS;
+}
+
+void DMACH1BurstConfig(Uint16 bsize, int16 srcbstep, int16 desbstep)
+{
+	EALLOW;
+
+	// Set up BURST registers:
+	DmaRegs.CH1.BURST_SIZE.all = bsize;	                // Number of words(X-1) x-ferred in a burst
+	DmaRegs.CH1.SRC_BURST_STEP = srcbstep;			    // Increment source addr between each word x-ferred
+	DmaRegs.CH1.DST_BURST_STEP = desbstep;              // Increment dest addr between each word x-ferred
+
+
+	EDIS;
+}
+
+void DMACH1TransferConfig(Uint16 tsize, int16 srctstep, int16 deststep)
+{
+	EALLOW;
+
+	// Set up TRANSFER registers:
+	DmaRegs.CH1.TRANSFER_SIZE = tsize;                  // Number of bursts per transfer, DMA interrupt will occur after completed transfer
+	DmaRegs.CH1.SRC_TRANSFER_STEP = srctstep;			// TRANSFER_STEP is ignored when WRAP occurs
+	DmaRegs.CH1.DST_TRANSFER_STEP = deststep;			// TRANSFER_STEP is ignored when WRAP occurs
+
+	EDIS;
+}
+
+void DMACH1WrapConfig(Uint16 srcwsize, int16 srcwstep, Uint16 deswsize, int16 deswstep)
+{
+	EALLOW;
+
+		// Set up WRAP registers:
+	DmaRegs.CH1.SRC_WRAP_SIZE = srcwsize;				// Wrap source address after N bursts
+    DmaRegs.CH1.SRC_WRAP_STEP = srcwstep;			    // Step for source wrap
+
+	DmaRegs.CH1.DST_WRAP_SIZE = deswsize;				// Wrap destination address after N bursts
+	DmaRegs.CH1.DST_WRAP_STEP = deswstep;				// Step for destination wrap
+
+	EDIS;
+}
+
+
+void DMACH1ModeConfig(Uint16 persel, Uint16 perinte, Uint16 oneshot, Uint16 cont, Uint16 synce, Uint16 syncsel, Uint16 ovrinte, Uint16 datasize, Uint16 chintmode, Uint16 chinte)
+{
+	EALLOW;
+
+	// Set up MODE Register:
+	DmaRegs.CH1.MODE.bit.PERINTSEL = persel;	    // Passed DMA channel as peripheral interrupt source
+	DmaRegs.CH1.MODE.bit.PERINTE = perinte;       	// Peripheral interrupt enable
+	DmaRegs.CH1.MODE.bit.ONESHOT = oneshot;       	// Oneshot enable
+	DmaRegs.CH1.MODE.bit.CONTINUOUS = cont;    		// Continous enable
+	DmaRegs.CH1.MODE.bit.SYNCE = synce;         	// Peripheral sync enable/disable
+	DmaRegs.CH1.MODE.bit.SYNCSEL = syncsel;       	// Sync effects source or destination
+	DmaRegs.CH1.MODE.bit.OVRINTE = ovrinte;         // Enable/disable the overflow interrupt
+	DmaRegs.CH1.MODE.bit.DATASIZE = datasize;      	// 16-bit/32-bit data size transfers
+	DmaRegs.CH1.MODE.bit.CHINTMODE = chintmode;		// Generate interrupt to CPU at beginning/end of transfer
+	DmaRegs.CH1.MODE.bit.CHINTE = chinte;        	// Channel Interrupt to CPU enable
+
+	// Clear any spurious flags:
+	DmaRegs.CH1.CONTROL.bit.PERINTCLR = 1;  		// Clear any spurious interrupt flags
+	DmaRegs.CH1.CONTROL.bit.SYNCCLR = 1;    		// Clear any spurious sync flags
+	DmaRegs.CH1.CONTROL.bit.ERRCLR = 1; 	     	// Clear any spurious sync error flags
+
+	// Initialize PIE vector for CPU interrupt:
+	PieCtrlRegs.PIEIER7.bit.INTx1 = 1;              // Enable DMA CH1 interrupt in PIE
+
+	EDIS;
+}
+
+// This function starts DMA Channel 1.
+void StartDMACH1(void)
+{
+	EALLOW;
+	DmaRegs.CH1.CONTROL.bit.RUN = 1;
+	EDIS;
+}
+
+void self_diagnostic(void)
+{
+		static int cnt = 0;
+		static int sram_pos = 1;
+		static int sram_err = 0;
+		unsigned int i;
+		unsigned int j;
+		
+		i = 0;
+		
+		if(cnt == 1) {	//SRAM을 256바이트 씩 256번 0x10000(65536)길이를 검사. 값은 0x1111 X (1~256)으로 지정
+
+			for(i = (256*sram_pos); i--;)
+				*(SRAM_HEALTH_CHECK + i) = (0x1111*sram_pos) & 0xffff;
+
+		} else if(cnt == 2) {
+
+			for(i = (256*sram_pos), j = 0; i--;)
+				if((0x1111*sram_pos) != (*(SRAM_HEALTH_CHECK + i)&0xffff))
+					j++;
+				
+				if(j == 0) 		sram_err = 0;
+				else 			sram_err++;
+					
+				if(sram_err > 5) SYSTEM.diagnostic |= SRAM_FAIL;	//SRAM 에러가 5회 연속 발생하면 시스템 정지 실행
+			
+			if(sram_pos++ > 256) sram_pos = 1;
+
+		} else if(cnt == 3) {
+			;
+		} else if(cnt == 4) {
+			;
+		} else if(cnt == 5) {
+			;
+		} else if(cnt == 6) {
+			;
+		} else {
+			cnt = 0;
+		}
+
+		cnt++;
+		
+//	SYSTEM.diagnostic |= CALIBRATION_NOT;
+//	SYSTEM.diagnostic |= SRAM_FAIL;
+//	SYSTEM.diagnostic |= MRAM_FAIL;
+//	SYSTEM.diagnostic |= ADC_FAIL;
+//	SYSTEM.diagnostic |= COMM_IF_FAIL;
+//	SYSTEM.diagnostic |= FLASH_FAIL;
+/*
+		" PROBLEM - SRAM     ",
+		" PROBLEM - MRAM     ",
+		" PROBLEM - ADC      ",
+		" PROBLEM - FLASH    ",
+		
+		SYSTEM.diagnostic = 1;
+		SYSTEM.diagnostic = 2;
+		SYSTEM.diagnostic = 3;
+		SYSTEM.diagnostic = 4;
+*/		
+}
