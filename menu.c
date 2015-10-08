@@ -295,7 +295,7 @@ void menu_00_05(unsigned int value, int display)
 		screen_frame3(str);
 		return;
 	} else if(display == 2) {
-		sprintf(string, "%7ld\0", (unsigned long)(ACCUMULATION.vo_max));
+		sprintf(string, "%7ld\0", DISPLAY.vo_max);
 		VFD_Single_Line_dump(LCD_L1_06, string);
 		sprintf(string, "%7ld\0", (unsigned long)(DISPLAY.rms_Vavg_value));
 		VFD_Single_Line_dump(LCD_L2_06, string);
@@ -9548,9 +9548,18 @@ void menu_81_03(unsigned int value, int display)
 			Screen_Position.x = 4;
 			Screen_Position.select = 1;
 		} else if(Screen_Position.select == 1) {
-			Screen_Position.y = 83;
-			Screen_Position.x = 4;
-			Screen_Position.select = 0;
+			if(AUX_RELAY_TEST.Curr_input_flag == 0)
+			{
+				Screen_Position.y = 83;
+				Screen_Position.x = 4;
+				Screen_Position.select = 0;
+			}
+			else
+			{
+				Screen_Position.y = 84;
+				Screen_Position.x = 4;
+				cursor_move(0, 0);//cursor off
+			}
 		}
 	}
 }
@@ -10439,6 +10448,7 @@ void menu_83_06(unsigned int value, int display)
 	unsigned int i;
 	char str[2][22];
 	static unsigned int auto_relay_test= 1;
+//unsigned int auto_relay_test= 1;
 
 	sprintf(str[0],"AUX. 1 2 3 4 5 6 7 8\0");
 
@@ -10557,6 +10567,25 @@ void menu_84_03(unsigned int value, int display)
 			Screen_Position.x = 4;
 			Screen_Position.select = 1;
 		}
+	}
+}
+
+void menu_84_04(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0], "  RUNNING NOW...... \0");
+	sprintf(str[1], "   PRESS ANY KEY !  \0");
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value) {
+		Screen_Position.y = 81;
+		Screen_Position.x = 3;
+		Screen_Position.select = 0;
 	}
 }
 
@@ -11021,6 +11050,12 @@ void menu_87_04(unsigned int value, int display)
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
+
+			//MRAM CLEAR
+			*(MRAM_Vo_MAX1) = 0;
+			*(MRAM_Vo_MAX2) = 0;
+			DISPLAY.vo_max = 0;
+
 			Screen_Position.y = 87;
 			Screen_Position.x = 5;
 			cursor_move(0, 0);//cursor off
@@ -15516,7 +15551,7 @@ const Screen_Function_Pointer menu_tables[200][18] = { //2015.02.17
 		{menu_dummy, menu_dummy, menu_dummy, menu_81_03, menu_81_04, menu_81_05, menu_81_06, menu_81_07, menu_81_08, menu_81_09, menu_81_10, menu_81_11, menu_81_12,}, // 81
 		{menu_dummy, menu_dummy, menu_dummy, menu_82_03, menu_82_04, menu_82_05, menu_82_06, menu_82_07, menu_82_08, menu_82_09, menu_82_10, menu_82_11, menu_82_12, menu_82_13,}, // 82
 		{menu_dummy, menu_dummy, menu_dummy, menu_83_03, menu_83_04, menu_83_05, menu_83_06, menu_83_07, menu_83_08,},                             // 83
-		{menu_dummy, menu_dummy, menu_dummy, menu_84_03, menu_dummy, menu_84_05, menu_84_06, menu_84_07, menu_84_08, menu_84_09,},                 // 84
+		{menu_dummy, menu_dummy, menu_dummy, menu_84_03, menu_84_04, menu_84_05, menu_84_06, menu_84_07, menu_84_08, menu_84_09,},                 // 84
 		{menu_dummy, menu_dummy, menu_dummy, menu_85_03, menu_85_04, menu_85_05, menu_85_06,},                                                     // 85
 		{menu_dummy, menu_dummy, menu_dummy, menu_86_03, menu_86_04, menu_86_05, menu_86_06,},                                                     // 86
 		{menu_dummy, menu_dummy, menu_dummy, menu_87_03, menu_87_04, menu_87_05, menu_87_06,},                                                     // 87

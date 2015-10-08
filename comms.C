@@ -225,13 +225,7 @@ void manager_handling(void)
 			MANAGER.tx_buffer[4] = 0;
 			MANAGER.tx_buffer[5] = 40;
 			                              
-//DISPLAY.rms_value[Va] = 100;			                              
-//DISPLAY.rms_value[Vb] = 200;
-//DISPLAY.rms_value[Vc] = 300;
-//DISPLAY.rms_value[Vn] = 400;
-
 			//Va
-			//float_to_integer(DISPLAY.rms_value[Va], &MANAGER.tx_buffer[6], 1);
 			float_to_integer(DISPLAY.rms_value[Va], &MANAGER.tx_buffer[6], 1.0F);
 			//Vb
 			float_to_integer(DISPLAY.rms_value[Vb], &MANAGER.tx_buffer[10], 1.0F);
@@ -248,7 +242,7 @@ void manager_handling(void)
 			//Vc 위상
 			float_to_integer(DISPLAY.angle[2], &MANAGER.tx_buffer[34], 1.0F);
 			//Vo max
-			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[38], 1.0F);
+//			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[38], 1.0F);
 			//주파수
 			float_to_integer(MEASUREMENT.frequency, &MANAGER.tx_buffer[42], 1.0F);
 			
@@ -299,9 +293,6 @@ void manager_handling(void)
 			float_to_integer(DISPLAY.angle[4], &MANAGER.tx_buffer[34], 1.0F);
 			//Ic 위상
 			float_to_integer(DISPLAY.angle[5], &MANAGER.tx_buffer[38], 1.0F);
-			//Io max
-			float_to_integer(ACCUMULATION.io_max, &MANAGER.tx_buffer[42], 1.0F);
-			
 			
 			i = COMM_CRC(MANAGER.tx_buffer, 46);
 			
@@ -1704,34 +1695,19 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			serial_ok_nak_send(0);
 		}
 		
-		//vo max  clear
-		else if(MANAGER.rx_buffer[3] == 0x02)
-		{			
-			ACCUMULATION.vo_max = 0;
-						
-			float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
-			
-			EVENT.data_reset |= Vo_RESET_EVENT;
-			
-			event_direct_save(&EVENT.data_reset);
-			
-			serial_ok_nak_send(0);
-		}
-		
-		//Io max  clear
-		else if(MANAGER.rx_buffer[3] == 0x03)
-		{			
-			ACCUMULATION.io_max = 0;
-						
-			float_to_integer(ACCUMULATION.io_max, IoMAX1, 1.0F);
-			
-			
-			EVENT.data_reset |= Io_RESET_EVENT;
-			
-			event_direct_save(&EVENT.data_reset);
-			
-			serial_ok_nak_send(0);
-		}
+//		//vo max  clear
+//		else if(MANAGER.rx_buffer[3] == 0x02)
+//		{			
+//			ACCUMULATION.vo_max = 0;
+//						
+//			float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
+//			
+//			EVENT.data_reset |= Vo_RESET_EVENT;
+//			
+//			event_direct_save(&EVENT.data_reset);
+//			
+//			serial_ok_nak_send(0);
+//		}
 		
 		//CB Close Time  clear
 		else if(MANAGER.rx_buffer[3] == 0x03)
@@ -1747,12 +1723,8 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			
 			serial_ok_nak_send(0);
 		}
-		
-		
 		//serial_write(1, &LOCAL_CONTROL.mode, LOCAL_CTRL_USE); //2015.02.24
 	}
-		
-	
 	
 	// debug
 	else if(MANAGER.rx_buffer[2] == 0x18)
@@ -2072,9 +2044,6 @@ void comm_drive(void)
 				
 				else
 				float_to_integer(DISPLAY.rms_value[In], COMM_2_Io, 10.0F);
-				
-				//Io max
-				//float_to_integer(ACCUMULATION.io_max, COMM_2_Io_max, 10.0F);
 			}
 			
 			else if(COMM.index == 1)

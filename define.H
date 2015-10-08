@@ -176,9 +176,6 @@
 #define COMM_BAUD_MIN   3
 #define COMM_BAUD_MAX   7
 
-#define DISPLAY_CUT_I_1A        0.021 // (0.04 / 2) * 1.05 //0.03[A] = 30[mA]
-#define DISPLAY_CUT_I_5A        0.105 // (0.2 / 2) * 1.05  //0.03[A] = 30[mA]
-
 #define DISPLAY_CURRENT_MIN 0.03	//30[mA]
 #define DISPLAY_VOLTAGE_MIN 1.9 	//1.9[V]
 #define DISPLAY_Io_MIN 			0.2		//0.2[mA]
@@ -662,6 +659,8 @@
 
 #define MRAM_RUNNING_HOUR1	(unsigned int *)0x15d0f0	//RUNNING HOUR METER MRAM 주소
 #define MRAM_RUNNING_HOUR2	(unsigned int *)0x15d0f1	//RUNNING HOUR METER MRAM 주소
+#define MRAM_Vo_MAX1				(unsigned int *)0x15d0f2	//Vo MAX MRAM 주소
+#define MRAM_Vo_MAX2				(unsigned int *)0x15d0f3	//Vo MAX MRAM 주소
 
 //누적값
 //유효전력
@@ -693,12 +692,6 @@
 #define VoMAX2          (unsigned int *)0x120f11
 #define VoMAX3          (unsigned int *)0x120f12
 #define VoMAX4          (unsigned int *)0x120f13
-
-//최대영상전류
-#define IoMAX1          (unsigned int *)0x120f14
-#define IoMAX2          (unsigned int *)0x120f15
-#define IoMAX3          (unsigned int *)0x120f16
-#define IoMAX4          (unsigned int *)0x120f17
 
 #define CB_CLOSE_TIME1	(unsigned int *)0x120f18
 #define CB_CLOSE_TIME2	(unsigned int *)0x120f19

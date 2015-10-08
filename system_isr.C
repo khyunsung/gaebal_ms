@@ -863,6 +863,11 @@ interrupt void TINT1_ISR(void)
 	if((DISPLAY.rms_value[Ia] >= RUNNING.Cut_Current) || (DISPLAY.rms_value[Ib] >= RUNNING.Cut_Current) || (DISPLAY.rms_value[Ic] >= RUNNING.Cut_Current))
 	{
 		++RUNNING.op_count;
+		AUX_RELAY_TEST.Curr_input_flag=1;
+	}
+	else
+	{
+		AUX_RELAY_TEST.Curr_input_flag=0;
 	}
 }
 
