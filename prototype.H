@@ -68,7 +68,7 @@ void eerom_read(unsigned int, void *);
 
 unsigned int aux_do_check(unsigned int *);
 
-//unsigned int COMM_CRC(unsigned int *, unsigned int);
+unsigned int COMM_CRC(unsigned int *, unsigned int);
 void make_crc_send(unsigned int *, unsigned int *, unsigned int);
 void serial_write(unsigned int, unsigned int *, unsigned int *);
 void serial_ok_nak_send(unsigned int);
@@ -191,3 +191,4 @@ void DMACH1WrapConfig(Uint16, int16, Uint16, int16);
 void DMACH1ModeConfig(Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16);
 void StartDMACH1(void);
 void self_diagnostic(void);
+void Save_Fault_Wave_Info(unsigned int);

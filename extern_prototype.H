@@ -63,7 +63,7 @@ extern void eerom_read(unsigned int, void *);
 
 extern unsigned int aux_do_check(unsigned int *);
 
-//extern unsigned int COMM_CRC(unsigned int *, unsigned int);
+extern unsigned int COMM_CRC(unsigned int *, unsigned int);
 extern void make_crc_send(unsigned int *, unsigned int *, unsigned int);
 extern void serial_write(unsigned int, unsigned int *, unsigned int *);
 extern void serial_ok_nak_send(unsigned int);
@@ -189,3 +189,4 @@ extern void DMACH1WrapConfig(Uint16, int16, Uint16, int16);
 extern void DMACH1ModeConfig(Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16);
 extern void StartDMACH1(void);
 extern void self_diagnostic(void);
+extern void Save_Fault_Wave_Info(unsigned int);

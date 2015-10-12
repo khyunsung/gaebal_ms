@@ -987,30 +987,61 @@ void wave_di_initial_post(void)
 /*
 wave 저장방식
 평상시 저장하는 부분 / analog : 5400word/0x1518, digital : 1800word/0x708
+//Ia - 0x200000 ~ 0x201517
+//Ib - 0x202a30 ~ 0x203F47
+//Ic - 0x205460 ~ 0x206977
+//In - 0x207e90 ~ 0x2093A7
+//Va - 0x20fd20 ~ 0x211237
+//Vb - 0x212750 ~ 0x213C67
+//Vc - 0x215180 ~ 0x216697
+//Vn - 0x217bb0 ~ 0x2190C7
+//Ry - 0x21a5e0 ~ 0x21ACE7
+//DI - 0x21B3F0 ~ 0x21C907
+//DO - 0x21C200 ~ 0x2190C7
+
 Ia - 0x200000 ~ 0x201517
 Ib - 0x202a30 ~ 0x203F47
 Ic - 0x205460 ~ 0x206977
 In - 0x207e90 ~ 0x2093A7
-Va - 0x20fd20 ~ 0x211237
-Vb - 0x212750 ~ 0x213C67
-Vc - 0x215180 ~ 0x216697
-Vn - 0x217bb0 ~ 0x2190C7
-Ry - 0x21a5e0 ~ 0x21ACE7
-DI - 0x21B3F0 ~ 0x21C907
-DO - 0x21C200 ~ 0x2190C7
+Va - 0x20A8C0 ~ 0x20BDD7
+Vb - 0x20D2F0 ~ 0x20E807
+Vc - 0x20FD20 ~ 0x211237
+Vn - 0x212750 ~ 0x213C67
+Ry - 0x215180 ~ 0x216697
+DI - 0x217BB0 ~ 0x2190C7
+DO - 0x21A5E0 ~ 0x21BAF7
 
 사고 후  저장하는 부분 / analog : 5400word/0x1518, digital : 1800word/0x708
+//Ia - 0x201518 ~ 0x202A2F
+//Ib - 0x203F48 ~ 0x206977
+//Ic - 0x206978 ~ 0x2093A7
+//In - 0x2093A8 ~ 0x20A8BF
+//Va - 0x211238 ~ 0x213C67
+//Vb - 0x213C68 ~ 0x216697
+//Vc - 0x216698 ~ 0x2190C7
+//Vn - 0x2190C8 ~ 0x21A5DF
+//Ry - 0x21ACE8 ~ 0x21B3ef
+//DI - 0x21BAF8 ~ 0x21C1ff
+//DO - 0x21C908 ~ 0x21D00F
+
 Ia - 0x201518 ~ 0x202A2F
-Ib - 0x203F48 ~ 0x206977
-Ic - 0x206978 ~ 0x2093A7
+Ib - 0x203F48 ~ 0x20545F
+Ic - 0x206978 ~ 0x207E8F
 In - 0x2093A8 ~ 0x20A8BF
-Va - 0x211238 ~ 0x213C67
-Vb - 0x213C68 ~ 0x216697
-Vc - 0x216698 ~ 0x2190C7
-Vn - 0x2190C8 ~ 0x21A5DF
-Ry - 0x21ACE8 ~ 0x21B3ef
-DI - 0x21BAF8 ~ 0x21C1ff
-DO - 0x21C908 ~ 0x21D00F
+Va - 0x20BDD8 ~ 0x20D2EF
+Vb - 0x20E808 ~ 0x20FD1F
+Vc - 0x211238 ~ 0x21274F
+Vn - 0x213C68 ~ 0x21517F
+Ry - 0x216698 ~ 0x217BAF
+DI - 0x2190C8 ~ 0x21A5DF
+DO - 0x21BAF8 ~ 0x21D00F
+
+1주기에 36샘플   1초에 60샘플
+36*60=2160[샘플]
+1초에 2160[샘플]
+0.5초에 1080[샘플]
+2.5초에 5400[샘플]
+
 
 사고 후 모든저장이 완료되면
 if((WAVE.post_count == 5400) && (WAVE.post_start == 0x1234))
@@ -1173,7 +1204,8 @@ void wave_save_process(void)
 		else
 		{
 			if(CORE.gr_select == ZCT_SELECT)
-			wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_Is_wave_buffer + FLASH.source_count));	
+				wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_In_wave_buffer + FLASH.source_count));
+			//wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_Is_wave_buffer + FLASH.source_count));
 			
 			else
 			{
@@ -1195,7 +1227,8 @@ void wave_save_process(void)
 		else
 		{
 			if(CORE.gr_select == ZCT_SELECT)
-			wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_Is_wave_buffer + FLASH.source_count));	
+				wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_In_wave_buffer + FLASH.source_count));
+			//wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_Is_wave_buffer + FLASH.source_count));
 			
 			else
 			{
@@ -1217,7 +1250,8 @@ void wave_save_process(void)
 		else
 		{
 			if(CORE.gr_select == ZCT_SELECT)
-			wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Post_Is_wave_buffer + FLASH.source_count));
+				wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Pre_In_wave_buffer + FLASH.source_count));
+			//wave_flash_word_write(FLASH_WAVE_In + FLASH.destination_count, *(Post_Is_wave_buffer + FLASH.source_count));
 			
 			else
 			{
@@ -1463,6 +1497,8 @@ void wave_save_process(void)
 		WAVE.post_start = 0;
 		FLASH.end_flag = 0;
 		WAVE.hold = 0xaaaa;
+		
+		Save_Fault_Wave_Info(1);	// Save Wave Info to MRAM
 	}
 }
 
