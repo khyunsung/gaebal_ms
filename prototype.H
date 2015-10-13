@@ -68,7 +68,7 @@ void eerom_read(unsigned int, void *);
 
 unsigned int aux_do_check(unsigned int *);
 
-//unsigned int COMM_CRC(unsigned int *, unsigned int);
+unsigned int COMM_CRC(unsigned int *, unsigned int);
 void make_crc_send(unsigned int *, unsigned int *, unsigned int);
 void serial_write(unsigned int, unsigned int *, unsigned int *);
 void serial_ok_nak_send(unsigned int);
@@ -182,3 +182,13 @@ void Save_Screen_Info(unsigned int);
 void Restore_Screen_Info(void);
 void modbus_comm_card_check(void);
 void SCI_Port_Err_Check(void);
+
+void DMAInitialize(void);
+void DMACH1AddrConfig(volatile Uint16 *,volatile Uint16 *);
+void DMACH1BurstConfig(Uint16, int16, int16);
+void DMACH1TransferConfig(Uint16, int16, int16);
+void DMACH1WrapConfig(Uint16, int16, Uint16, int16);
+void DMACH1ModeConfig(Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16);
+void StartDMACH1(void);
+void self_diagnostic(void);
+void Save_Fault_Wave_Info(unsigned int);

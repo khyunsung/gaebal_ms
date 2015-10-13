@@ -13,6 +13,43 @@ void Save_Relay_Event(float ar_ratio)
 	event_direct_save(&EVENT.operation);
 }
 
+void Save_Fault_Wave_Info(unsigned int selection)
+{
+	struct tm ftime;
+	time_t tmp_time;
+	
+	if(selection == 0) {
+			FAULT_INFO.year 			= TIME.year;  // 연
+			FAULT_INFO.month 			= TIME.month; // 월
+			FAULT_INFO.day 				= TIME.day;   // 일
+			FAULT_INFO.hour 			= TIME.hour;  // 시
+			FAULT_INFO.minute 		= TIME.minute; // 분
+			FAULT_INFO.second 		= TIME.second; // 초
+			FAULT_INFO.milisecond = TIME.milisecond; //msec
+			FAULT_INFO.fault_type = EVENT.fault_type;
+		} else {
+			ftime.tm_year = FAULT_INFO.year + 30;
+			ftime.tm_mon  = FAULT_INFO.month;
+			ftime.tm_mday = FAULT_INFO.day;
+			ftime.tm_hour = FAULT_INFO.hour;
+			ftime.tm_min  = FAULT_INFO.minute;
+			ftime.tm_sec  = FAULT_INFO.second;
+
+			tmp_time = mktime( &ftime);
+			
+			*RATED_FREQ_IN_WAVE 	= 0; // fill up
+			*CT_RATIO_IN_WAVE		 	= 0; // fill up
+			*PT_RATIO_IN_WAVE 		= 0; // fill up
+			
+			*MODBUS_ADDR_IN_WAVE 			= ADDRESS.address;
+			*DATE_TIME_IN_WAVE  			= tmp_time >> 16;
+			*(DATE_TIME_IN_WAVE + 1) 	= tmp_time;
+			*MSEC_IN_WAVE 						= FAULT_INFO.milisecond;
+			*TYPE_IN_WAVE 						= 0;	// fill up
+			*TRIP_TITLE_IN_WAVE 			= FAULT_INFO.fault_type;
+		}
+}
+
 void relay_dropout_to_normal(unsigned int ar_relay_bit)
 {
 	WAVE.relay &= ~ar_relay_bit;
@@ -74,6 +111,7 @@ void RELAY_OCR50_1(void)
 						Phase_Info = (Phase_Info == 0)? EVENT.operation: OCR50_1.Op_Phase;
 						Save_Relay_Event(OCR50_1.Op_Ratio * 100.0F);
 						Save_Screen_Info(OCR50_1.Op_Phase);
+						Save_Fault_Wave_Info(0);
 						WAVE.post_start = 0x1234;						
 					}
 				}
@@ -161,6 +199,7 @@ void RELAY_OCR50_2(void)
 						EVENT.fault_type = F_OCR50_2;
 						Save_Relay_Event(OCR50_2.Op_Ratio * 100.0F);
 						Save_Screen_Info(OCR50_2.Op_Phase);
+						Save_Fault_Wave_Info(0);
 						WAVE.post_start = 0x1234;
 					}
 				}
@@ -235,6 +274,7 @@ void RELAY_OCGR50(void)
 					EVENT.fault_type = F_OCGR50;
 					Save_Relay_Event(OCGR50.Op_Ratio * 100.0F);
 					Save_Screen_Info(OCGR50.Op_Phase);
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -308,6 +348,7 @@ void RELAY_OCGR51(void)
 					EVENT.fault_type = F_OCGR51;
 					Save_Relay_Event(OCGR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(OCGR51.Op_Phase);				
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -409,6 +450,7 @@ void RELAY_THR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: THR.Op_Phase;
 					Save_Relay_Event(THR.Op_Ratio * 100.0F);
 					Save_Screen_Info(THR.Op_Phase);
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -440,6 +482,7 @@ void RELAY_THR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: THR.Op_Phase;
 					Save_Relay_Event(THR.Op_Ratio * 100.0F);
 					Save_Screen_Info(THR.Op_Phase);
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -514,6 +557,7 @@ void RELAY_NSR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: NSR.Op_Phase;
 					Save_Relay_Event(NSR.Op_Ratio * 100.0F);
 					Save_Screen_Info(NSR.Op_Phase);		
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -606,6 +650,7 @@ void RELAY_51LR(void)
 					EVENT.fault_type = F_51LR_TOO;
 					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(LR51.Op_Phase);	
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -666,6 +711,7 @@ void RELAY_51LR(void)
 					EVENT.fault_type = F_51LR_ROCK;
 					Save_Relay_Event(LR51.Op_Ratio * 100.0F);
 					Save_Screen_Info(LR51.Op_Phase);	
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -870,6 +916,7 @@ void RELAY_UCR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: UCR.Op_Phase;
 					Save_Relay_Event(UCR.Op_Ratio * 100.0F);
 					Save_Screen_Info(UCR.Op_Phase);		
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -941,6 +988,7 @@ void RELAY_DGR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: DGR.Op_Phase;
 					Save_Relay_Event(DGR.Op_Ratio * 100.0F);
 					Save_Screen_Info(DGR.Op_Phase);
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
@@ -1015,6 +1063,7 @@ void RELAY_SGR(void)
 					Phase_Info = (Phase_Info == 0)? EVENT.operation: SGR.Op_Phase;
 					Save_Relay_Event(SGR.Op_Ratio * 100.0F);
 					Save_Screen_Info(SGR.Op_Phase);
+					Save_Fault_Wave_Info(0);
 					WAVE.post_start = 0x1234;
 				}
 			}
