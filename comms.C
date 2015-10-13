@@ -323,7 +323,13 @@ void manager_handling(void)
 			MANAGER.tx_buffer[4] = 0;
 			MANAGER.tx_buffer[5] = 40;
 			                              
+//DISPLAY.rms_value[Va] = 100;			                              
+//DISPLAY.rms_value[Vb] = 200;
+//DISPLAY.rms_value[Vc] = 300;
+//DISPLAY.rms_value[Vn] = 400;
+
 			//Va
+			//float_to_integer(DISPLAY.rms_value[Va], &MANAGER.tx_buffer[6], 1);
 			float_to_integer(DISPLAY.rms_value[Va], &MANAGER.tx_buffer[6], 1.0F);
 			//Vb
 			float_to_integer(DISPLAY.rms_value[Vb], &MANAGER.tx_buffer[10], 1.0F);
@@ -331,28 +337,6 @@ void manager_handling(void)
 			float_to_integer(DISPLAY.rms_value[Vc], &MANAGER.tx_buffer[14], 1.0F);
 			//Vo
 			float_to_integer(DISPLAY.rms_value[Vn], &MANAGER.tx_buffer[18], 1.0F);
-<<<<<<< HEAD
-			//Vp
-			float_to_integer(MEASUREMENT.V1_value, &MANAGER.tx_buffer[22], 1.0F);
-			//Vn
-			float_to_integer(MEASUREMENT.V2_value, &MANAGER.tx_buffer[26], 1.0F);
-			//Vb 위상
-			float_to_integer(DISPLAY.angle[1], &MANAGER.tx_buffer[30], 1.0F);
-			//Vc 위상
-			float_to_integer(DISPLAY.angle[2], &MANAGER.tx_buffer[34], 1.0F);
-			//Vo max
-//			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[38], 1.0F);
-			//주파수
-			float_to_integer(MEASUREMENT.frequency, &MANAGER.tx_buffer[42], 1.0F);
-			
-			
-			i = COMM_CRC(MANAGER.tx_buffer, 46);
-			
-			MANAGER.tx_buffer[46] = i >> 8;
-			MANAGER.tx_buffer[47] = i & 0x00ff;
-			
-			MANAGER.tx_length = 48;
-=======
 			//Vom
 			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[22], 1.0F);
 			//Vavg
@@ -377,7 +361,6 @@ void manager_handling(void)
 			MANAGER.tx_buffer[55] = i & 0x00ff;
 			
 			MANAGER.tx_length = 56;
->>>>>>> origin/master
 			
 			MANAGER.isr_tx = MANAGER.tx_buffer;
 			
@@ -413,22 +396,6 @@ void manager_handling(void)
 			//Ips
 			float_to_integer(DISPLAY.I1_value, &MANAGER.tx_buffer[26], 10.0F);
 			//Ins
-<<<<<<< HEAD
-			float_to_integer(MEASUREMENT.I2_value, &MANAGER.tx_buffer[26], 10.0F);
-			//IA 위상
-			float_to_integer(DISPLAY.angle[3], &MANAGER.tx_buffer[30], 1.0F);
-			//Ib 위상
-			float_to_integer(DISPLAY.angle[4], &MANAGER.tx_buffer[34], 1.0F);
-			//Ic 위상
-			float_to_integer(DISPLAY.angle[5], &MANAGER.tx_buffer[38], 1.0F);
-			
-			i = COMM_CRC(MANAGER.tx_buffer, 46);
-			
-			MANAGER.tx_buffer[46] = i >> 8;
-			MANAGER.tx_buffer[47] = i & 0x00ff;
-			
-			MANAGER.tx_length = 48;
-=======
 			float_to_integer(DISPLAY.I2_value, &MANAGER.tx_buffer[30], 10.0F);
 			
 			//Ia 3rd
@@ -491,7 +458,6 @@ void manager_handling(void)
 			MANAGER.tx_buffer[85] = i & 0x00ff;
 			
 			MANAGER.tx_length = 86;
->>>>>>> origin/master
 			
 			MANAGER.isr_tx = MANAGER.tx_buffer;
 			
@@ -1986,19 +1952,34 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			serial_ok_nak_send(0);
 		}
 		
-//		//vo max  clear
-//		else if(MANAGER.rx_buffer[3] == 0x02)
-//		{			
-//			ACCUMULATION.vo_max = 0;
-//						
-//			float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
-//			
-//			EVENT.data_reset |= Vo_RESET_EVENT;
-//			
-//			event_direct_save(&EVENT.data_reset);
-//			
-//			serial_ok_nak_send(0);
-//		}
+		//vo max  clear
+		else if(MANAGER.rx_buffer[3] == 0x02)
+		{			
+			ACCUMULATION.vo_max = 0;
+						
+			float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
+			
+			EVENT.data_reset |= Vo_RESET_EVENT;
+			
+			event_direct_save(&EVENT.data_reset);
+			
+			serial_ok_nak_send(0);
+		}
+		
+		//Io max  clear
+		else if(MANAGER.rx_buffer[3] == 0x03)
+		{			
+			ACCUMULATION.io_max = 0;
+						
+			float_to_integer(ACCUMULATION.io_max, IoMAX1, 1.0F);
+			
+			
+			EVENT.data_reset |= Io_RESET_EVENT;
+			
+			event_direct_save(&EVENT.data_reset);
+			
+			serial_ok_nak_send(0);
+		}
 		
 		//CB Close Time  clear
 		else if(MANAGER.rx_buffer[3] == 0x03)
@@ -2014,8 +1995,12 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			
 			serial_ok_nak_send(0);
 		}
+		
+		
 		//serial_write(1, &LOCAL_CONTROL.mode, LOCAL_CTRL_USE); //2015.02.24
 	}
+	
+	
 	
 	// debug
 	else if(MANAGER.rx_buffer[2] == 0x18)
@@ -2372,9 +2357,6 @@ void comm_drive(void)
 				if(CORE.gr_select == ZCT_SELECT)
 				float_to_integer(DISPLAY.rms_value[Is], COMM2_IN, 10.0F);
 				else
-<<<<<<< HEAD
-				float_to_integer(DISPLAY.rms_value[In], COMM_2_Io, 10.0F);
-=======
 				float_to_integer(DISPLAY.rms_value[In], COMM2_IN, 10.0F);
 				
 				//Iavg
@@ -2383,7 +2365,6 @@ void comm_drive(void)
 				float_to_integer(DISPLAY.I1_value, COMM2_IPS, 10.0F);
 				//Ins
 				float_to_integer(DISPLAY.I2_value, COMM2_INS, 10.0F);
->>>>>>> origin/master
 			}
 			
 			else if(COMM.index == 1)
