@@ -1952,19 +1952,34 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			serial_ok_nak_send(0);
 		}
 		
-//		//vo max  clear
-//		else if(MANAGER.rx_buffer[3] == 0x02)
-//		{			
+		//vo max  clear
+		else if(MANAGER.rx_buffer[3] == 0x02)
+		{			
 //			ACCUMULATION.vo_max = 0;
-//						
+						
 //			float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
-//			
-//			EVENT.data_reset |= Vo_RESET_EVENT;
-//			
-//			event_direct_save(&EVENT.data_reset);
-//			
-//			serial_ok_nak_send(0);
-//		}
+			
+			EVENT.data_reset |= Vo_RESET_EVENT;
+			
+			event_direct_save(&EVENT.data_reset);
+			
+			serial_ok_nak_send(0);
+		}
+		
+		//Io max  clear
+		else if(MANAGER.rx_buffer[3] == 0x03)
+		{			
+			//ACCUMULATION.io_max = 0;
+						
+			//float_to_integer(ACCUMULATION.io_max, IoMAX1, 1.0F);
+			
+			
+			EVENT.data_reset |= Io_RESET_EVENT;
+			
+			event_direct_save(&EVENT.data_reset);
+			
+			serial_ok_nak_send(0);
+		}
 		
 		//CB Close Time  clear
 		else if(MANAGER.rx_buffer[3] == 0x03)

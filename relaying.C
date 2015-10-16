@@ -17,6 +17,8 @@ void Save_Fault_Wave_Info(unsigned int selection)
 {
 	struct tm ftime;
 	time_t tmp_time;
+	void *void_p;
+	unsigned long *tmp32_p;
 	
 	if(selection == 0) {
 			FAULT_INFO.year 			= TIME.year;  // ¿¬
@@ -47,6 +49,31 @@ void Save_Fault_Wave_Info(unsigned int selection)
 			*MSEC_IN_WAVE 						= FAULT_INFO.milisecond;
 			*TYPE_IN_WAVE 						= 0;	// fill up
 			*TRIP_TITLE_IN_WAVE 			= FAULT_INFO.fault_type;
+			
+			//offset -   0,  1,  2,  3,   4,    5,   6,  7,  8,  9
+			//          Ia, Ib, Ic, In, In2,  ZCT,  Va, Vb, Vc, Vn			
+			*OFFSET_IA  = CALIBRATION.offset[0];		
+			
+			void_p = &CALIBRATION.slope[0];
+			tmp32_p = (unsigned long *)void_p;
+			*SCALE_FACTOR_IA 				= (*tmp32_p)>>16;
+			*(SCALE_FACTOR_IA + 1)	= *tmp32_p;
+			
+			*OFFSET_IB   		 = CALIBRATION.offset[1];
+			*SCALE_FACTOR_IB = CALIBRATION.slope[1];                     
+			*OFFSET_IC   		 = CALIBRATION.offset[2];
+			*SCALE_FACTOR_IC = CALIBRATION.slope[2];
+			*OFFSET_IN   		 = CALIBRATION.offset[3];
+			*SCALE_FACTOR_IN = CALIBRATION.slope[3];
+			*OFFSET_VA   		 = CALIBRATION.offset[6];
+			*SCALE_FACTOR_VA = CALIBRATION.slope[6];
+			*OFFSET_VB   		 = CALIBRATION.offset[7];
+			*SCALE_FACTOR_VB = CALIBRATION.slope[7];
+			*OFFSET_VC   		 = CALIBRATION.offset[8];
+			*SCALE_FACTOR_VC = CALIBRATION.slope[8];
+			*OFFSET_VN   		 = CALIBRATION.offset[9];
+			*SCALE_FACTOR_VN = CALIBRATION.slope[9];
+			
 		}
 }
 

@@ -664,6 +664,7 @@
 #define MRAM_RUNNING_HOUR2	(unsigned int *)0x15d0f1	//RUNNING HOUR METER MRAM 林家
 #define MRAM_Vo_MAX1				(unsigned int *)0x15d0f2	//Vo MAX MRAM 林家
 #define MRAM_Vo_MAX2				(unsigned int *)0x15d0f3	//Vo MAX MRAM 林家
+#define MRAM_CHECK				(unsigned int *)0x17FFF0	//MRAM 惑矫眉农 林家
 
 //穿利蔼
 //蜡瓤傈仿
@@ -894,33 +895,33 @@
 #define FLASH_WAVE_DO   (unsigned int *)0x15C200
 
 #define OFFSET_IA   		(unsigned int *)0x15d010
-#define SCALE_FACTOR_IA (unsigned int *)0x15d012
-#define OFFSET_IB   		(unsigned int *)0x15d016
-#define SCALE_FACTOR_IB (unsigned int *)0x15d018
-#define OFFSET_IC   		(unsigned int *)0x15d01C
-#define SCALE_FACTOR_IC (unsigned int *)0x15d01E
-#define OFFSET_IN   		(unsigned int *)0x15d022
-#define SCALE_FACTOR_IN (unsigned int *)0x15d024
-#define OFFSET_VA   		(unsigned int *)0x15d028
-#define SCALE_FACTOR_VA (unsigned int *)0x15d02A
-#define OFFSET_VB   		(unsigned int *)0x15d02E
-#define SCALE_FACTOR_VB (unsigned int *)0x15d030
-#define OFFSET_VC   		(unsigned int *)0x15d036
-#define SCALE_FACTOR_VC (unsigned int *)0x15d03A
-#define OFFSET_VN   		(unsigned int *)0x15d03A
-#define SCALE_FACTOR_VN (unsigned int *)0x15d03C
+#define SCALE_FACTOR_IA (unsigned int *)0x15d011
+#define OFFSET_IB   		(unsigned int *)0x15d013
+#define SCALE_FACTOR_IB (unsigned int *)0x15d014
+#define OFFSET_IC   		(unsigned int *)0x15d016
+#define SCALE_FACTOR_IC (unsigned int *)0x15d017
+#define OFFSET_IN   		(unsigned int *)0x15d019
+#define SCALE_FACTOR_IN (unsigned int *)0x15d01A
+#define OFFSET_VA   		(unsigned int *)0x15d01C
+#define SCALE_FACTOR_VA (unsigned int *)0x15d01D
+#define OFFSET_VB   		(unsigned int *)0x15d01F
+#define SCALE_FACTOR_VB (unsigned int *)0x15d020
+#define OFFSET_VC   		(unsigned int *)0x15d022
+#define SCALE_FACTOR_VC (unsigned int *)0x15d023
+#define OFFSET_VN   		(unsigned int *)0x15d025
+#define SCALE_FACTOR_VN (unsigned int *)0x15d026
 
-#define MODBUS_ADDR_IN_WAVE	(unsigned int *)0x15d040
-#define RATED_FREQ_IN_WAVE	(unsigned int *)0x15d041
+#define MODBUS_ADDR_IN_WAVE	(unsigned int *)0x15d028
+#define RATED_FREQ_IN_WAVE	(unsigned int *)0x15d029
 
-#define CT_RATIO_IN_WAVE		(unsigned int *)0x15d042
-#define PT_RATIO_IN_WAVE		(unsigned int *)0x15d048
+#define CT_RATIO_IN_WAVE		(unsigned int *)0x15d02A
+#define PT_RATIO_IN_WAVE		(unsigned int *)0x15d02F
 
-#define DATE_TIME_IN_WAVE		(unsigned int *)0x15d04E
-#define MSEC_IN_WAVE				(unsigned int *)0x15d050
-#define TYPE_IN_WAVE				(unsigned int *)0x15d051
-#define TRIP_TITLE_IN_WAVE	(unsigned int *)0x15d052
-#define WAVE_WRITE_CHECK 		(unsigned int *)0x15d053	//0x19AFFF //0x1d020 //0x15d011
+#define DATE_TIME_IN_WAVE		(unsigned int *)0x15d035
+#define MSEC_IN_WAVE				(unsigned int *)0x15d037
+#define TYPE_IN_WAVE				(unsigned int *)0x15d038
+#define TRIP_TITLE_IN_WAVE	(unsigned int *)0x15d039
+#define WAVE_WRITE_CHECK 		(unsigned int *)0x15d03A	//0x19AFFF //0x1d020 //0x15d011
 
 
 #define FLASH_CHECK_SECTOR (unsigned int *)0x19e000
