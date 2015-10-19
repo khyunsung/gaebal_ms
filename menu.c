@@ -14144,16 +14144,26 @@ void menu_154_01(unsigned int value, int display)
 {
 	const char *str[2] = {
 			"[66 SET      ] ?   \1\0",
-			"                   \2\0" 
+			"[WATCHDOG    ] ?   \2\0"  //2015.10.19
 	};
 
+//2015.10.19
 	if(display) {
 		screen_frame3(str);
-		cursor_move(0, 15);
+		if(Screen_Position.select == 0) {
+			cursor_move(0, 15);
+		} else if (Screen_Position.select == 1) {
+			cursor_move(1, 15);
+		}
 		return;
 	}
 
-	if(value == UP_KEY) {
+	if(value == LEFT_KEY) {
+		if(Screen_Position.select-- <= 0) Screen_Position.select = 2;
+		Screen_Position.select %= 3;
+	} else if(value == RIGHT_KEY) {
+		if(Screen_Position.select++ >= 2) Screen_Position.select = 0;
+	} else if(value == UP_KEY) {
 		Screen_Position.y = 80;
 		Screen_Position.x = 3;
 		Screen_Position.select = 0;
@@ -14162,11 +14172,21 @@ void menu_154_01(unsigned int value, int display)
 		Screen_Position.x = 1;
 		Screen_Position.select = 0;
 	} else if(value == ENTER_KEY) {
-		Screen_Position.y = 158;
-		Screen_Position.x = 2;
-		Screen_Position.select = 1;
-		SET_66.ratio_temp = SET_66.ratio;
+		if(Screen_Position.select == 0) {
+			SET_66.ratio_temp = SET_66.ratio;
+			Screen_Position.y = 158;
+			Screen_Position.x = 2;
+			Screen_Position.select = 1;
+		} else if(Screen_Position.select == 1) {
+			WATCHDOG.use_temp = WATCHDOG.use;
+		
+			Screen_Position.y = 159;
+			Screen_Position.x = 2;
+			(WATCHDOG.use == ENABLE) ? (Screen_Position.select = 0) : (Screen_Position.select = 1);
+		}
 	}
+	//2015.10.19 END
+
 }
 
 void menu_154_02(unsigned int value, int display)
@@ -15094,6 +15114,151 @@ void menu_158_09(unsigned int value, int display)
 	}
 }
 
+//2015.10.19
+void menu_159_02(unsigned int value, int display)
+{
+	char str[2][22];
+
+	if(display) {
+		sprintf(str[0],"PRE MODE  : %s \0", WATCHDOG.use_temp == ENABLE? "ENABLE " : "DISABLE");  
+		sprintf(str[1]," ENABLE?   DISABLE? \0");
+		screen_frame2(str);
+
+		if(Screen_Position.select == 0) {
+			cursor_move(1, 7);
+		} else if(Screen_Position.select == 1) {
+			cursor_move(1, 18);
+		}
+		return;
+	}
+
+	if(value == LEFT_KEY) {
+		Screen_Position.select -= 1;
+		Screen_Position.select %= 2;
+	} else if(value == RIGHT_KEY) {
+		Screen_Position.select += 1;
+		Screen_Position.select %= 2;
+	} else if(value == ENTER_KEY) {
+		if(Screen_Position.select == 0) {
+			WATCHDOG.use_temp = ENABLE;
+			Screen_Position.y = 159;
+			Screen_Position.x = 3;
+			cursor_move(0, 0);
+		} else if(Screen_Position.select == 1) {
+			WATCHDOG.use_temp = DISABLE;
+			Screen_Position.y = 159;
+			Screen_Position.x = 3;
+			cursor_move(0, 0);
+		}
+	}
+}
+
+void menu_159_03(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0],"NEW SETTING :      %c\0", ENTER);
+	sprintf(str[1],"NEW MODE : %s  \0", WATCHDOG.use_temp == ENABLE? "ENABLE " : "DISABLE");
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value == ENTER_KEY) {
+			Screen_Position.y = 159;
+			Screen_Position.x = 4;
+			Screen_Position.select = 1;
+	}
+}
+
+void menu_159_04(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0],"                    \0");
+	sprintf(str[1],"WANT TO SET ?  [Y/N]\0");
+
+	if(display) {
+		screen_frame2(str);
+		if(Screen_Position.select == 0) {
+			cursor_move(1, 16);
+		} else if(Screen_Position.select == 1) {
+			cursor_move(1, 18);
+		}
+		return;
+	}
+
+	if(value == LEFT_KEY) {
+		Screen_Position.select -= 1;
+		Screen_Position.select %= 2;
+	} else if(value == RIGHT_KEY) {
+		Screen_Position.select += 1;
+		Screen_Position.select %= 2;
+	} else if(value == ENTER_KEY) {
+		if(Screen_Position.select == 0) {
+			WATCHDOG.use = WATCHDOG.use_temp;
+
+// FLASH 저장 안함
+//			if(setting_save(&WATCHDOG.use, DISP_3PHASE_USE, 1))
+//			{
+//				setting_load(&WATCHDOG.use, 1, DISP_3PHASE_USE);
+//			}
+//			else
+//			{
+//				//FLASH WRITE ERROR pop up 화면
+//			}
+
+			Screen_Position.y = 159;
+			Screen_Position.x = 5;
+			cursor_move(0, 0);//cursor off
+		} else if(Screen_Position.select == 1) {
+			Screen_Position.y = 159;
+			Screen_Position.x = 6;
+			cursor_move(0, 0);//cursor off
+		}
+	}
+}
+
+void menu_159_05(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0], "   SET COMPLETE !   \0");
+	sprintf(str[1], "   PRESS ANY KEY !  \0");
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value) {
+			Screen_Position.y = 154;
+			Screen_Position.x = 1;
+			Screen_Position.select = 0;
+	}
+}
+
+void menu_159_06(unsigned int value, int display)
+{
+	char str[2][22];
+
+	sprintf(str[0], "   SET CANCELED !   \0");
+	sprintf(str[1], "   PRESS ANY KEY !  \0");
+
+	if(display) {
+		screen_frame2(str);
+		return;
+	}
+
+	if(value) {
+			Screen_Position.y = 154;
+			Screen_Position.x = 1;
+			Screen_Position.select = 0;
+	}
+}
+//2015.10.19 end
+
 void menu_dummy(unsigned int value, int display)
 {
 	char str[2][22];
@@ -15656,7 +15821,7 @@ const Screen_Function_Pointer menu_tables[200][18] = { //2015.02.17
 		{menu_dummy, menu_dummy, menu_156_02, menu_156_03, menu_156_04, menu_156_05, menu_156_06, menu_156_07, menu_156_08, menu_156_09, menu_156_10, menu_156_11, menu_156_12, menu_156_13, menu_156_14, menu_156_15, menu_156_16,}, // 156
 		{menu_dummy, menu_dummy, menu_157_02, menu_157_03, menu_157_04, menu_157_05,},                                                             // 157
 		{menu_dummy, menu_dummy, menu_158_02, menu_158_03, menu_158_04, menu_158_05, menu_158_06, menu_158_07, menu_158_08, menu_158_09,},         // 158
-		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 159
+		{menu_dummy, menu_dummy, menu_159_02, menu_159_03, menu_159_04, menu_159_05, menu_159_06, },                                               // 159
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 160
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 161
 		{menu_dummy, menu_dummy, menu_dummy, },                                                                                                    // 162

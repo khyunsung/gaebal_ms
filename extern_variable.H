@@ -1014,6 +1014,15 @@ extern struct
 	unsigned int property_temp;
 } DIGITAL_OUTPUT;
 
+//2015.10.19
+extern struct
+{
+	unsigned int use;
+
+	unsigned int use_temp;
+} WATCHDOG;
+//2015.10.19 END
+
 extern struct
 {
 	unsigned int ratio;
