@@ -15199,15 +15199,8 @@ void menu_159_04(unsigned int value, int display)
 		if(Screen_Position.select == 0) {
 			WATCHDOG.use = WATCHDOG.use_temp;
 
-// FLASH 저장 안함
-//			if(setting_save(&WATCHDOG.use, DISP_3PHASE_USE, 1))
-//			{
-//				setting_load(&WATCHDOG.use, 1, DISP_3PHASE_USE);
-//			}
-//			else
-//			{
-//				//FLASH WRITE ERROR pop up 화면
-//			}
+			if(WATCHDOG.use == 0xaaaa)			Watchdog_Enable_FM31L27x();
+			else if(WATCHDOG.use == 0xbbbb)	Watchdog_Disable_FM31L27x();
 
 			Screen_Position.y = 159;
 			Screen_Position.x = 5;
