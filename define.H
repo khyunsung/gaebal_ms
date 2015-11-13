@@ -928,6 +928,7 @@
 //-------- 이전 FLASH MEMORY ADDRESS END
 
 //-------- SRAM1 MEMORY ADDRESS
+/*
 #define Pre_Ia_wave_buffer      (unsigned int *)0x200000 // 150주기 5400word 0x1518
 #define Post_Ia_wave_buffer     (unsigned int *)0x201518 // 150주기
 #define Pre_Ib_wave_buffer      (unsigned int *)0x202a30 // 150주기 5400word 0x1518
@@ -936,20 +937,54 @@
 #define Post_Ic_wave_buffer     (unsigned int *)0x206978 // 150주기
 #define Pre_In_wave_buffer      (unsigned int *)0x207e90 // 150주기
 #define Post_In_wave_buffer     (unsigned int *)0x2093a8 // 150주기
+
+#define Pre_Izct_wave_buffer    (unsigned int *)0x20d2f0 // 150주기
+#define Post_Izct_wave_buffer   (unsigned int *)0x20e808 // 150주기
+
+
 #define Pre_Va_wave_buffer      (unsigned int *)0x20a8c0 // 150주기
-#define Post_Va_wave_buffer     (unsigned int *)0x20bdd8 // 150주기
-#define Pre_Vb_wave_buffer      (unsigned int *)0x20d2f0 // 150주기
-#define Post_Vb_wave_buffer     (unsigned int *)0x20e808 // 150주기
-#define Pre_Vc_wave_buffer      (unsigned int *)0x20fd20 // 150주기
-#define Post_Vc_wave_buffer     (unsigned int *)0x211238 // 150주기
-#define Pre_Vn_wave_buffer      (unsigned int *)0x212750 // 150주기
-#define Post_Vn_wave_buffer     (unsigned int *)0x213c68 // 150주기
-#define Pre_relay_wave_buffer   (unsigned int *)0x215180 // 150주기 -> 1800개 digital은 12개만
-#define Post_relay_wave_buffer  (unsigned int *)0x216698 // 150주기 0x708
-#define Pre_DI_wave_buffer      (unsigned int *)0x217bb0 // 150주기
-#define Post_DI_wave_buffer     (unsigned int *)0x2190c8 // 150주기
-#define Pre_DO_wave_buffer      (unsigned int *)0x21a5e0 // 150주기
+#define Post_Va_wave_buffer     (unsigned int *)0x211238 // 150주기
+#define Pre_Vb_wave_buffer      (unsigned int *)0x20bdd8 // 150주기
+#define Post_Vb_wave_buffer     (unsigned int *)0x20d2f0 // 150주기
+#define Pre_Vc_wave_buffer      (unsigned int *)0x20e808 // 150주기
+#define Post_Vc_wave_buffer     (unsigned int *)fd20 // 150주기
+#define Pre_Vn_wave_buffer      (unsigned int *)0x211238 // 150주기
+#define Post_Vn_wave_buffer     (unsigned int *)0x212750 // 150주기
+#define Pre_relay_wave_buffer   (unsigned int *)0x213c68 // 150주기 -> 1800개 digital은 12개만
+#define Post_relay_wave_buffer  (unsigned int *)0x215180 // 150주기 0x708
+#define Pre_DI_wave_buffer      (unsigned int *)0x216698 // 150주기
+#define Post_DI_wave_buffer     (unsigned int *)0x217bb0 // 150주기
+#define Pre_DO_wave_buffer      (unsigned int *)0x2190c8 // 150주기
 #define Post_DO_wave_buffer     (unsigned int *)0x21baf8 // 150주기
+#define Wave_Information				(unsigned int *)0x21d010 //
+*/
+#define Pre_Ia_wave_buffer      (unsigned int *)0x200000L // 150주기 5400word 0x1518
+#define Post_Ia_wave_buffer     (unsigned int *)(0x200000L + 0x1518L) 		// 150주기	, 0x201518
+#define Pre_Ib_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 2L) // 150주기 5400word 0x1518, 0x202A30
+#define Post_Ib_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 3L) // 150주기	, 0x203F48
+#define Pre_Ic_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 4L) // 150주기	, 0x205460
+#define Post_Ic_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 5L) // 150주기	, 0x206978
+#define Pre_In_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 6L) // 150주기	, 0x207E90, Izct 도 같이 저장한다.
+#define Post_In_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 7L) // 150주기	, 0x2093A8
+#define Pre_Is_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 8L) // 150주기	, 0x20A8C0
+#define Post_Is_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 9L) // 150주기	, 0x20BDD8
+#define Pre_Izct_wave_buffer    (unsigned int *)(0x200000L + 0x1518L * 10L)// 150주기	, 0x20D2F0
+#define Post_Izct_wave_buffer   (unsigned int *)(0x200000L + 0x1518L * 11L)// 150주기	, 0x20E808
+#define Pre_Va_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 12L)// 150주기	, 0x20FD20
+#define Post_Va_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 13L)// 150주기	, 0x211238
+#define Pre_Vb_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 14L)// 150주기	, 0x212750
+#define Post_Vb_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 15L)// 150주기	, 0x213C68
+#define Pre_Vc_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 16L)// 150주기	, 0x215180
+#define Post_Vc_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 17L)// 150주기	, 0x216698
+#define Pre_Vn_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 18L)// 150주기	, 0x217BB0
+#define Post_Vn_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 19L)// 150주기	, 0x2190C8
+
+#define Pre_relay_wave_buffer   (unsigned int *)(0x200000L + 0x1518L * 20L)               // 150주기 -> 1800개 digital은 12개만	, 0x21A5E0
+#define Post_relay_wave_buffer  (unsigned int *)(0x200000L + 0x1518L * 20L + 0x708L * 1L) // 150주기 0x708	, 0x21ACE8
+#define Pre_DI_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 20L + 0x708L * 2L) // 150주기	, 0x21B3F0
+#define Post_DI_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 20L + 0x708L * 3L) // 150주기	, 0x21BAF8
+#define Pre_DO_wave_buffer      (unsigned int *)(0x200000L + 0x1518L * 20L + 0x708L * 4L) // 150주기	, 0x21C200
+#define Post_DO_wave_buffer     (unsigned int *)(0x200000L + 0x1518L * 20L + 0x708L * 5L) // 150주기	, 0x21C908
 #define Wave_Information				(unsigned int *)0x21d010 //
 
 #define SRAM_HEALTH_CHECK     	(unsigned int *)0x220000

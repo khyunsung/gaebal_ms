@@ -1317,7 +1317,10 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 		
 		//ad 인터럽트에 의해서 통신이 원활한 대용량 전송이 어렵기 때문에
 		//ad 외부인터럽트를 중지시키고, 만약 2초 동안 안들어 오면 다시 가동시킨다.
-		if(IER & M_INT12)	IER &= ~M_INT12;	//Enable 일 경우에만 한 번 Disable 시킨다.
+		//M_INT12는 외부 인터럽트, M_INT8은 SCI-C 인터럽트
+		if(IER & M_INT12)	{
+			IER &= ~(M_INT12 | M_INT8);	//Enable 일 경우에만 한 번 Disable 시킨다.
+		}
 
 		//외부 인터럽트 중지 시간 타이머 적용 카운터
 		Manager_Fault_Wave_Sending_Count++;
@@ -1747,20 +1750,36 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 		//word count
 		// ocr50-1
 		if(MANAGER.rx_buffer[3] == 0x00) {
-			OCR50_1.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			OCR50_1.use = OCR50_2.use = (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];	// 50-1, 50-2에 공통으로 En/Disable 적용해야함.
 			OCR50_1.mode = 				(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
 			OCR50_1.current_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
 			OCR50_1.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
 			OCR50_1.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
 			serial_write(5, &OCR50_1.use, OCR50_1_USE);
+			
+			// 50-1, 50-2에 공통으로 CRC 적용해야함.
+			buff[0] = OCR50_2.use;					MANAGER.rx_buffer[ 6] = buff[0] >> 8; MANAGER.rx_buffer[ 7] = buff[0] & 0xff;
+			buff[1] = OCR50_2.mode;					MANAGER.rx_buffer[ 8] = buff[1] >> 8; MANAGER.rx_buffer[ 9] = buff[1] & 0xff;
+			buff[2] = OCR50_2.current_set;	MANAGER.rx_buffer[10] = buff[2] >> 8; MANAGER.rx_buffer[11] = buff[2] & 0xff;
+			buff[3] = OCR50_2.delay_time;		MANAGER.rx_buffer[12] = buff[3] >> 8; MANAGER.rx_buffer[13] = buff[3] & 0xff;
+			buff[4] = OCR50_2.do_relay;			MANAGER.rx_buffer[14] = buff[4] >> 8; MANAGER.rx_buffer[15] = buff[4] & 0xff;
+			serial_write_2nd(5, &OCR50_2.use, OCR50_2_USE);
 		// ocr50-2
 		} else if(MANAGER.rx_buffer[3] == 0x01) {
-			OCR50_2.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
+			OCR50_2.use = OCR50_1.use = (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7]; // 50-1, 50-2에 공통으로 En/Disable 적용해야함.
 			OCR50_2.mode = 				(MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
 			OCR50_2.current_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
 			OCR50_2.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
 			OCR50_2.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
 		serial_write(5, &OCR50_2.use, OCR50_2_USE);
+
+			// 50-1, 50-2에 공통으로 CRC 적용해야함.
+			buff[0] = OCR50_1.use;					MANAGER.rx_buffer[ 6] = buff[0] >> 8; MANAGER.rx_buffer[ 7] = buff[0] & 0xff;
+			buff[1] = OCR50_1.mode;					MANAGER.rx_buffer[ 8] = buff[1] >> 8; MANAGER.rx_buffer[ 9] = buff[1] & 0xff;
+			buff[2] = OCR50_1.current_set;	MANAGER.rx_buffer[10] = buff[2] >> 8; MANAGER.rx_buffer[11] = buff[2] & 0xff;
+			buff[3] = OCR50_1.delay_time;		MANAGER.rx_buffer[12] = buff[3] >> 8; MANAGER.rx_buffer[13] = buff[3] & 0xff;
+			buff[4] = OCR50_1.do_relay;			MANAGER.rx_buffer[14] = buff[4] >> 8; MANAGER.rx_buffer[15] = buff[4] & 0xff;
+			serial_write_2nd(5, &OCR50_1.use, OCR50_1_USE);
 		// ocgr50
 		} else if(MANAGER.rx_buffer[3] == 0x02) {
 			OCGR50.use = 					(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
@@ -2204,6 +2223,30 @@ void serial_write(unsigned int ar_length, unsigned int *ar_data, unsigned int *a
 	serial_ok_nak_send(0x04);
 }
 
+void serial_write_2nd(unsigned int ar_length, unsigned int *ar_data, unsigned int *ar_address)
+{
+	unsigned int i;
+	
+	// 지정된 word 단위 개수만틈 수신버퍼에서 word로 변환하여 임시변수에 저장
+	for(i = 0; i < ar_length; i++)
+	{
+		// 상위 바이트
+		MANAGER.temp[i] = MANAGER.rx_buffer[6 + (i << 1)];
+		
+		// 상위바이트 MSB쪽으로 shift
+		MANAGER.temp[i] <<= 8;
+		
+		// 하위 바이트 or
+		MANAGER.temp[i] |= MANAGER.rx_buffer[7 + (i << 1)];
+	}
+
+	// ack
+	// 일단 설정값 저장 함수를 호출하고 결과가 양호하면 후처리 실행
+	if(setting_save(MANAGER.temp, ar_address, ar_length))
+	{
+	}
+}
+
 // 전면 시리얼 통신 수신된 프레임에 대해 ack, nak를 pc로 송신 위한 함수
 // ar_nak_code - ack, nak 코드
 // ack는 0, 나머지는 nak
@@ -2595,6 +2638,6 @@ void fault_wave_send_check(void)
 	if(IER & M_INT12) {
 		return;
 	} else {
-		IER |= M_INT12;
+		IER |= (M_INT12 | M_INT8);
 	}
 }

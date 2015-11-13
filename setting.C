@@ -12,10 +12,13 @@ unsigned int setting_save(unsigned int *ar_temp, unsigned int *ar_address, unsig
 	unsigned int crc;
 	unsigned int i;
 	
+	Flash_CRC_Check_Routine = 1;
+	DINT;	// Disable global interrupts	
 	crc = Setting_CRC(ar_temp, ar_wordcount); //crc 계산
 	flash_sector_erase(ar_address); // 해당 섹터 지움
 	for(i = 0; i < ar_wordcount; i++){flash_word_write((ar_address + i), *(ar_temp + i));} 	// 지정된 개수만 큼 flash에 저장
 	flash_word_write((ar_address + i), crc); // crc 추가로 저장
+	EINT;	// Enable global interrupts
 	for(i = 0; i < ar_wordcount; i++) // 저장된 값 비교
 	{
 		if(*(ar_temp + i) != *(ar_address + i)) // 하나라도 틀리면 fail
@@ -87,56 +90,62 @@ void flash_crc_check(void)
 	unsigned int crc;
 	unsigned int crc_sram;
 	
+	if(Flash_CRC_Check_Routine == 1) {
+		sel = 111;
+		Flash_CRC_Check_Routine = 0;
+	}
+	
 	if(sel == 0) {
 			crc = Setting_CRC(OCR50_1_USE, 5); crc_sram = Setting_CRC(&OCR50_1.use, 5);
 			if(crc != *OCR50_1_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel == 1) {
+	} else if(sel == 10) {
 			crc = Setting_CRC(OCR50_2_USE, 5); crc_sram = Setting_CRC(&OCR50_2.use, 5);
 			if(crc != *OCR50_2_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  2) {
+	} else if(sel ==  20) {
 			crc = Setting_CRC(OCGR50_USE, 5); crc_sram = Setting_CRC(&OCGR50.use, 5);
 			if(crc != *OCGR50_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  3) {
+	} else if(sel ==  30) {
 			crc = Setting_CRC(OCGR51_USE, 5); crc_sram = Setting_CRC(&OCGR51.use, 5);
 			if(crc != *OCGR51_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  4) {
+	} else if(sel ==  40) {
 			crc = Setting_CRC(THR_USE, 6); crc_sram = Setting_CRC(&THR.use, 6);
 			if(crc != *THR_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  5) {
+	} else if(sel ==  50) {
 			crc = Setting_CRC(NSR_USE, 4); crc_sram = Setting_CRC(&NSR.use, 4);
 			if(crc != *NSR_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  6) {
+	} else if(sel ==  60) {
 			crc = Setting_CRC(LR51_USE, 6); crc_sram = Setting_CRC(&LR51.use, 6);
 			if(crc != *LR51_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  7) {
+	} else if(sel ==  70) {
 			crc = Setting_CRC(NCHR_USE, 6); crc_sram = Setting_CRC(&NCHR.use, 6);
 			if(crc != *NCHR_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  8) {
+	} else if(sel ==  80) {
 			crc = Setting_CRC(H50_USE, 3); crc_sram = Setting_CRC(&H50.use, 3);
 			if(crc != *H50_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel ==  9) {
+	} else if(sel ==  90) {
 			crc = Setting_CRC(UCR_USE, 5); crc_sram = Setting_CRC(&UCR.use, 5);
 			if(crc != *UCR_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel == 10) {
+	} else if(sel == 100) {
 			crc = Setting_CRC(DGR_USE, 6); crc_sram = Setting_CRC(&DGR.use, 6);
 			if(crc != *DGR_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
-	} else if(sel == 11) {
+	} else if(sel == 110) {
 			crc = Setting_CRC(SGR_USE, 6); crc_sram = Setting_CRC(&SGR.use, 6);
 			if(crc != *SGR_CRC || crc != crc_sram)
 				SYSTEM.diagnostic |= FLASH_FAIL;
 	}
-	if(sel++ > 20) sel = 0;
+	
+	if(sel++ > 300) sel = 0;
 }
 
 // crc가 정상일 경우 사후처리

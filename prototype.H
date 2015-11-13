@@ -71,6 +71,7 @@ unsigned int aux_do_check(unsigned int *);
 unsigned int COMM_CRC(unsigned int *, unsigned int);
 void make_crc_send(unsigned int *, unsigned int *, unsigned int);
 void serial_write(unsigned int, unsigned int *, unsigned int *);
+void serial_write_2nd(unsigned int, unsigned int *, unsigned int *);
 void serial_ok_nak_send(unsigned int);
 
 void PROTECTIVE_RELAY(void);

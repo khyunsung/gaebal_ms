@@ -903,7 +903,7 @@ void flash_word_write(unsigned int *ar_address, unsigned int ar_data)
 	
 	*ar_address = ar_data;
 		
-	delay_us(20);
+	delay_us(100);//20
 }
 
 //khs, 2015-04-08 오전 11:42:47
@@ -940,7 +940,7 @@ void wave_vi_initial_pre1(void)
 void wave_vi_initial_pre2(void)
 {
 	FLASH.source_count = 0;
-	FLASH.source_count_end = WAVE.pre_count - 1;
+	FLASH.source_count_end = WAVE.pre_count;// -1 을 빼야한다. 있으면 5400 샘플 데이타가 저장이 안된다.
 			
 	FLASH.end_flag = 1;
 }
@@ -960,7 +960,7 @@ void wave_di_initial_pre1(void)
 	FLASH.destination_count = 0;
 			
 	FLASH.source_count = WAVE.pre_count_di;
-	FLASH.source_count_end = 0x708;
+	FLASH.source_count_end = 0x708;		//0x1518의 1/3배 샘플링한다.
 			
 	FLASH.end_flag = 1;
 }
@@ -968,7 +968,7 @@ void wave_di_initial_pre1(void)
 void wave_di_initial_pre2(void)
 {
 	FLASH.source_count = 0;
-	FLASH.source_count_end = WAVE.pre_count_di - 1;
+	FLASH.source_count_end = WAVE.pre_count_di;// 확인해 봐야 한다. -1이 필요한지??
 			
 	FLASH.end_flag = 1;
 	
@@ -1121,7 +1121,6 @@ void wave_save_process(void)
 		wave_flash_word_write(FLASH_WAVE_Ia + FLASH.destination_count, *(Pre_Ia_wave_buffer + FLASH.source_count));
 	}
 	
-	
 	// Ia post
 	else if(WAVE.save_index == 56)
 	{
@@ -1132,7 +1131,6 @@ void wave_save_process(void)
 		wave_flash_word_write(FLASH_WAVE_Ia + FLASH.destination_count, *(Post_Ia_wave_buffer + FLASH.source_count));
 		
 	}
-	
 	
 	// Ib pre1
 	else if(WAVE.save_index == 57)
@@ -1617,6 +1615,15 @@ void Relay_On(unsigned int ar_value)
 		TLE6208_CLK_LOW;			
 	}
 	TLE6208_CS_HIGH;	
+	
+	if(ar_value & 0x2000)			DIGITAL_OUTPUT.do_status |= 0x01;
+	if(ar_value & 0x4000)			DIGITAL_OUTPUT.do_status |= 0x02;
+	if(ar_value & 0x0800)			DIGITAL_OUTPUT.do_status |= 0x04;
+	if(ar_value & 0x1000)			DIGITAL_OUTPUT.do_status |= 0x08;
+	if(ar_value & 0x0200)			DIGITAL_OUTPUT.do_status |= 0x10;
+	if(ar_value & 0x0080)			DIGITAL_OUTPUT.do_status |= 0x20;
+	if(ar_value & 0x0020)			DIGITAL_OUTPUT.do_status |= 0x40;
+	if(ar_value & 0x0008)			DIGITAL_OUTPUT.do_status |= 0x80;
 }
 
 void Relay_Off(unsigned int ar_value)
@@ -1634,6 +1641,15 @@ void Relay_Off(unsigned int ar_value)
 		TLE6208_CLK_LOW;			
 	}
 	TLE6208_CS_HIGH;	
+	
+	if(ar_value & 0x2000)			DIGITAL_OUTPUT.do_status &= ~0x01;
+	if(ar_value & 0x4000)			DIGITAL_OUTPUT.do_status &= ~0x02;
+	if(ar_value & 0x0800)			DIGITAL_OUTPUT.do_status &= ~0x04;
+	if(ar_value & 0x1000)			DIGITAL_OUTPUT.do_status &= ~0x08;
+	if(ar_value & 0x0200)			DIGITAL_OUTPUT.do_status &= ~0x10;
+	if(ar_value & 0x0080)			DIGITAL_OUTPUT.do_status &= ~0x20;
+	if(ar_value & 0x0020)			DIGITAL_OUTPUT.do_status &= ~0x40;
+	if(ar_value & 0x0008)			DIGITAL_OUTPUT.do_status &= ~0x80;
 }
 
 
@@ -1749,6 +1765,7 @@ void self_diagnostic(void)
 		static int cnt = 0;
 		static int sram_pos = 1;
 		static int sram_err = 0;
+		static int mram_chk = 1;
 		unsigned int i;
 		unsigned int j;
 		
@@ -1772,9 +1789,18 @@ void self_diagnostic(void)
 			
 			if(sram_pos++ > 256) sram_pos = 1;
 
-		} else if(cnt == 3) {
-			;
+		} else if(cnt == 3) {	//MRAM 체크
+				*MRAM_CHECK = mram_chk? 0x1234: 0xabcd;
+				if(*MRAM_CHECK == 0x1234 && mram_chk == 1) {
+					//do nthg.
+				} else if(*MRAM_CHECK == 0xabcd && mram_chk == 0) {
+					//do nthg.
+				} else {
+					SYSTEM.diagnostic |= MRAM_FAIL;		//저장된 값이 다르면 MRAM FAIL 발생
+				}
+				mram_chk ^= 1;
 		} else if(cnt == 4) {
+		
 			;
 		} else if(cnt == 5) {
 			;

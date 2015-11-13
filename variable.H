@@ -1806,30 +1806,30 @@ unsigned int const CRC_Low[256] = {
 
 unsigned long const wave_buffer_address[10] =
 {
-	0x200000,
-	0x202a30,
-	0x205460,
-	0x207e90,
-	0x20a8c0,
-	0x20d2f0,
-	0x20fd20,
-	0x212750,
-	0x215180,
-	0x217bb0
+	0x200000L,	//Ia, 0
+	(0x200000L + 0x2a30L), 		 //Ib, 1, 0x202A30
+	(0x200000L + (0x2a30L * 2L)), //Ic, 2,	0x205460
+	(0x200000L + (0x2a30L * 3L)), //In, 3, 0x207E90
+	(0x200000L + (0x2a30L * 4L)), //Iz2 <-- 사용 안함, 0x20A8C0
+	(0x200000L + (0x2a30L * 5L)), //Izct <-- 옵션 변수를 보고 사용할지 유무 판단, 0x20D2F0
+	(0x200000L + (0x2a30L * 6L)), //Va, 4, 0x20FD20
+	(0x200000L + (0x2a30L * 7L)), //Vb, 5, 0x212750
+	(0x200000L + (0x2a30L * 8L)), //Vc, 6, 0x215180
+	(0x200000L + (0x2a30L * 9L))  //Vn, 7, 0x217BB0
 };
 
 unsigned long const wave_buffer_post_address[10] =
 {
-	0x201518,
-	0x203f48,
-	0x206978,
-	0x2093a8,
-	0x20bdd8,
-	0x20e808,
-	0x211238,
-	0x213c68,
-	0x216698,
-	0x2190c8
+	0x201518L,	//Ia, 0
+	(0x201518L + 0x2a30L), 		 //Ib, 1, 0x203F48
+	(0x201518L + (0x2a30L * 2L)), //Ic, 2, 0x206978
+	(0x201518L + (0x2a30L * 3L)), //In, 3, 0x2093A8
+	(0x201518L + (0x2a30L * 4L)), //Iz2 <-- 사용 안함, 0x20BDD8
+	(0x201518L + (0x2a30L * 5L)), //Izct <-- 옵션 변수를 보고 사용할지 유무 판단, 0x20E808
+	(0x201518L + (0x2a30L * 6L)), //Va, 4, 0x211238
+	(0x201518L + (0x2a30L * 7L)), //Vb, 5, 0x213C68
+	(0x201518L + (0x2a30L * 8L)), //Vc, 6, 0x216698
+	(0x201518L + (0x2a30L * 9L))  //Vn, 7, 0x2190C8
 };
 
 unsigned int const do_control[7] = {0x2000, 0x0800, 0x0200, 0x0080, 0x0020, 0x0010, 0x0008};
@@ -1947,4 +1947,5 @@ unsigned int Popup_OpPhase_Info = 0;
 unsigned int Phase_Info = 0;
 unsigned int Popup_Action = 0;
 unsigned int Manager_Fault_Wave_Sending_Count = 0;
+unsigned int Flash_CRC_Check_Routine = 1;
 #endif

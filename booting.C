@@ -222,28 +222,28 @@ void booting_setting_check(void)
 		temp[10 + (i << 1)] = *temp16_p;
 		temp[11 + (i << 1)] = *(temp16_p + 1);
 	}
-//	for(i = 0; i < 10; i++)	//intercept
-//	{
-//		void_p = &CALIBRATION.intercept[i];
-//		temp16_p = (unsigned int*)void_p;
-//		eerom_read(0x30 + (i << 1), temp16_p);
-//		eerom_read(0x31 + (i << 1), temp16_p + 1);
-//		temp[30 + (i << 1)] = *temp16_p;
-//		temp[31 + (i << 1)] = *(temp16_p + 1);
-//	}
-	for(i = 0; i < 10; i++)	//angle
+	for(i = 0; i < 10; i++)	//intercept
 	{
-		void_p = &CALIBRATION.angle[i];
+		void_p = &CALIBRATION.intercept[i];
 		temp16_p = (unsigned int*)void_p;
 		eerom_read(0x30 + (i << 1), temp16_p);
 		eerom_read(0x31 + (i << 1), temp16_p + 1);
 		temp[30 + (i << 1)] = *temp16_p;
 		temp[31 + (i << 1)] = *(temp16_p + 1);
 	}
+	for(i = 0; i < 10; i++)	//angle
+	{
+		void_p = &CALIBRATION.angle[i];
+		temp16_p = (unsigned int*)void_p;
+		eerom_read(0x50 + (i << 1), temp16_p);
+		eerom_read(0x51 + (i << 1), temp16_p + 1);
+		temp[50 + (i << 1)] = *temp16_p;
+		temp[51 + (i << 1)] = *(temp16_p + 1);
+	}
 	eerom_read(0xa0, &i);
 
 //j = Setting_CRC(temp, 90);
-	j = Setting_CRC(temp, 50);
+	j = Setting_CRC(temp, 70);
 	if(i != j)	// calibration factor 틀어짐
 	{
 		SYSTEM.diagnostic |= CALIBRATION_NOT;
@@ -313,17 +313,27 @@ void booting_setting_check(void)
 			temp[10 + (i << 1)] = *temp16_p;  //[10]~[29]
 			temp[11 + (i << 1)] = *(temp16_p + 1);
 		}
+		for(i = 0; i < 10; i++)	//intercept
+		{
+			void_p = &CALIBRATION.intercept[i];
+			temp16_p = (unsigned int *)void_p;
+			eerom_write(0x30 + (i << 1), temp16_p);
+			eerom_write(0x31 + (i << 1), temp16_p + 1);
+			temp[30 + (i << 1)] = *temp16_p;
+			temp[31 + (i << 1)] = *(temp16_p + 1);
+		}
+		
 		for(i = 0; i < 10; i++) //angle 저장
 		{
 			void_p = &CALIBRATION.angle[i];
 			temp16_p = (unsigned int *)void_p;
-			eerom_write(0x30 + (i << 1), temp16_p);
-			eerom_write(0x31 + (i << 1), temp16_p + 1);
-			temp[30 + (i << 1)] = *temp16_p; //[30]~[49]
-			temp[31 + (i << 1)] = *(temp16_p + 1);
+			eerom_write(0x50 + (i << 1), temp16_p);
+			eerom_write(0x51 + (i << 1), temp16_p + 1);
+			temp[50 + (i << 1)] = *temp16_p; //[30]~[49]
+			temp[51 + (i << 1)] = *(temp16_p + 1);
 		}
 		
-		i = Setting_CRC(temp, 50);
+		i = Setting_CRC(temp, 70);
 		eerom_write(0xa0, &i);
 		//-------- EEROM 저장 END
 	}

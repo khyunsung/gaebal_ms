@@ -14077,17 +14077,26 @@ void menu_153_10(unsigned int value, int display)
 				temp1[10 + (i << 1)] = *temp16_p;  //[10]~[29]
 				temp1[11 + (i << 1)] = *(temp16_p + 1);
 			}
+			for(i = 0; i < 10; i++)	//intercept
+			{
+				void_p = &CALIBRATION.intercept[i];
+				temp16_p = (unsigned int *)void_p;
+				eerom_write(0x30 + (i << 1), temp16_p);
+				eerom_write(0x31 + (i << 1), temp16_p + 1);
+				temp1[30 + (i << 1)] = *temp16_p;
+				temp1[31 + (i << 1)] = *(temp16_p + 1);
+			}
 			for(i = 0; i < 10; i++) //angle 저장
 			{
 				void_p = &CALIBRATION.angle[i];
 				temp16_p = (unsigned int *)void_p;
-				eerom_write(0x30 + (i << 1), temp16_p);
-				eerom_write(0x31 + (i << 1), temp16_p + 1);
-				temp1[30 + (i << 1)] = *temp16_p; //[30]~[49]
-				temp1[31 + (i << 1)] = *(temp16_p + 1);
+				eerom_write(0x50 + (i << 1), temp16_p);
+				eerom_write(0x51 + (i << 1), temp16_p + 1);
+				temp1[50 + (i << 1)] = *temp16_p; //[30]~[49]
+				temp1[51 + (i << 1)] = *(temp16_p + 1);
 			}
 			
-			i = Setting_CRC(temp1, 50);
+			i = Setting_CRC(temp1, 70);
 			eerom_write(0xa0, &i);
 			//-------- EEROM 저장 END
 
@@ -15930,6 +15939,7 @@ void menu_drive(void)
 		Screen_Position.y = 100;
 		Screen_Position.x = 0;
 		Screen_Position.data_change = NORMAL_MENU;
+		cursor_move(0, 0);//cursor off
 
 		menu_tables[Screen_Position.y][Screen_Position.x](SYSTEM.diagnostic, 0);
 		menu_tables[Screen_Position.y][Screen_Position.x](SYSTEM.diagnostic, 1);
