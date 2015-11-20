@@ -634,7 +634,7 @@
 // EVENT 저장 8bit임
 #define FRAM_START				(unsigned int *)0x120000
 
-#define WAVE_SAVE_OFFSET	0x1d020
+#define WAVE_SAVE_OFFSET	0x18100	//0x1d020
 #define EVENT_ROLLOVER		(unsigned int *)(0x140000 + WAVE_SAVE_OFFSET)		//0x21D010 (in FLASH Memory)
 #define EVENT_SP					(unsigned int *)(0x140001 + WAVE_SAVE_OFFSET)
 
@@ -660,10 +660,10 @@
 #define MRAM_START				(unsigned int *)0x140000	//khs, 요것이 MRAM
 
 
-#define MRAM_RUNNING_HOUR1	(unsigned int *)0x15d0f0	//RUNNING HOUR METER MRAM 주소
-#define MRAM_RUNNING_HOUR2	(unsigned int *)0x15d0f1	//RUNNING HOUR METER MRAM 주소
-#define MRAM_Vo_MAX1				(unsigned int *)0x15d0f2	//Vo MAX MRAM 주소
-#define MRAM_Vo_MAX2				(unsigned int *)0x15d0f3	//Vo MAX MRAM 주소
+#define MRAM_RUNNING_HOUR1	(unsigned int *)0x158000	//RUNNING HOUR METER MRAM 주소
+#define MRAM_RUNNING_HOUR2	(unsigned int *)0x158001	//RUNNING HOUR METER MRAM 주소
+#define MRAM_Vo_MAX1				(unsigned int *)0x158002	//Vo MAX MRAM 주소
+#define MRAM_Vo_MAX2				(unsigned int *)0x158003	//Vo MAX MRAM 주소
 #define MRAM_CHECK				(unsigned int *)0x17FFF0	//MRAM 상시체크 주소
 
 //누적값
@@ -882,17 +882,30 @@
 //-------- 이전 FLASH MEMORY ADDRESS(MRAM으로 수정 필요)
 // Flash
 //#define FLASH_SECTOR000 (unsigned int *)0x180000
-#define FLASH_WAVE_Ia   (unsigned int *)0x140000
-#define FLASH_WAVE_Ib   (unsigned int *)0x142a30
+////#define FLASH_WAVE_Ia   (unsigned int *)0x140000	
+////#define FLASH_WAVE_Ib   (unsigned int *)0x142a30	
+////#define FLASH_WAVE_Ic   (unsigned int *)0x145460
+////#define FLASH_WAVE_In   (unsigned int *)0x147e90
+////#define FLASH_WAVE_Va		(unsigned int *)0x14fd20
+////#define FLASH_WAVE_Vb   (unsigned int *)0x152750
+////#define FLASH_WAVE_Vc   (unsigned int *)0x155180
+////#define FLASH_WAVE_Vn   (unsigned int *)0x157bb0
+////#define FLASH_WAVE_RELAY (unsigned int *)0x15a5e0
+////#define FLASH_WAVE_DI   (unsigned int *)0x15B3F0
+////#define FLASH_WAVE_DO   (unsigned int *)0x15C200
+
+#define FLASH_WAVE_Ia   (unsigned int *)0x140000		//전류는 4종류만 보기 때문에 SRAM 주소와 다르게 설정되므로
+#define FLASH_WAVE_Ib   (unsigned int *)0x142a30		//혼돈하지 말 것. 특히 전압Va 시작 주소가 다르다.
 #define FLASH_WAVE_Ic   (unsigned int *)0x145460
 #define FLASH_WAVE_In   (unsigned int *)0x147e90
-#define FLASH_WAVE_Va		(unsigned int *)0x14fd20
-#define FLASH_WAVE_Vb   (unsigned int *)0x152750
-#define FLASH_WAVE_Vc   (unsigned int *)0x155180
-#define FLASH_WAVE_Vn   (unsigned int *)0x157bb0
-#define FLASH_WAVE_RELAY (unsigned int *)0x15a5e0
-#define FLASH_WAVE_DI   (unsigned int *)0x15B3F0
-#define FLASH_WAVE_DO   (unsigned int *)0x15C200
+#define FLASH_WAVE_Va		(unsigned int *)0x14a8c0
+#define FLASH_WAVE_Vb   (unsigned int *)0x14d2f0
+#define FLASH_WAVE_Vc   (unsigned int *)0x14fd20
+#define FLASH_WAVE_Vn   (unsigned int *)0x152750
+#define FLASH_WAVE_RELAY (unsigned int *)0x155180		//Relay, DI, DO 정보는 3600 샘플데이타만 있다.
+#define FLASH_WAVE_DI   (unsigned int *)0x155f90
+#define FLASH_WAVE_DO   (unsigned int *)0x156da0
+
 
 #define OFFSET_IA   		(unsigned int *)0x15d010
 #define SCALE_FACTOR_IA (unsigned int *)0x15d011
@@ -1272,5 +1285,7 @@
 #define NIC_RESET_OFF  *GpioIntRegs_GPASET_High |= 0x0400
 #define NIC_RESET_ON *GpioIntRegs_GPACLEAR_High |= 0x0400
  
+#define EVENT_TOTAL_COUNT		(200 - 1)//전체 이벤트 개수 총 200 개 일때
+
 //#endif	//_DEFINE_H_
 

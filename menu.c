@@ -3180,6 +3180,7 @@ void menu_28_05(unsigned int value, int display)
 void menu_29_02(unsigned int value, int display)
 {
 	char str[22];
+	int i;
 	
 	if(display) {
 		Event_Item_Display();
@@ -3191,7 +3192,11 @@ void menu_29_02(unsigned int value, int display)
 		}
 		
 		delay_us(1000);
-		sprintf(str, "%3d\0", EVENT.view_start - EVENT.view_point + 1);
+		
+		i = EVENT.view_start - EVENT.view_point + 1;
+		if(i <= 0)
+			i = EVENT.view_start - EVENT.view_point + (EVENT_TOTAL_COUNT + 1 + 1);
+		sprintf(str, "%3d\0", i);
 		VFD_Single_Line_dump(LCD_L1_00, str);
 				
 		return;
@@ -3199,23 +3204,23 @@ void menu_29_02(unsigned int value, int display)
 
 	if(value == LEFT_KEY) {
 		if(EVENT.rollover)
-		{
-			if(EVENT.view_point == 199)	{EVENT.view_point = 0;}
+		{	//in that case
+			if(EVENT.view_point == EVENT_TOTAL_COUNT)	{EVENT.view_point = 0;}
 			else												{++EVENT.view_point;}
 		}
 		else
-		{
+		{	//not that case
 			if(EVENT.view_point == EVENT.view_start)	{EVENT.view_point = 0;}
 			else																			{++EVENT.view_point;}
 		}
 	} else if(value == RIGHT_KEY) {
 		if(EVENT.rollover)
-		{
-			if(EVENT.view_point == 0)	{EVENT.view_point = 199;}
+		{ //in that case
+			if(EVENT.view_point == 0)	{EVENT.view_point = EVENT_TOTAL_COUNT;}
 			else											{--EVENT.view_point;}
 		}
 		else
-		{
+		{ //not that case
 			if(EVENT.view_point == 0)	{EVENT.view_point = EVENT.view_start;}
 			else											{--EVENT.view_point;}
 		}
@@ -10927,12 +10932,13 @@ void menu_86_04(unsigned int value, int display)
 			Screen_Position.y = 86;
 			Screen_Position.x = 5;
 			cursor_move(0, 0);//cursor off
-			for(str[0][0] = 0; str[0][0] < 200; str[0][0]++)
+			for(str[0][0] = 0; str[0][0] < (200*18); str[0][0]++)
 				*(EVENT_ROLLOVER + str[0][0]) = 0;
 			EVENT.view_start = 0;
 			EVENT.view_point = 0;
 			EVENT.rollover = 0;
 			EVENT.sp = 0;
+			EVENT.temp = 0;
 		} else if(Screen_Position.select == 1) {
 			Screen_Position.y = 86;
 			Screen_Position.x = 6;
@@ -15390,8 +15396,11 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	int temp_int;
 	char str[22];
 	char str2[2][22];
+	int view_point_tmp;
 
-	EVENT.temp = *(EVENT_INDEX1 + (EVENT.view_point * 18));
+	if(EVENT.view_point == 0) view_point_tmp = EVENT_TOTAL_COUNT;
+	else 											view_point_tmp = EVENT.view_point - 1;
+	EVENT.temp = *(EVENT_INDEX1 + (view_point_tmp * 18));
 	EVENT.temp &= 0x00ff;
 	
 	// pickup/op
@@ -15399,35 +15408,35 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	{
 		
 		// relay 종류
-		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_INDEX2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		
 		str[0] = (temp16 > 16)? 0: temp16;
 		
 		// relay curve (특성 정보인데 사용을 하나?)
-		temp16 = *(EVENT_CONTENT1 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_CONTENT1 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		temp16_2 = temp16;
 //		LCD.line_3rd_adder = relay_curve[temp16];
 		
 		//상 정보 (Phase)
-		temp16 = *(EVENT_CONTENT2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_CONTENT2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 //		LCD.line_4th_adder = event_phase[temp16];
 
-//		i_tmp[0] =  *(EVENT_OPTIME1 + (EVENT.view_point * 18)) << 24
-//							+ *(EVENT_OPTIME2 + (EVENT.view_point * 18)) << 16
-//							+ *(EVENT_OPTIME3 + (EVENT.view_point * 18)) << 8
-//							+ *(EVENT_OPTIME4 + EVENT.view_point * 18);
-		i_tmp[0]  =  *(EVENT_OPTIME1 + EVENT.view_point * 18); i_tmp[0] <<= 8;
-		i_tmp[0] |=  *(EVENT_OPTIME2 + EVENT.view_point * 18); i_tmp[0] <<= 8;
-		i_tmp[0] |=  *(EVENT_OPTIME3 + EVENT.view_point * 18); i_tmp[0] <<= 8;
-		i_tmp[0] |=  *(EVENT_OPTIME4 + EVENT.view_point * 18);
+//		i_tmp[0] =  *(EVENT_OPTIME1 + (view_point_tmp * 18)) << 24
+//							+ *(EVENT_OPTIME2 + (view_point_tmp * 18)) << 16
+//							+ *(EVENT_OPTIME3 + (view_point_tmp * 18)) << 8
+//							+ *(EVENT_OPTIME4 + view_point_tmp * 18);
+		i_tmp[0]  =  *(EVENT_OPTIME1 + view_point_tmp * 18); i_tmp[0] <<= 8;
+		i_tmp[0] |=  *(EVENT_OPTIME2 + view_point_tmp * 18); i_tmp[0] <<= 8;
+		i_tmp[0] |=  *(EVENT_OPTIME3 + view_point_tmp * 18); i_tmp[0] <<= 8;
+		i_tmp[0] |=  *(EVENT_OPTIME4 + view_point_tmp * 18);
 							
-//		i_tmp[1] = (*(EVENT_RATIO1 + (EVENT.view_point * 18)) << 8) + *(EVENT_RATIO1 + (EVENT.view_point * 18));
-		i_tmp[1] = *(EVENT_RATIO1 + EVENT.view_point * 18);
+//		i_tmp[1] = (*(EVENT_RATIO1 + (view_point_tmp * 18)) << 8) + *(EVENT_RATIO1 + (view_point_tmp * 18));
+		i_tmp[1] = *(EVENT_RATIO1 + view_point_tmp * 18);
 		i_tmp[1] <<= 8;
-		i_tmp[1] |= *(EVENT_RATIO2 + EVENT.view_point * 18);
+		i_tmp[1] |= *(EVENT_RATIO2 + view_point_tmp * 18);
 		
 
 		//"59  Vr:   1.35 "
@@ -15460,13 +15469,13 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	// relay set
 	else if(EVENT.temp == 0x02)
 	{
-		temp16 = *(EVENT_CONTENT2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_CONTENT2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		if(temp16 == 1) {
 			screen_frame3(event3e);//{"   ] SYS PARAMETER  ",
 		} else {
 
-			temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+			temp16 = *(EVENT_INDEX2 + (view_point_tmp * 18));
 			temp16 &= 0x00ff;
 	
 			if(temp16 == (OCR50_1_SET_EVENT >> 16))       	{			screen_frame3(event31);
@@ -15493,10 +15502,10 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	// system set
 	else if(EVENT.temp == 0x03)
 	{	
-		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_INDEX2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 			
-		if(temp16 & 0x0080)	{screen_frame3(event10);}
+		if(temp16 & 0x0080)	{screen_frame3(event10);}//"SYSTEM REBOOT"
 		else
 		{
 			screen_frame3(event4);
@@ -15512,7 +15521,7 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	{
 		screen_frame3(event5);
 		
-		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_INDEX2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		
 //		LCD.line_2nd_adder = event_reset[temp16];
@@ -15525,10 +15534,10 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	{
 		screen_frame3(event6);
 		
-		temp16 = *(EVENT_CONTENT1 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_CONTENT1 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		temp16 <<= 8;
-		temp16 |= (*(EVENT_CONTENT2 + (EVENT.view_point * 18)) & 0x00ff);
+		temp16 |= (*(EVENT_CONTENT2 + (view_point_tmp * 18)) & 0x00ff);
 
 		for(temp_char = 0; temp_char < 8; temp_char++)
 		{
@@ -15547,10 +15556,10 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 		// close
 		else										{screen_frame3(event9);}
 		
-		temp16 = *(EVENT_CONTENT1 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_CONTENT1 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		temp16 <<= 8;
-		temp16 |= (*(EVENT_CONTENT2 + (EVENT.view_point * 18)) & 0x00ff);
+		temp16 |= (*(EVENT_CONTENT2 + (view_point_tmp * 18)) & 0x00ff);
 		
 		for(temp_char = 0; temp_char < 9; temp_char++)
 		{
@@ -15572,7 +15581,7 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	{
 		screen_frame3(event11);
 		
-		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_INDEX2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		
 //		LCD.line_2nd_adder = event_mode_change[temp16];
@@ -15585,15 +15594,15 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	{
 		screen_frame3(event11);
 		
-		temp16 = *(EVENT_INDEX2 + (EVENT.view_point * 18));
+		temp16 = *(EVENT_INDEX2 + (view_point_tmp * 18));
 		temp16 &= 0x00ff;
 		
 //		LCD.line_2nd_adder = event_control[temp16];
 //		LCD.line_2nd_addressing = LCD_L2_05;
 //		LCD.line_2nd_status = 1;
 	}
-	
-	temp_int = EVENT.view_start - EVENT.view_point;
+/*	
+	temp_int = EVENT.view_start - view_point_tmp;
 	
 	if(temp_int < 0)	{temp_int += 99;}
 	
@@ -15612,6 +15621,7 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 	LCD.line_1st_adder = LCD.line_data1;
 	LCD.line_1st_addressing = LCD_L1_00;
 	LCD.line_1st_status = 1;			
+*/	
 }
 
 void Event_Time_Display(void)		//khs, 2015-04-03 오후 7:16:58
@@ -15625,32 +15635,34 @@ void Event_Time_Display(void)		//khs, 2015-04-03 오후 7:16:58
 	unsigned int msecond;
 
 	char str[22];
+	int view_point_tmp;
 
 		//순서
-		
-		year = *(EVENT_YEAR + (EVENT.view_point * 18));
+		if(EVENT.view_point == 0) view_point_tmp = EVENT_TOTAL_COUNT;
+		else 											view_point_tmp = EVENT.view_point - 1;
+		year = *(EVENT_YEAR + (view_point_tmp * 18));
 		year &= 0x00ff;
 		
-		month = *(EVENT_MONTH + (EVENT.view_point * 18));
+		month = *(EVENT_MONTH + (view_point_tmp * 18));
 		month &= 0x00ff;
 		
-		day = *(EVENT_DAY + (EVENT.view_point * 18));
+		day = *(EVENT_DAY + (view_point_tmp * 18));
 		day &= 0x00ff;
 		
-		hour = *(EVENT_HOUR + (EVENT.view_point * 18));
+		hour = *(EVENT_HOUR + (view_point_tmp * 18));
 		hour &= 0x00ff;
 		
-		minute = *(EVENT_MINUTE + (EVENT.view_point * 18));
+		minute = *(EVENT_MINUTE + (view_point_tmp * 18));
 		minute &= 0x00ff;
 		
-		second = *(EVENT_SECOND + (EVENT.view_point * 18));
+		second = *(EVENT_SECOND + (view_point_tmp * 18));
 		second &= 0x00ff;
 		
 		
-		msecond = *(EVENT_MS1 + (EVENT.view_point * 18));
+		msecond = *(EVENT_MS1 + (view_point_tmp * 18));
 		msecond &= 0x00ff;
 		msecond <<= 8;
-		msecond |= (*(EVENT_MS2 + (EVENT.view_point * 18)) & 0x00ff);
+		msecond |= (*(EVENT_MS2 + (view_point_tmp * 18)) & 0x00ff);
 
 		//이벤트가 없을때는 시간 표시를 하지 않는다.
 		if(year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0 && second == 0) return;

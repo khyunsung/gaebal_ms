@@ -1352,8 +1352,8 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			*(Manager_tx_long + 5) = MANAGER.rx_buffer[5] = i;			//Byte Length - L
 			 
 			//맨마지막 wordcount
-			wave_dump_serial_sram(FLASH_WAVE_Ia,
-													 (MANAGER.rx_buffer[6] << 16) + (MANAGER.rx_buffer[7] << 8) + MANAGER.rx_buffer[8],
+			wave_dump_serial_sram_long(FLASH_WAVE_Ia,
+													 ((long)MANAGER.rx_buffer[6] << 16) + ((long)MANAGER.rx_buffer[7] << 8) + (long)MANAGER.rx_buffer[8],
 														j);
 
 		}
@@ -1364,7 +1364,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			*(Manager_tx_long + 5) = 0x00;
 			
 			//맨마지막 wordcount
-			wave_dump_serial_sram(FLASH_WAVE_Ia, MANAGER.rx_buffer[3] * 512, 512);
+			wave_dump_serial_sram(FLASH_WAVE_Ia, (long)MANAGER.rx_buffer[3] * 512L, 512);
 		}
 	}
 	
@@ -2338,6 +2338,42 @@ void wave_dump_serial_sramTest(unsigned int *ar_flash, unsigned int ar_offset, u
 }
 */
 void wave_dump_serial_sram(unsigned int *ar_flash, unsigned int ar_offset, unsigned int ar_wordcount)
+{
+	unsigned int *flash_point;
+	unsigned int i, j;
+			
+	flash_point = ar_flash + ar_offset;
+	
+	for(i = 0; i < ar_wordcount; i++)
+	{
+		j = i << 1;
+		
+		*(Manager_tx_long_eleven + j) = *(flash_point + i) >> 8;
+		*(Manager_tx_long_twelve + j) = *(flash_point + i) & 0x00ff;
+	}
+	
+	j = 11 + (ar_wordcount << 1);
+	
+//	*(Manager_tx_long + 4) &= 0xff;
+	i = COMM_CRC(Manager_tx_long, j);
+	//i = COMM_CRC(Manager_tx_long, 5);
+	
+	*(Manager_tx_long_eleven + (ar_wordcount << 1)) = i >> 8;
+	*(Manager_tx_long_twelve + (ar_wordcount << 1)) = i & 0x00ff;
+	
+	MANAGER.tx_length = 13 + (ar_wordcount << 1);
+	
+	MANAGER.isr_tx = Manager_tx_long;
+	
+	// tx interrupt 활성
+	*ScibRegs_SCICTL2 |= 0x0001;
+			
+	// tx intrrupt 활성화 후 최초 한번 써야함
+	MANAGER.tx_count = 1;
+	*ScibRegs_SCITXBUF = *MANAGER.isr_tx;
+}
+	
+void wave_dump_serial_sram_long(unsigned int *ar_flash, unsigned long ar_offset, unsigned int ar_wordcount)
 {
 	unsigned int *flash_point;
 	unsigned int i, j;

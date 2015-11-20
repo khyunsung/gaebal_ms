@@ -493,7 +493,7 @@ void booting_setting_check(void)
 	EVENT.control     = 0x0a000000;
 
 	EVENT.sp = *EVENT_SP & 0x00ff;	// event check
-	if(EVENT.sp > 199)	// 200개 이상이면 불량
+	if(EVENT.sp > EVENT_TOTAL_COUNT)	// 200개 이상이면 불량
 	{
 		// 관련 변수 초기화
 		EVENT.sp = 0;

@@ -951,7 +951,8 @@ void event_info_update(void)
 	if(EVENT.rollover == 0)
 	{
 		//시작점 지정
-		EVENT.view_start = (int)(EVENT.sp - 1);
+//		EVENT.view_start = (int)(EVENT.sp - 1);
+		EVENT.view_start = (int)(EVENT.sp);
 		// 현재 보는 부분 지정
 		EVENT.view_point = EVENT.view_start;
 	}
@@ -960,13 +961,14 @@ void event_info_update(void)
 	{						
 		if(EVENT.sp == 0)
 		{
-			EVENT.view_start = 99;
-			EVENT.view_point = 99;
+			EVENT.view_start = EVENT_TOTAL_COUNT;
+			EVENT.view_point = EVENT_TOTAL_COUNT;
 		}
 		
 		else
 		{
-			EVENT.view_start = (int)(EVENT.sp - 1);
+//			EVENT.view_start = (int)(EVENT.sp - 1);
+			EVENT.view_start = (int)(EVENT.sp);
 			EVENT.view_point = EVENT.view_start;
 		}
 	}	
@@ -1013,7 +1015,7 @@ void event_direct_save(unsigned long *ar_event)
 	++EVENT.sp;
 	
 	// 200개 다차면 rollover 플래그 셋하고 sp는 0으로 초기화
-	if(EVENT.sp == 200)
+	if(EVENT.sp == (EVENT_TOTAL_COUNT + 1))
 	{
 		EVENT.sp = 0;
 		

@@ -164,6 +164,7 @@ void float_to_integer(float, unsigned int *, float);
 void float_to_integer2(float, unsigned int *, float);
 
 void wave_dump_serial_sram(unsigned int *, unsigned int, unsigned int);
+void wave_dump_serial_sram_long(unsigned int *, unsigned long, unsigned int);
 void himix_drive(void);
 void himix_crc(unsigned int);
 

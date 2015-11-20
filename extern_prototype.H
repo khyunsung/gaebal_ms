@@ -160,6 +160,7 @@ extern void float_to_integer2(float, unsigned int *, float);
 
 
 extern void wave_dump_serial_sram(unsigned int *, unsigned int, unsigned int);
+extern void wave_dump_serial_sram_long(unsigned int *, unsigned long, unsigned int);
 extern void himix_drive(void);
 extern void himix_crc(unsigned int);
 
