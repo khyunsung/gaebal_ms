@@ -16,14 +16,14 @@ void booting_setting_check(void)
 	for(i = 0; i < 0x0e54; i++)
 	*(ebss_start + i) = 0;
 	//-------- 모든 내부변수 clear 끝
-	
+
 	//와치독 기능 추가 2015-10-20
 	if(Watchdog_Read_FM31L27x(0x0a) & 0x80)
 		WATCHDOG.use = ENABLE;
 	else
 		WATCHDOG.use = DISABLE;	
 	Watchdog_Disable_FM31L27x();
-	
+
 	//-------- 초기화면 표시시작
 	// lcd 화면 켜기
 	LCD_BACKLIGHT_ON;
@@ -33,8 +33,8 @@ void booting_setting_check(void)
 	lcd_control_write(LCD_CLEAR);
 	delay_us(2000);
 										//01234567890123456789
-	LCD.line_buffer1 = "      HYUNDAI";
-	LCD.line_buffer2 = "  HEAVY INDUSTRIES";
+	LCD.line_buffer1 = "      HYUNDAI       ";
+	LCD.line_buffer2 = "  HEAVY INDUSTRIES  ";
 	/*
 	for(i = 0; i < 20; i++)
 	{
@@ -58,7 +58,7 @@ void booting_setting_check(void)
 	//-------- 초기화면 표시 끝
 	
 	//-------- LED 초기화 시작
-	*LED_CS = FAULT_LED;
+	*LED_CS = FAULT_LED;				
 	delay_us(500000);
 
 	*LED_CS = FAULT_LED | SYS_FAIL_LED;				
@@ -316,12 +316,12 @@ void booting_setting_check(void)
 		for(i = 0; i < 10; i++)	//intercept
 		{
 			void_p = &CALIBRATION.intercept[i];
-			temp16_p = (unsigned int *)void_p;
+			temp16_p = (unsigned int*)void_p;
 			eerom_write(0x30 + (i << 1), temp16_p);
 			eerom_write(0x31 + (i << 1), temp16_p + 1);
 			temp[30 + (i << 1)] = *temp16_p;
 			temp[31 + (i << 1)] = *(temp16_p + 1);
-		}
+		}		
 		
 		for(i = 0; i < 10; i++) //angle 저장
 		{

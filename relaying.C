@@ -19,7 +19,7 @@ void Save_Fault_Wave_Info(unsigned int selection)
 	time_t tmp_time;
 	void *void_p;
 	unsigned long *tmp32_p;
-	
+
 	if(selection == 0) {
 			FAULT_INFO.year 			= TIME.year;  // ¿¬
 			FAULT_INFO.month 			= TIME.month; // ¿ù

@@ -1284,7 +1284,7 @@
 
 #define NIC_RESET_OFF  *GpioIntRegs_GPASET_High |= 0x0400
 #define NIC_RESET_ON *GpioIntRegs_GPACLEAR_High |= 0x0400
- 
+
 #define EVENT_TOTAL_COUNT		(200 - 1)//전체 이벤트 개수 총 200 개 일때
 
 //#endif	//_DEFINE_H_

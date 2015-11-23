@@ -31,7 +31,6 @@
 //tcs/ccs
 //육상 dc110
 //선박 ac220, dc320
-
 interrupt void XINT3_ISR(void)
 {
 	//메모리 addressing
@@ -44,7 +43,7 @@ interrupt void XINT3_ISR(void)
   // 상기 시작주소에서 아래와 같이 배열됨
   //offset -   0,  1,  2,  3,   4,    5,   6,  7,  8,  9
   //          Ia, Ib, Ic, In, In2,  ZCT,  Va, Vb, Vc, Vn
-  
+
   // adc와 dsp사이에 있는 dpram 시작 주소 지정
 	if(*GpioIntRegs_GPADAT_Low & 0x0040)	{SAMPLE.dpram = AD_buffer_low;}
 	else																	{SAMPLE.dpram = AD_buffer_high;}
@@ -52,7 +51,7 @@ interrupt void XINT3_ISR(void)
 	// 곱셈연산 줄이기 위해
 	// 한번에 세개씩 읽다보니 직전 샘플 등을 계산할 때 편하기위해, 곱셈연산을 줄이기 위해 미리 곱해놈
 	DFT.index_count_3times = DFT.index_count * 3;
-
+	
 	//10 채널기준
   // 10채널 중 실제로 사용하는 채널은 8채널 -> 10채널은 H/W장이가 미리 만들어 놓았음
   // F, M 모델 공통으로

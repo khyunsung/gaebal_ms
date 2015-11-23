@@ -11,7 +11,6 @@ void main(void)
 {
 	// H/W 초기화 및 관리....
 	// 아래 세개 함수는 H/W 변동이 없는 한 수정 없음
-
 	cpu_setup();         // DSP setup에 관한 것은 TI guide에 따름
 	lcd_setup();	     // LCD 컨트롤러에 따름
 	interrupt_control(); // 인터럽트 등록

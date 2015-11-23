@@ -191,7 +191,9 @@ void DMACH1BurstConfig(Uint16, int16, int16);
 void DMACH1TransferConfig(Uint16, int16, int16);
 void DMACH1WrapConfig(Uint16, int16, Uint16, int16);
 void DMACH1ModeConfig(Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16, Uint16);
+
 void StartDMACH1(void);
+
 void self_diagnostic(void);
 void Save_Fault_Wave_Info(unsigned int);
 void fault_wave_send_check(void);

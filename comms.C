@@ -338,7 +338,7 @@ void manager_handling(void)
 			//Vo
 			float_to_integer(DISPLAY.rms_value[Vn], &MANAGER.tx_buffer[18], 1.0F);
 			//Vom
-//			float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[22], 1.0F);
+			//float_to_integer(ACCUMULATION.vo_max, &MANAGER.tx_buffer[22], 1.0F);
 			//Vavg
 			float_to_integer(DISPLAY.rms_Vavg_value, &MANAGER.tx_buffer[26], 1.0F);
 			//Vps
@@ -412,7 +412,7 @@ void manager_handling(void)
 			float_to_integer2(6, &MANAGER.tx_buffer[44], 10.0F);
 			//Ia TDDFacter     
 			float_to_integer2(7, &MANAGER.tx_buffer[46], 10.0F);
-			
+
 			//Ib 3rd
 			float_to_integer2(1, &MANAGER.tx_buffer[48], 10.0F);
 			//Ib 5th           
@@ -451,7 +451,7 @@ void manager_handling(void)
 			float_to_integer2(DISPLAY.angle[6], &MANAGER.tx_buffer[80], 10.0F);
 			//∠Io
 			float_to_integer2(DISPLAY.angle[7], &MANAGER.tx_buffer[82], 10.0F);
-			
+		
 			i = COMM_CRC(MANAGER.tx_buffer, 84);
 			
 			MANAGER.tx_buffer[84] = i >> 8;
@@ -1314,7 +1314,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			
 			return;
 		}
-		
+
 		//ad 인터럽트에 의해서 통신이 원활한 대용량 전송이 어렵기 때문에
 		//ad 외부인터럽트를 중지시키고, 만약 2초 동안 안들어 오면 다시 가동시킨다.
 		//M_INT12는 외부 인터럽트, M_INT8은 SCI-C 인터럽트
@@ -1350,8 +1350,8 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			
 			*(Manager_tx_long + 4) = MANAGER.rx_buffer[4] = i >> 8;	//Byte Length - H
 			*(Manager_tx_long + 5) = MANAGER.rx_buffer[5] = i;			//Byte Length - L
-			 
-			//맨마지막 wordcount
+
+			// 맨마지막 wordcount
 			wave_dump_serial_sram_long(FLASH_WAVE_Ia,
 													 ((long)MANAGER.rx_buffer[6] << 16) + ((long)MANAGER.rx_buffer[7] << 8) + (long)MANAGER.rx_buffer[8],
 														j);
@@ -1742,7 +1742,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 	}
 		
 	
-//	/////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 	//wrtie
 	// 계전요소 write
 	else if(MANAGER.rx_buffer[2] == 0x80)
@@ -1771,7 +1771,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			OCR50_2.current_set = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
 			OCR50_2.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
 			OCR50_2.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
-		serial_write(5, &OCR50_2.use, OCR50_2_USE);
+			serial_write(5, &OCR50_2.use, OCR50_2_USE);
 
 			// 50-1, 50-2에 공통으로 CRC 적용해야함.
 			buff[0] = OCR50_1.use;					MANAGER.rx_buffer[ 6] = buff[0] >> 8; MANAGER.rx_buffer[ 7] = buff[0] & 0xff;
@@ -1787,7 +1787,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			OCGR50.current_set = 	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
 			OCGR50.delay_time = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
 			OCGR50.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
-		serial_write(5, &OCGR50.use, OCGR50_USE);
+			serial_write(5, &OCGR50.use, OCGR50_USE);
 		// ocgr51
 		} else if(MANAGER.rx_buffer[3] == 0x03) {
 			OCGR51.use = 					(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
@@ -1795,7 +1795,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			OCGR51.current_set = 	(MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
 			OCGR51.time_lever = 	(MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
 			OCGR51.do_relay = 		(MANAGER.rx_buffer[14] << 8) + MANAGER.rx_buffer[15];
-		serial_write(5, &OCGR51.use, OCGR51_USE);
+			serial_write(5, &OCGR51.use, OCGR51_USE);
 		// THR(49)
 		} else if(MANAGER.rx_buffer[3] == 0x04) {
 			THR.use = 				(MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
@@ -1811,7 +1811,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 			NSR.current_set = (MANAGER.rx_buffer[ 8] << 8) + MANAGER.rx_buffer[ 9];
 			NSR.delay_time  = (MANAGER.rx_buffer[10] << 8) + MANAGER.rx_buffer[11];
 			NSR.do_relay    = (MANAGER.rx_buffer[12] << 8) + MANAGER.rx_buffer[13];
-		serial_write(4, &NSR.use, NSR_USE);
+			serial_write(4, &NSR.use, NSR_USE);
 		// 51LR
 		} else if(MANAGER.rx_buffer[3] == 0x06) {
 			LR51.use =               (MANAGER.rx_buffer[ 6] << 8) + MANAGER.rx_buffer[ 7];
@@ -1974,9 +1974,9 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 		//vo max  clear
 		else if(MANAGER.rx_buffer[3] == 0x02)
 		{			
-//			ACCUMULATION.vo_max = 0;
+			//ACCUMULATION.vo_max = 0;
 						
-//			float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
+			//float_to_integer(ACCUMULATION.vo_max, VoMAX1, 1.0F);
 			
 			EVENT.data_reset |= Vo_RESET_EVENT;
 			
@@ -2018,7 +2018,7 @@ event_send:		MANAGER.tx_buffer[4] = j >> 8;
 		
 		//serial_write(1, &LOCAL_CONTROL.mode, LOCAL_CTRL_USE); //2015.02.24
 	}
-	
+		
 	
 	
 	// debug
@@ -2372,7 +2372,7 @@ void wave_dump_serial_sram(unsigned int *ar_flash, unsigned int ar_offset, unsig
 	MANAGER.tx_count = 1;
 	*ScibRegs_SCITXBUF = *MANAGER.isr_tx;
 }
-	
+
 void wave_dump_serial_sram_long(unsigned int *ar_flash, unsigned long ar_offset, unsigned int ar_wordcount)
 {
 	unsigned int *flash_point;
@@ -2512,7 +2512,7 @@ void comm_drive(void)
 					//Vo
 					float_to_integer(DISPLAY.rms_value[Vn], COMM2_VO, 1);
 					//Vo_max
-//					float_to_integer(ACCUMULATION.vo_max, COMM2_VO_MAX, 1);
+					//float_to_integer(ACCUMULATION.vo_max, COMM2_VO_MAX, 1);
 					//Vavg
 					float_to_integer(DISPLAY.rms_Vavg_value, COMM2_VAVG, 1);
 					//Vps

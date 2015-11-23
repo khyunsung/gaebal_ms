@@ -25,6 +25,8 @@ unsigned int setting_save(unsigned int *ar_temp, unsigned int *ar_address, unsig
 		return(0);
 	}
 	
+//	if( SysParamFlag == 1 ) return(1);
+
 // 설정 값에 따른 이벤트 저장
 //---------계전요소 설정 이벤트 저장
 	if(ar_address == OCR50_1_USE)					{
@@ -1664,7 +1666,7 @@ void ClearFLASH(void)
 	*(MRAM_RUNNING_HOUR1) = 0;
 	*(MRAM_RUNNING_HOUR2) = 0;
 	RUNNING.RunningHourCNT = 0;
-
+	
 	*(MRAM_Vo_MAX1) = 0;
 	*(MRAM_Vo_MAX2) = 0;
 	DISPLAY.vo_max = 0;

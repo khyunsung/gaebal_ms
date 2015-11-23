@@ -3251,7 +3251,7 @@ void menu_30_02(unsigned int value, int display)
 	char string[22];
 
 	const char *str[2] = {
-			" \6d :     [%]      \1\0",
+			" \6d :   [%]        \1\0",
 			" P_LIMIT :          \0" };
 
 	if(display == 1) {
@@ -9555,10 +9555,10 @@ void menu_81_03(unsigned int value, int display)
 		} else if(Screen_Position.select == 1) {
 			if(AUX_RELAY_TEST.Curr_input_flag == 0)
 			{
-				Screen_Position.y = 83;
-				Screen_Position.x = 4;
-				Screen_Position.select = 0;
-			}
+			Screen_Position.y = 83;
+			Screen_Position.x = 4;
+			Screen_Position.select = 0;
+		}
 			else
 			{
 				Screen_Position.y = 84;
@@ -10939,6 +10939,16 @@ void menu_86_04(unsigned int value, int display)
 			EVENT.rollover = 0;
 			EVENT.sp = 0;
 			EVENT.temp = 0;
+
+			*(EVENT_YEAR   + 18*199) = TIME.year;   // 연
+			*(EVENT_MONTH  + 18*199) = TIME.month;  // 월
+			*(EVENT_DAY    + 18*199) = TIME.day;    // 일
+			*(EVENT_HOUR   + 18*199) = TIME.hour;   // 시
+			*(EVENT_MINUTE + 18*199) = TIME.minute; // 분
+			*(EVENT_SECOND + 18*199) = TIME.second; // 초
+			*(EVENT_MS1    + 18*199) = TIME.milisecond >> 8; //msec 상위바이트
+			*(EVENT_MS2    + 18*199) = TIME.milisecond;      // msec 하위바이트
+
 		} else if(Screen_Position.select == 1) {
 			Screen_Position.y = 86;
 			Screen_Position.x = 6;
@@ -14086,12 +14096,12 @@ void menu_153_10(unsigned int value, int display)
 			for(i = 0; i < 10; i++)	//intercept
 			{
 				void_p = &CALIBRATION.intercept[i];
-				temp16_p = (unsigned int *)void_p;
+				temp16_p = (unsigned int*)void_p;
 				eerom_write(0x30 + (i << 1), temp16_p);
 				eerom_write(0x31 + (i << 1), temp16_p + 1);
 				temp1[30 + (i << 1)] = *temp16_p;
 				temp1[31 + (i << 1)] = *(temp16_p + 1);
-			}
+			}			
 			for(i = 0; i < 10; i++) //angle 저장
 			{
 				void_p = &CALIBRATION.angle[i];
@@ -14166,7 +14176,7 @@ void menu_154_01(unsigned int value, int display)
 	if(display) {
 		screen_frame3(str);
 		if(Screen_Position.select == 0) {
-			cursor_move(0, 15);
+		cursor_move(0, 15);
 		} else if (Screen_Position.select == 1) {
 			cursor_move(1, 15);
 		}
@@ -14189,17 +14199,17 @@ void menu_154_01(unsigned int value, int display)
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
 			SET_66.ratio_temp = SET_66.ratio;
-			Screen_Position.y = 158;
-			Screen_Position.x = 2;
-			Screen_Position.select = 1;
+		Screen_Position.y = 158;
+		Screen_Position.x = 2;
+		Screen_Position.select = 1;
 		} else if(Screen_Position.select == 1) {
 			WATCHDOG.use_temp = WATCHDOG.use;
 		
 			Screen_Position.y = 159;
 			Screen_Position.x = 2;
 			(WATCHDOG.use == ENABLE) ? (Screen_Position.select = 0) : (Screen_Position.select = 1);
-		}
 	}
+}
 	//2015.10.19 END
 
 }
@@ -15459,7 +15469,7 @@ void Event_Item_Display(void)		//khs, 2015-03-31 오후 7:36:32
 				sprintf(str2[1],"  Ph:%s   Ot: %.3f   \0", event_phase[temp16], ((float)i_tmp[0])/1000.0F);
 			}
 		} else {
-			sprintf(str2[0],"   ] NO EVENT !    \x01\0");
+			sprintf(str2[0],"   ] EVENT CLEAR   \x01\0");
 			sprintf(str2[1],"                     \0");
 		}
 
@@ -15664,8 +15674,8 @@ void Event_Time_Display(void)		//khs, 2015-04-03 오후 7:16:58
 		msecond <<= 8;
 		msecond |= (*(EVENT_MS2 + (view_point_tmp * 18)) & 0x00ff);
 
-		//이벤트가 없을때는 시간 표시를 하지 않는다.
-		if(year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0 && second == 0) return;
+		//이벤트가 없을때는 시간 표시를 하지 않는다.  (Event Clear로 바뀌면서 사용 안함)
+		//if(year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0 && second == 0) return;
 
 		delay_us(1000);
 		sprintf(str, " DAY : %2d.%2d.%2d     %c\0", year, month, day, ENTER);
