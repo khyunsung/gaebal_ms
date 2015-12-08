@@ -82,6 +82,11 @@ float Get_thr_DelayTime(int);
 void MOTOR_START_CHECK(void);
 void Cal_RHour(void);
 
+void LocalHandleWait(void); //2015.11.6
+void LocalHandleContrl(unsigned int); 	//2015.11.6
+void LocalContrlObserver(void); 	//2015.11.6
+void CB_RLY_off(void);	//2015.11.6
+
 void RELAY_OCR50_1(void);
 void RELAY_OCR50_2(void);
 void RELAY_OCGR50(void);

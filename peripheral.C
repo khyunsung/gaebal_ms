@@ -533,9 +533,12 @@ void key_drive(void)
 				}
 			}
 
-			else if((SYSTEM.pushed_key == CB_ON_KEY) || (SYSTEM.pushed_key == CB_OFF_KEY))	// cb on/off
-			{
  //2015.02.25
+			//if((Temp_key & 0xf00)&&(!PASSpacket.Pass.local_allow)&&(!DoneAck)&&(!InFaultScn))	LocalHandleContrl(Temp_key);
+			if((KHS_Key_Press & 0xf00)&&(LOCAL_CTRL.use==ENABLE))	{LocalHandleContrl(KHS_Key_Press);}
+
+//		else if((SYSTEM.pushed_key == CB_ON_KEY) || (SYSTEM.pushed_key == CB_OFF_KEY))	// cb on/off
+//		{
 //				// local control enable 시에만 유효
 //				if(LOCAL_CONTROL.mode == 0xaaaa)
 //				{
@@ -572,13 +575,10 @@ void key_drive(void)
 //						}
 //					}
 //				}
-//2015.02.25 END
-			}
-			
-			// local/remote
-			else if((SYSTEM.pushed_key == REMOTE_KEY) || (SYSTEM.pushed_key == LOCAL_KEY))
-			{
-//2015.02.25
+//			}
+//		// local/remote
+//		else if((SYSTEM.pushed_key == REMOTE_KEY) || (SYSTEM.pushed_key == LOCAL_KEY))
+//		{
 //				// local control 모드일 경우에만
 //				if(LOCAL_CONTROL.mode == 0xaaaa)
 //				{
@@ -618,8 +618,8 @@ void key_drive(void)
 //						}
 //					}
 //				}
+//			}
 //2015.02.25 END
-			}
 			// 눌린 키에대한 동작이 완료되었으므로 카운터 리셋
 			SYSTEM.pushed_key_count = 0;
 		}
@@ -1121,6 +1121,7 @@ void wave_save_process(void)
 		wave_flash_word_write(FLASH_WAVE_Ia + FLASH.destination_count, *(Pre_Ia_wave_buffer + FLASH.source_count));
 	}
 	
+	
 	// Ia post
 	else if(WAVE.save_index == 56)
 	{
@@ -1131,6 +1132,7 @@ void wave_save_process(void)
 		wave_flash_word_write(FLASH_WAVE_Ia + FLASH.destination_count, *(Post_Ia_wave_buffer + FLASH.source_count));
 		
 	}
+	
 	
 	// Ib pre1
 	else if(WAVE.save_index == 57)
@@ -1515,50 +1517,47 @@ void led_handling(void)
 		if(RELAY_STATUS.operation_sum_holding == 0)												{SYSTEM.led_on &= ~FAULT_LED;} // led 끈다
 	}
 
+//LOCAL CONTROL 관련 LED 부분
+//	if(LOCAL_CONTROL.mode == 0xaaaa) // local 제어가 가능할 경우에만 해당 led 사용함
+//	{
+//		if((DIDO.di_status & 0x0003) == 0x0001) // close di 1번이 52a
+//		{
+//			SYSTEM.led_on |= CB_CLOSE_LED;
+//			SYSTEM.led_on &= ~CB_OPEN_LED;
+//		}
+//		else if((DIDO.di_status & 0x0003) == 0x0002)	// open  di 2번이 52b
+//		{
+//			SYSTEM.led_on &= ~CB_CLOSE_LED;
+//			SYSTEM.led_on |= CB_OPEN_LED;
+//		}
+//		else // 그외에는 차단기 접점고장 또는 차단기 고장으로 간주하고 led를 다꺼버림
+//		{
+//			SYSTEM.led_on &= ~CB_CLOSE_LED;
+//			SYSTEM.led_on &= ~CB_OPEN_LED;
+//		}
+//
+//
+//		if(SYSTEM.remote1_local0 == 0) // local이면
+//		{
+//			SYSTEM.led_on |= LOCAL_LED;
+//			SYSTEM.led_on &= ~REMOTE_LED;
+//		}
+//		else //remote
+//		{
+//			SYSTEM.led_on &= ~LOCAL_LED;
+//			SYSTEM.led_on |= REMOTE_LED;
+//		}
+//	}
+//	else // local 제어 disable 시 아래 led 다 안씀
+//	{
+//		SYSTEM.led_on &= ~CB_CLOSE_LED;
+//		SYSTEM.led_on &= ~CB_OPEN_LED;
+//
+//		SYSTEM.led_on &= ~LOCAL_LED;
+//		SYSTEM.led_on &= ~REMOTE_LED;
+//	}
+//LOCAL CONTROL 관련 LED 부분 END
 	
-	// local 제어가 가능할 경우에만 해당 led 사용함
-	if(LOCAL_CONTROL.mode == 0xaaaa)
-	{
-		// close di 1번이 52a
-		if((DIDO.di_status & 0x0003) == 0x0001)
-		{
-			SYSTEM.led_on |= CB_CLOSE_LED;
-			SYSTEM.led_on &= ~CB_OPEN_LED;
-		}
-		// open  di 2번이 52b
-		else if((DIDO.di_status & 0x0003) == 0x0002)
-		{
-			SYSTEM.led_on &= ~CB_CLOSE_LED;
-			SYSTEM.led_on |= CB_OPEN_LED;
-		}
-		// 그외에는 차단기 접점고장 또는 차단기 고장으로 간주하고 led를 다꺼버림
-		else
-		{
-			SYSTEM.led_on &= ~CB_CLOSE_LED;
-			SYSTEM.led_on &= ~CB_OPEN_LED;
-		}
-		// local이면
-		if(SYSTEM.remote1_local0 == 0)
-		{
-			SYSTEM.led_on |= LOCAL_LED;
-			SYSTEM.led_on &= ~REMOTE_LED;
-		}
-		//remote
-		else
-		{
-			SYSTEM.led_on &= ~LOCAL_LED;
-			SYSTEM.led_on |= REMOTE_LED;
-		}
-	}
-	// local 제어 disable 시 아래 led 다 안씀
-	else
-	{
-		SYSTEM.led_on &= ~CB_CLOSE_LED;
-		SYSTEM.led_on &= ~CB_OPEN_LED;
-		
-		SYSTEM.led_on &= ~LOCAL_LED;
-		SYSTEM.led_on &= ~REMOTE_LED;
-	}
 	
 	// 내부 자가진단 상황이 발생된 경우
 	if(SYSTEM.diagnostic)	{SYSTEM.led_on |= SYS_FAIL_LED;}

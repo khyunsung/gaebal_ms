@@ -1557,6 +1557,9 @@ void booting_setting_check(void)
 	DISPLAY.vo_max <<= 16;
 	DISPLAY.vo_max |= (*(MRAM_Vo_MAX2) & 0xffff);
 
+	//REMOTE_LOCAL_STATUS 값
+	LOCAL_CONTROL.LocalHandleMode = (*(REMOTE_LOCAL_STAUTS) & 0xffff); //2015.11.6
+
 //	float_to_8bit_fram(&ACCUMULATION.energy_p, EP1, 0);
 //	float_to_8bit_fram(&ACCUMULATION.energy_q, EQ1, 0);
 //	float_to_8bit_fram(&ACCUMULATION.energy_rp, REP1, 0);
@@ -1579,6 +1582,28 @@ void booting_setting_check(void)
 
 //-------- LED, DO 초기화
 	SYSTEM.led_on = OP_LED;	// op led on
+
+//2015.11.6
+	if(LOCAL_CTRL.use==ENABLE)
+	{
+		LOCAL_CONTROL.LocalHandleStatus = LOCAL_CONTROL.LocalHandleMode & 0x01;
+		if(LOCAL_CONTROL.LocalHandleStatus == 1)
+		{
+			SYSTEM.led_on |= LOCAL_LED;		//LOCAL LED ON
+			SYSTEM.led_on &= ~REMOTE_LED;	//REMOTE LED OFF
+		}
+		else
+		{
+			SYSTEM.led_on &= ~LOCAL_LED;	//LOCAL LED OFF
+			SYSTEM.led_on |= REMOTE_LED;	//REMOTE LED ON
+		}
+	}
+	else
+	{
+		SYSTEM.led_on &= ~LOCAL_LED;	//LOCAL LED OFF
+		SYSTEM.led_on &= ~REMOTE_LED;	//REMOTE LED OFF
+	}
+//2015.11.6 END
 
 //-------- LED, DO 초기화 END
 
