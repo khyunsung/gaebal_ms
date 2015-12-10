@@ -625,8 +625,8 @@ void key_drive(void)
 //			}
 //2015.02.25 END
 			// 눌린 키에대한 동작이 완료되었으므로 카운터 리셋
-			SYSTEM.pushed_key_count = 0;
-		}
+//			SYSTEM.pushed_key_count = 0;
+//		}
 	}
 	else // 키가 눌리지 않았을 경우
 	{

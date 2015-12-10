@@ -25,7 +25,7 @@ unsigned int setting_save(unsigned int *ar_temp, unsigned int *ar_address, unsig
 		return(0);
 	}
 	
-//	if( SysParamFlag == 1 ) return(1);
+	if( SysParamFlag == 1 ) return(1);
 
 // 설정 값에 따른 이벤트 저장
 //---------계전요소 설정 이벤트 저장

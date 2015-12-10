@@ -9576,6 +9576,7 @@ void menu_80_09(unsigned int value, int display)
 void menu_80_10(unsigned int value, int display)
 {
 	char str[2][22];
+	unsigned long l_tmp;
 
 	sprintf(str[0],"                    \0");
 	sprintf(str[1],"WANT TO SET ?  [Y/N]\0");
@@ -9598,9 +9599,12 @@ void menu_80_10(unsigned int value, int display)
 		Screen_Position.select %= 2;
 	} else if(value == ENTER_KEY) {
 		if(Screen_Position.select == 0) {
+			
+			SysParamFlag = 0;
 		 //설정값 저장
 			if(OCR50_1.use != OCR50_1.use_temp) 
 			{
+				SysParamFlag = 1;
 				OCR50_1.use = OCR50_1.use_temp;	
 				if(setting_save(&OCR50_1.use, OCR50_1_USE, 5))
 				{
@@ -9613,6 +9617,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(OCR50_2.use != OCR50_2.use_temp)	
 			{
+				SysParamFlag = 1;
 				OCR50_2.use = OCR50_2.use_temp;	
 				if(setting_save(&OCR50_2.use, OCR50_2_USE, 5))
 				{
@@ -9625,6 +9630,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(OCGR50.use != OCGR50.use_temp)
 			{
+				SysParamFlag = 1;
 				OCGR50.use = OCGR50.use_temp;
 				if(setting_save(&OCGR50.use, OCGR50_USE, 5))
 				{
@@ -9637,6 +9643,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(OCGR51.use != OCGR51.use_temp)
 			{
+				SysParamFlag = 1;
 				OCGR51.use = OCGR51.use_temp;
 				if(setting_save(&OCGR51.use, OCGR51_USE, 5))
 				{
@@ -9649,6 +9656,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(THR.use != THR.use_temp)
 			{
+				SysParamFlag = 1;
 				THR.use = THR.use_temp;
 				if(setting_save(&THR.use, THR_USE, 6))
 				{
@@ -9661,6 +9669,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(NSR.use != NSR.use_temp)
 			{
+				SysParamFlag = 1;
 				NSR.use = NSR.use_temp;
 				if(setting_save(&NSR.use, NSR_USE, 4))
 				{
@@ -9673,6 +9682,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(LR51.use != LR51.use_temp)
 			{
+				SysParamFlag = 1;
 				LR51.use = LR51.use_temp;
 				if(setting_save(&LR51.use, LR51_USE, 6))
 				{
@@ -9685,6 +9695,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(NCHR.use != NCHR.use_temp)
 			{
+				SysParamFlag = 1;
 				NCHR.use = NCHR.use_temp;
 				if(setting_save(&NCHR.use, NCHR_USE, 6))
 				{
@@ -9697,6 +9708,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(H50.use != H50.use_temp)
 			{
+				SysParamFlag = 1;
 				H50.use = H50.use_temp;
 				if(setting_save(&H50.use, H50_USE, 3))
 				{
@@ -9709,6 +9721,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(UCR.use != UCR.use_temp)
 			{
+				SysParamFlag = 1;
 				UCR.use = UCR.use_temp;
 				if(setting_save(&UCR.use, UCR_USE, 5))
 				{
@@ -9721,6 +9734,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(DGR.use != DGR.use_temp)
 			{
+				SysParamFlag = 1;
 				DGR.use = DGR.use_temp;
 				if(setting_save(&DGR.use, DGR_USE, 6))
 				{
@@ -9733,6 +9747,7 @@ void menu_80_10(unsigned int value, int display)
 			}
 			if(SGR.use != SGR.use_temp)
 			{
+				SysParamFlag = 1;
 				SGR.use = SGR.use_temp;
 				if(setting_save(&SGR.use, SGR_USE, 6))
 				{
@@ -9747,6 +9762,12 @@ void menu_80_10(unsigned int value, int display)
 			Screen_Position.y = 80;
 			Screen_Position.x = 11;
 			cursor_move(0, 0);//cursor off
+			
+			if( SysParamFlag == 1 ) {
+				SysParamFlag = 0;
+				l_tmp = 0x02000000L + RELAY_ONOFF_EVENT + 1;
+				event_direct_save(&l_tmp);
+			}
 		} else if(Screen_Position.select == 1) {
 			Screen_Position.y = 80;
 			Screen_Position.x = 12;
