@@ -1977,6 +1977,4 @@ unsigned int Popup_Action = 0;
 unsigned int Manager_Fault_Wave_Sending_Count = 0;
 unsigned int Flash_CRC_Check_Routine = 1;
 
-unsigned int Event_Memory_Pool[18*20];
-
 #endif

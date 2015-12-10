@@ -24,30 +24,30 @@ const char* wave2[2]={"   WAVE CAPTURING",
 const char* wave3[2]={" WAVE CAPTURE FINISH",
                       "   PRESS ANY KEY"};
 
-const char* event31[2]={"   ] 50   SETTING   ",
-                       "                    "};
-const char* event32[2]={"   ] 50   SETTING   ",
-                       "                    "};
-const char* event33[2]={"   ] 50G  SETTING   ",
-                       "                    "};
-const char* event34[2]={"   ] 51G  SETTING   ",
-                       "                    "};
-const char* event35[2]={"   ] THR  SETTING   ",
-                       "                    "};
-const char* event36[2]={"   ] NSR  SETTING   ",
-                       "                    "};
-const char* event37[2]={"   ] 51LR SETTING   ",
-                       "                    "};
-const char* event38[2]={"   ] NCHR SETTING   ",
-                       "                    "};
-const char* event39[2]={"   ] 50H  SETTING   ",
-                       "                    "};
-const char* event3a[2]={"   ] UCR  SETTING   ",
-                       "                    "};
-const char* event3b[2]={"   ] 67GD SETTING   ",
-                       "                    "};
-const char* event3c[2]={"   ] 67GS SETTING   ",
-                       "                    "};
+const char* event31[2]={"   ] 50 PARAMETER   ",
+                       "     RE-SETTING.    "};                       
+const char* event32[2]={"   ] 50 PARAMETER   ",
+                       "     RE-SETTING.    "};                       
+const char* event33[2]={"   ] 50G PARAMETER  ",
+                       "     RE-SETTING.    "};                       
+const char* event34[2]={"   ] 51G PARAMETER  ",
+                       "     RE-SETTING.    "};                       
+const char* event35[2]={"   ] THR PARAMETER  ",
+                       "     RE-SETTING.    "};                       
+const char* event36[2]={"   ] NSR PARAMETER  ",
+                       "     RE-SETTING.    "};                       
+const char* event37[2]={"   ] 51LR PARAMETER ",
+                       "     RE-SETTING.    "};                       
+const char* event38[2]={"   ] NCHR PARAMETER ",
+                       "     RE-SETTING.    "};                       
+const char* event39[2]={"   ] 50H PARAMETER  ",
+                       "     RE-SETTING.    "};                       
+const char* event3a[2]={"   ] UCR PARAMETER  ",
+                       "     RE-SETTING.    "};                       
+const char* event3b[2]={"   ] 67GD PARAMETER ",
+                       "     RE-SETTING.    "};                       
+const char* event3c[2]={"   ] 67GS PARAMETER ",
+                       "     RE-SETTING.    "};                       
 const char* event3d[2]={"   ] RLY PARAMETER  ",
                        "     RE-SETTING.    "};
 const char* event3e[2]={"   ] SYS PARAMETER  ",

@@ -18,6 +18,9 @@ void main(void)
 	// 나머지 system setup 및 변수정리
 	booting_setting_check();
 
+	// B접점인 8번 출력을 Open 상태로 만든다.
+	DO_Output(DO_ON_BIT[7]);
+
 	// Enable Global interrupt INTM
 	EINT;	// 여기서부터 인터럽트 활성 화
 
@@ -43,10 +46,13 @@ void real_main(void)
 		}
 
 		// key
-		if(TIMER.key > 80)	{key_drive();}
+		//if(TIMER.key > 80)	{key_drive();}
 
-		// lcd
-		if(TIMER.lcd > 200)	{menu_drive();}//300
+		// key & lcd
+		if(TIMER.lcd > 120)	{
+			key_drive();
+			menu_drive();
+		}//300, 200
 
 		// 기본계측 및 선간,위상
 		if(TIMER.measurement > 4)
@@ -178,7 +184,7 @@ void real_main(void)
 			SCI_Port_Err_Check();
 			self_diagnostic();
 			fault_wave_send_check();
-			//flash_crc_check();
+			flash_crc_check();
 			Watchdog_Kick_FM31L27x();
 		}
 		*LED_CS = SYSTEM.led_on; // 주기적으로 led값을 써주지 않으면 led가 꺼지는것 처럼 보임 (latch 회로가 없음), 1ms도 허용치 않음

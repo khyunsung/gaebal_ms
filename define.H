@@ -83,6 +83,9 @@
 #define Hz50	0x1234	//50Hz
 #define Hz60	0x5678	//60Hz
 
+#define HZ50_MODE_SELECT	*GpioIntRegs_GPACLEAR_High |= 0x1000
+#define HZ60_MODE_SELECT  *GpioIntRegs_GPASET_High |= 0x1000
+
 #define NCT_SELECT	0x1234 //NCT 사용
 #define ZCT_SELECT	0x5678 //ZCT 사용
 
@@ -348,19 +351,19 @@
 #define WAVE_DGR_BIT      0x0400
 #define WAVE_SGR_BIT      0x0800
 
-#define OCR50_1_SET_EVENT   0x00000000L
-#define OCR50_2_SET_EVENT   0x00010000L
-#define OCGR50_SET_EVENT    0x00020000L
-#define OCGR51_SET_EVENT    0x00030000L
-#define THR_SET_EVENT       0x00040000L
-#define NSR_SET_EVENT       0x00050000L
-#define LR51_SET_EVENT      0x00060000L
-#define NCHR_SET_EVENT      0x00070000L
-#define H50_SET_EVENT       0x00080000L
-#define UCR_SET_EVENT       0x00090000L
-#define DGR_SET_EVENT       0x000a0000L
-#define SGR_SET_EVENT       0x000b0000L
-#define RELAY_ONOFF_EVENT   0x000c0000L
+#define OCR50_1_SET_EVENT   0x00010000L
+#define OCR50_2_SET_EVENT   0x00020000L
+#define OCGR50_SET_EVENT    0x00030000L
+#define OCGR51_SET_EVENT    0x00040000L
+#define THR_SET_EVENT       0x00050000L
+#define NSR_SET_EVENT       0x00060000L
+#define LR51_SET_EVENT      0x00070000L
+#define NCHR_SET_EVENT      0x00080000L
+#define H50_SET_EVENT       0x00090000L
+#define UCR_SET_EVENT       0x000a0000L
+#define DGR_SET_EVENT       0x000b0000L
+#define SGR_SET_EVENT       0x000c0000L
+#define RELAY_ONOFF_EVENT   0x000d0000L
 
 #define CT_PT_SET_EVENT       0x00000000L
 #define DI_DEBOUNCE_EVENT     0x00010000L
@@ -830,7 +833,6 @@
 #define LOCAL_CTRL_USE	(unsigned int *)0x18B000
 #define CLOSE_TIME			(unsigned int *)0x18B001
 #define OPEN_TIME				(unsigned int *)0x18B002
-//#define RE_LO_STATUS		(unsigned int *)0x18B002
 #define LOCAL_CTRL_CRC	(unsigned int *)0x18B003
 
 #define DGR_ANGLE_COMP	(unsigned int *)0x18B800
@@ -881,6 +883,8 @@
 //#define TCS_RELAY       (unsigned int *)0x189002
 //#define CCS_TIME        (unsigned int *)0x189003
 //#define CCS_RELAY       (unsigned int *)0x189004
+#define TCS_VALUE       (unsigned int *)0x00403d
+#define CCS_VALUE       (unsigned int *)0x00403e
 
 #define COMM_ADDRESS    (unsigned int *)0x18a000
 #define COMM_BAUDRATE   (unsigned int *)0x18a001
